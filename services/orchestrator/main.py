@@ -264,8 +264,15 @@ def withdraw(
     db: Session = Depends(session),
 ):
     case = own_case(db, case_id, account)
-    if case.status != "WITHDRAWN":
-        consent = db.get(Consent, db.get(CaseLink, case.id).consent_id)
+    # Retention may already have disposed the case without an owner withdrawal.
+    # The case lock serializes requests; the receipt makes repeated withdrawals a no-op.
+    prior = db.scalar(select(Withdrawal).where(Withdrawal.case_id == case.id))
+    if not prior:
+        consent = db.scalar(
+            select(Consent)
+            .where(Consent.id == db.get(CaseLink, case.id).consent_id)
+            .with_for_update()
+        )
         consent.status = "WITHDRAWN"
         dispose(db, case, request)
         db.add(Withdrawal(case_id=case.id, idempotency_key=str(body.idempotency_key)))

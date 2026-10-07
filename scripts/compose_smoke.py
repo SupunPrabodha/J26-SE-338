@@ -6,7 +6,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import httpx
 from dotenv import dotenv_values
@@ -96,11 +96,56 @@ def main():
                     ).status_code
                     == 200
                 )
+            # Expire only this synthetic case while its owner session remains valid.
+            # This tests retention-before-withdrawal without waiting for the default TTL.
+            case = str(UUID(case))
+            container_python(
+                "orchestrator",
+                f"""
+from datetime import timedelta
+from sqlalchemy.orm import Session
+from research_common.database import Case, engine
+from research_contracts import now
+from orchestrator.workflow import enforce_retention
+with Session(engine()) as db, db.begin():
+    db.get(Case, '{case}').expires_at = now() - timedelta(seconds=1)
+enforce_retention()
+""",
+            )
             assert (
-                student.post(
-                    f"/api/v1/cases/{case}/withdraw", json={"idempotency_key": str(uuid4())}
-                ).status_code
-                == 200
+                student.get(f"/api/v1/cases/{case}/status").json()["processing_status"]
+                == "WITHDRAWN"
+            )
+            assert reviewer.get(f"/api/v1/review-tasks/{task['task_id']}").status_code == 404
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                withdrawals = list(
+                    executor.map(
+                        lambda _: student.post(
+                            f"/api/v1/cases/{case}/withdraw",
+                            json={"idempotency_key": str(uuid4())},
+                        ),
+                        range(2),
+                    )
+                )
+            assert all(response.status_code == 200 for response in withdrawals)
+            assert withdrawals[0].json() == withdrawals[1].json()
+            assert (
+                student.get(f"/api/v1/consents/{consent['consent_id']}").json()["consent_status"]
+                == "WITHDRAWN"
+            )
+            assert student.post("/api/v1/submissions", json=payload).status_code == 403
+            container_python(
+                "orchestrator",
+                f"""
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+from research_common.database import Audit, Retention, Withdrawal, engine
+with Session(engine()) as db:
+    for model in (Withdrawal, Retention):
+        assert db.scalar(select(func.count()).select_from(model).where(model.case_id == '{case}')) == 1
+    for event in ('WITHDRAWAL', 'RETENTION'):
+        assert db.scalar(select(func.count()).select_from(Audit).where(Audit.case_id == '{case}', Audit.event_type == event)) == 1
+""",
             )
             assert reviewer.get(f"/api/v1/review-tasks/{task['task_id']}").status_code == 404
             assert reviewer.post("/api/v1/auth/logout").status_code == 204
@@ -148,6 +193,8 @@ def main():
                     "assigned review",
                     "human action",
                     "withdrawal access revocation",
+                    "retention before concurrent owner withdrawals",
+                    "single withdrawal receipt and audit event",
                     "logout",
                     "frontend checks skipped"
                     if "--backend-only" in sys.argv
