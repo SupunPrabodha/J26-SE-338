@@ -1,0 +1,1012 @@
+[
+  {
+    "contract": "AccountResponse",
+    "valid": true,
+    "payload": {
+      "account_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "role": "STUDENT",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "AccountResponse",
+    "valid": false,
+    "payload": {
+      "account_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "role": "STUDENT",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "AssignmentRequest",
+    "valid": true,
+    "payload": {
+      "counsellor_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "AssignmentRequest",
+    "valid": false,
+    "payload": {
+      "counsellor_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "AuditEvent",
+    "valid": true,
+    "payload": {
+      "case_id": null,
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "event_id": "10000000-0000-4000-8000-000000000001",
+      "event_type": "AUTH_LOGIN",
+      "schema_version": "1.0.0",
+      "service_name": "orchestrator",
+      "service_version": "0.1.0",
+      "status": "SYNTHETIC_EXAMPLE",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "AuditEvent",
+    "valid": false,
+    "payload": {
+      "case_id": null,
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "event_id": "10000000-0000-4000-8000-000000000001",
+      "event_type": "AUTH_LOGIN",
+      "schema_version": "2.0.0",
+      "service_name": "orchestrator",
+      "service_version": "0.1.0",
+      "status": "SYNTHETIC_EXAMPLE",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ConsentDecision",
+    "valid": true,
+    "payload": {
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "development_only": true,
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ConsentDecision",
+    "valid": false,
+    "payload": {
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "development_only": true,
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ConsentRecord",
+    "valid": true,
+    "payload": {
+      "consent_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "expires_at": "2026-10-07T01:00:00Z",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ConsentRecord",
+    "valid": false,
+    "payload": {
+      "consent_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "expires_at": "2026-10-07T01:00:00Z",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ExplanationRequest",
+    "valid": true,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "inference": {
+        "calibrated": false,
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "confidence": 0,
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "emotional_tone": "synthetic-neutral",
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "model_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "review_priority": "HUMAN_REVIEW_REQUIRED",
+        "schema_version": "1.0.0",
+        "service_name": "nlp",
+        "service_version": "0.1.0",
+        "stress_language_signals": [
+          "synthetic-busy-timetable"
+        ],
+        "synthetic": true,
+        "wellbeing_indicator": "synthetic-academic-pressure"
+      },
+      "preprocessing": {
+        "anonymized_text": "SYNTHETIC_EXAMPLE",
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "language": "en",
+        "normalized_text": "SYNTHETIC_EXAMPLE",
+        "pipeline_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "schema_version": "1.0.0",
+        "service_name": "preprocessing",
+        "service_version": "0.1.0",
+        "synthetic": true,
+        "token_offsets": [
+          [
+            0,
+            0
+          ]
+        ],
+        "tokens": [
+          "SYNTHETIC_EXAMPLE"
+        ],
+        "transformations": [
+          "SYNTHETIC_EXAMPLE"
+        ]
+      },
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ExplanationRequest",
+    "valid": false,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "inference": {
+        "calibrated": false,
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "confidence": 0,
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "emotional_tone": "synthetic-neutral",
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "model_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "review_priority": "HUMAN_REVIEW_REQUIRED",
+        "schema_version": "1.0.0",
+        "service_name": "nlp",
+        "service_version": "0.1.0",
+        "stress_language_signals": [
+          "synthetic-busy-timetable"
+        ],
+        "synthetic": true,
+        "wellbeing_indicator": "synthetic-academic-pressure"
+      },
+      "preprocessing": {
+        "anonymized_text": "SYNTHETIC_EXAMPLE",
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "language": "en",
+        "normalized_text": "SYNTHETIC_EXAMPLE",
+        "pipeline_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "schema_version": "1.0.0",
+        "service_name": "preprocessing",
+        "service_version": "0.1.0",
+        "synthetic": true,
+        "token_offsets": [
+          [
+            0,
+            0
+          ]
+        ],
+        "tokens": [
+          "SYNTHETIC_EXAMPLE"
+        ],
+        "transformations": [
+          "SYNTHETIC_EXAMPLE"
+        ]
+      },
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ExplanationResponse",
+    "valid": true,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "counterfactual": null,
+      "development_only": true,
+      "evidence": [
+        "SYNTHETIC_EXAMPLE"
+      ],
+      "explainer_version": "mock-1",
+      "faithfulness": null,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "method": "MOCK_FIXED_FIXTURE",
+      "purpose": "synthetic-wellbeing-screening",
+      "reliability_status": "NOT_EVALUATED",
+      "schema_version": "1.0.0",
+      "service_name": "xai",
+      "service_version": "0.1.0",
+      "stability": null,
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ExplanationResponse",
+    "valid": false,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "counterfactual": null,
+      "development_only": true,
+      "evidence": [
+        "SYNTHETIC_EXAMPLE"
+      ],
+      "explainer_version": "mock-1",
+      "faithfulness": null,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "method": "MOCK_FIXED_FIXTURE",
+      "purpose": "synthetic-wellbeing-screening",
+      "reliability_status": "NOT_EVALUATED",
+      "schema_version": "2.0.0",
+      "service_name": "xai",
+      "service_version": "0.1.0",
+      "stability": null,
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "FixturesResponse",
+    "valid": true,
+    "payload": {
+      "development_only": true,
+      "fixtures": {
+        "english": "SYNTHETIC: My practice timetable feels busy this week.",
+        "sinhala": "SYNTHETIC: මේ සතියේ මගේ පුහුණු කාලසටහන කාර්යබහුලයි.",
+        "romanized": "SYNTHETIC: Me sathiye mage practice kalasatahana busy.",
+        "mixed": "SYNTHETIC: මේ සතියේ practice timetable එක busy."
+      },
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "FixturesResponse",
+    "valid": false,
+    "payload": {
+      "development_only": true,
+      "fixtures": {
+        "english": "SYNTHETIC: My practice timetable feels busy this week.",
+        "sinhala": "SYNTHETIC: මේ සතියේ මගේ පුහුණු කාලසටහන කාර්යබහුලයි.",
+        "romanized": "SYNTHETIC: Me sathiye mage practice kalasatahana busy.",
+        "mixed": "SYNTHETIC: මේ සතියේ practice timetable එක busy."
+      },
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "HealthResponse",
+    "valid": true,
+    "payload": {
+      "development_only": true,
+      "schema_version": "1.0.0",
+      "service_name": "SYNTHETIC_EXAMPLE",
+      "status": "ok",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "HealthResponse",
+    "valid": false,
+    "payload": {
+      "development_only": true,
+      "schema_version": "2.0.0",
+      "service_name": "SYNTHETIC_EXAMPLE",
+      "status": "ok",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "HumanReviewAction",
+    "valid": true,
+    "payload": {
+      "action": "START_REVIEW",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "HumanReviewAction",
+    "valid": false,
+    "payload": {
+      "action": "START_REVIEW",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "InferenceRequest",
+    "valid": true,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "preprocessing": {
+        "anonymized_text": "SYNTHETIC_EXAMPLE",
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "language": "en",
+        "normalized_text": "SYNTHETIC_EXAMPLE",
+        "pipeline_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "schema_version": "1.0.0",
+        "service_name": "preprocessing",
+        "service_version": "0.1.0",
+        "synthetic": true,
+        "token_offsets": [
+          [
+            0,
+            0
+          ]
+        ],
+        "tokens": [
+          "SYNTHETIC_EXAMPLE"
+        ],
+        "transformations": [
+          "SYNTHETIC_EXAMPLE"
+        ]
+      },
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "InferenceRequest",
+    "valid": false,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "preprocessing": {
+        "anonymized_text": "SYNTHETIC_EXAMPLE",
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "language": "en",
+        "normalized_text": "SYNTHETIC_EXAMPLE",
+        "pipeline_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "schema_version": "1.0.0",
+        "service_name": "preprocessing",
+        "service_version": "0.1.0",
+        "synthetic": true,
+        "token_offsets": [
+          [
+            0,
+            0
+          ]
+        ],
+        "tokens": [
+          "SYNTHETIC_EXAMPLE"
+        ],
+        "transformations": [
+          "SYNTHETIC_EXAMPLE"
+        ]
+      },
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "InferenceResponse",
+    "valid": true,
+    "payload": {
+      "calibrated": false,
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "confidence": 0,
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "dataset_version": "synthetic-fixtures-1",
+      "development_only": true,
+      "emotional_tone": "synthetic-neutral",
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "model_version": "mock-1",
+      "purpose": "synthetic-wellbeing-screening",
+      "review_priority": "HUMAN_REVIEW_REQUIRED",
+      "schema_version": "1.0.0",
+      "service_name": "nlp",
+      "service_version": "0.1.0",
+      "stress_language_signals": [
+        "synthetic-busy-timetable"
+      ],
+      "synthetic": true,
+      "wellbeing_indicator": "synthetic-academic-pressure"
+    }
+  },
+  {
+    "contract": "InferenceResponse",
+    "valid": false,
+    "payload": {
+      "calibrated": false,
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "confidence": 0,
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "dataset_version": "synthetic-fixtures-1",
+      "development_only": true,
+      "emotional_tone": "synthetic-neutral",
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "model_version": "mock-1",
+      "purpose": "synthetic-wellbeing-screening",
+      "review_priority": "HUMAN_REVIEW_REQUIRED",
+      "schema_version": "2.0.0",
+      "service_name": "nlp",
+      "service_version": "0.1.0",
+      "stress_language_signals": [
+        "synthetic-busy-timetable"
+      ],
+      "synthetic": true,
+      "wellbeing_indicator": "synthetic-academic-pressure"
+    }
+  },
+  {
+    "contract": "PreprocessRequest",
+    "valid": true,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "text": "SYNTHETIC: My practice timetable feels busy this week."
+    }
+  },
+  {
+    "contract": "PreprocessRequest",
+    "valid": false,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "2.0.0",
+      "synthetic": true,
+      "text": "SYNTHETIC: My practice timetable feels busy this week."
+    }
+  },
+  {
+    "contract": "PreprocessResponse",
+    "valid": true,
+    "payload": {
+      "anonymized_text": "SYNTHETIC_EXAMPLE",
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "dataset_version": "synthetic-fixtures-1",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "language": "en",
+      "normalized_text": "SYNTHETIC_EXAMPLE",
+      "pipeline_version": "mock-1",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "1.0.0",
+      "service_name": "preprocessing",
+      "service_version": "0.1.0",
+      "synthetic": true,
+      "token_offsets": [
+        [
+          0,
+          0
+        ]
+      ],
+      "tokens": [
+        "SYNTHETIC_EXAMPLE"
+      ],
+      "transformations": [
+        "SYNTHETIC_EXAMPLE"
+      ]
+    }
+  },
+  {
+    "contract": "PreprocessResponse",
+    "valid": false,
+    "payload": {
+      "anonymized_text": "SYNTHETIC_EXAMPLE",
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "dataset_version": "synthetic-fixtures-1",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "language": "en",
+      "normalized_text": "SYNTHETIC_EXAMPLE",
+      "pipeline_version": "mock-1",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "2.0.0",
+      "service_name": "preprocessing",
+      "service_version": "0.1.0",
+      "synthetic": true,
+      "token_offsets": [
+        [
+          0,
+          0
+        ]
+      ],
+      "tokens": [
+        "SYNTHETIC_EXAMPLE"
+      ],
+      "transformations": [
+        "SYNTHETIC_EXAMPLE"
+      ]
+    }
+  },
+  {
+    "contract": "PseudonymousCase",
+    "valid": true,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "error_code": null,
+      "processing_status": "RECEIVED",
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "updated_at": "2026-10-07T00:00:00Z"
+    }
+  },
+  {
+    "contract": "PseudonymousCase",
+    "valid": false,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "error_code": null,
+      "processing_status": "RECEIVED",
+      "schema_version": "2.0.0",
+      "synthetic": true,
+      "updated_at": "2026-10-07T00:00:00Z"
+    }
+  },
+  {
+    "contract": "RetentionAction",
+    "valid": true,
+    "payload": {
+      "action": "DELETE_DERIVED_EVIDENCE",
+      "action_id": "10000000-0000-4000-8000-000000000001",
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "schema_version": "1.0.0",
+      "status": "PENDING",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "RetentionAction",
+    "valid": false,
+    "payload": {
+      "action": "DELETE_DERIVED_EVIDENCE",
+      "action_id": "10000000-0000-4000-8000-000000000001",
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "schema_version": "2.0.0",
+      "status": "PENDING",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ReviewTask",
+    "valid": true,
+    "payload": {
+      "case": {
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "created_at": "2026-10-07T00:00:00Z",
+        "development_only": true,
+        "error_code": null,
+        "processing_status": "RECEIVED",
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "updated_at": "2026-10-07T00:00:00Z"
+      },
+      "development_only": true,
+      "explanation": {
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "counterfactual": null,
+        "development_only": true,
+        "evidence": [
+          "SYNTHETIC_EXAMPLE"
+        ],
+        "explainer_version": "mock-1",
+        "faithfulness": null,
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "method": "MOCK_FIXED_FIXTURE",
+        "purpose": "synthetic-wellbeing-screening",
+        "reliability_status": "NOT_EVALUATED",
+        "schema_version": "1.0.0",
+        "service_name": "xai",
+        "service_version": "0.1.0",
+        "stability": null,
+        "synthetic": true
+      },
+      "human_review_required": true,
+      "inference": {
+        "calibrated": false,
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "confidence": 0,
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "emotional_tone": "synthetic-neutral",
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "model_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "review_priority": "HUMAN_REVIEW_REQUIRED",
+        "schema_version": "1.0.0",
+        "service_name": "nlp",
+        "service_version": "0.1.0",
+        "stress_language_signals": [
+          "synthetic-busy-timetable"
+        ],
+        "synthetic": true,
+        "wellbeing_indicator": "synthetic-academic-pressure"
+      },
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "task_id": "10000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "contract": "ReviewTask",
+    "valid": false,
+    "payload": {
+      "case": {
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "created_at": "2026-10-07T00:00:00Z",
+        "development_only": true,
+        "error_code": null,
+        "processing_status": "RECEIVED",
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "updated_at": "2026-10-07T00:00:00Z"
+      },
+      "development_only": true,
+      "explanation": {
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "counterfactual": null,
+        "development_only": true,
+        "evidence": [
+          "SYNTHETIC_EXAMPLE"
+        ],
+        "explainer_version": "mock-1",
+        "faithfulness": null,
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "method": "MOCK_FIXED_FIXTURE",
+        "purpose": "synthetic-wellbeing-screening",
+        "reliability_status": "NOT_EVALUATED",
+        "schema_version": "1.0.0",
+        "service_name": "xai",
+        "service_version": "0.1.0",
+        "stability": null,
+        "synthetic": true
+      },
+      "human_review_required": true,
+      "inference": {
+        "calibrated": false,
+        "case_id": "10000000-0000-4000-8000-000000000001",
+        "confidence": 0,
+        "consent_status": "ACTIVE",
+        "consent_version": "dev-notice-1",
+        "correlation_id": "10000000-0000-4000-8000-000000000001",
+        "dataset_version": "synthetic-fixtures-1",
+        "development_only": true,
+        "emotional_tone": "synthetic-neutral",
+        "idempotency_key": "10000000-0000-4000-8000-000000000001",
+        "model_version": "mock-1",
+        "purpose": "synthetic-wellbeing-screening",
+        "review_priority": "HUMAN_REVIEW_REQUIRED",
+        "schema_version": "1.0.0",
+        "service_name": "nlp",
+        "service_version": "0.1.0",
+        "stress_language_signals": [
+          "synthetic-busy-timetable"
+        ],
+        "synthetic": true,
+        "wellbeing_indicator": "synthetic-academic-pressure"
+      },
+      "schema_version": "2.0.0",
+      "synthetic": true,
+      "task_id": "10000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "contract": "ServiceContext",
+    "valid": true,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ServiceContext",
+    "valid": false,
+    "payload": {
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "consent_status": "ACTIVE",
+      "consent_version": "dev-notice-1",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "purpose": "synthetic-wellbeing-screening",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ServiceError",
+    "valid": true,
+    "payload": {
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "error_code": "AUTH_REQUIRED",
+      "message": "Request could not be completed safely.",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "ServiceError",
+    "valid": false,
+    "payload": {
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "error_code": "AUTH_REQUIRED",
+      "message": "Request could not be completed safely.",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "SubmissionSession",
+    "valid": true,
+    "payload": {
+      "development_only": true,
+      "expires_at": "2026-10-07T00:00:00Z",
+      "role": "STUDENT",
+      "schema_version": "1.0.0",
+      "session_id": "10000000-0000-4000-8000-000000000001",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "SubmissionSession",
+    "valid": false,
+    "payload": {
+      "development_only": true,
+      "expires_at": "2026-10-07T00:00:00Z",
+      "role": "STUDENT",
+      "schema_version": "2.0.0",
+      "session_id": "10000000-0000-4000-8000-000000000001",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "VersionResponse",
+    "valid": true,
+    "payload": {
+      "development_only": true,
+      "mode": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+      "schema_version": "1.0.0",
+      "service_name": "SYNTHETIC_EXAMPLE",
+      "service_version": "0.1.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "VersionResponse",
+    "valid": false,
+    "payload": {
+      "development_only": true,
+      "mode": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+      "schema_version": "2.0.0",
+      "service_name": "SYNTHETIC_EXAMPLE",
+      "service_version": "0.1.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "WithdrawalRequest",
+    "valid": true,
+    "payload": {
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "WithdrawalRequest",
+    "valid": false,
+    "payload": {
+      "development_only": true,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "schema_version": "2.0.0",
+      "synthetic": true
+    }
+  },
+  {
+    "contract": "WorkflowExecution",
+    "valid": true,
+    "payload": {
+      "attempts": 0,
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "error_code": null,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "processing_status": "RECEIVED",
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "updated_at": "2026-10-07T00:00:00Z"
+    }
+  },
+  {
+    "contract": "WorkflowExecution",
+    "valid": false,
+    "payload": {
+      "attempts": 0,
+      "case_id": "10000000-0000-4000-8000-000000000001",
+      "correlation_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-10-07T00:00:00Z",
+      "development_only": true,
+      "error_code": null,
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "processing_status": "RECEIVED",
+      "schema_version": "2.0.0",
+      "synthetic": true,
+      "updated_at": "2026-10-07T00:00:00Z"
+    }
+  },
+  {
+    "contract": "WorkflowRequest",
+    "valid": true,
+    "payload": {
+      "consent_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "fixture_id": "english",
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "text": "SYNTHETIC: My practice timetable feels busy this week."
+    }
+  },
+  {
+    "contract": "WorkflowRequest",
+    "valid": false,
+    "payload": {
+      "consent_id": "10000000-0000-4000-8000-000000000001",
+      "development_only": true,
+      "fixture_id": "english",
+      "idempotency_key": "10000000-0000-4000-8000-000000000001",
+      "schema_version": "2.0.0",
+      "synthetic": true,
+      "text": "SYNTHETIC: My practice timetable feels busy this week."
+    }
+  }
+]

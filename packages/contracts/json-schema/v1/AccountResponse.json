@@ -1,0 +1,52 @@
+{
+  "$defs": {
+    "Role": {
+      "enum": [
+        "STUDENT",
+        "COUNSELLOR",
+        "ADMIN",
+        "RESEARCHER",
+        "SERVICE"
+      ],
+      "title": "Role",
+      "type": "string"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/AccountResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "format": "uuid",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "role": {
+      "$ref": "#/$defs/Role"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "account_id",
+    "role"
+  ],
+  "title": "AccountResponse",
+  "type": "object"
+}

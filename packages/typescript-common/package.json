@@ -1,0 +1,7 @@
+{
+  "name": "@j26/common",
+  "version": "0.1.0",
+  "private": true,
+  "exports": { "./contracts": "./src/contracts.d.ts", "./api": "./src/api.ts", "./ui": "./src/ui.tsx" },
+  "peerDependencies": { "react": "19.3.0" }
+}
