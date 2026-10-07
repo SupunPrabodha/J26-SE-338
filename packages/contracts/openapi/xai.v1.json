@@ -1,0 +1,1111 @@
+{
+  "components": {
+    "schemas": {
+      "ErrorCode": {
+        "enum": [
+          "AUTH_REQUIRED",
+          "AUTH_INVALID",
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "CONSENT_REQUIRED",
+          "CONSENT_INVALID",
+          "CONTRACT_INVALID",
+          "CONFLICT",
+          "RATE_LIMITED",
+          "DEPENDENCY_UNAVAILABLE",
+          "DOWNSTREAM_FAILED",
+          "DOWNSTREAM_TIMEOUT",
+          "RETRY_EXHAUSTED",
+          "INTERNAL_ERROR"
+        ],
+        "title": "ErrorCode",
+        "type": "string"
+      },
+      "ExplanationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "consent_status": {
+            "const": "ACTIVE",
+            "default": "ACTIVE",
+            "title": "Consent Status",
+            "type": "string"
+          },
+          "consent_version": {
+            "const": "dev-notice-1",
+            "default": "dev-notice-1",
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "inference": {
+            "$ref": "#/components/schemas/InferenceResponse"
+          },
+          "preprocessing": {
+            "$ref": "#/components/schemas/PreprocessResponse"
+          },
+          "purpose": {
+            "const": "synthetic-wellbeing-screening",
+            "default": "synthetic-wellbeing-screening",
+            "title": "Purpose",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "case_id",
+          "correlation_id",
+          "idempotency_key",
+          "preprocessing",
+          "inference"
+        ],
+        "title": "ExplanationRequest",
+        "type": "object"
+      },
+      "ExplanationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "consent_status": {
+            "const": "ACTIVE",
+            "default": "ACTIVE",
+            "title": "Consent Status",
+            "type": "string"
+          },
+          "consent_version": {
+            "const": "dev-notice-1",
+            "default": "dev-notice-1",
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "counterfactual": {
+            "title": "Counterfactual",
+            "type": "null"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "explainer_version": {
+            "const": "mock-1",
+            "default": "mock-1",
+            "title": "Explainer Version",
+            "type": "string"
+          },
+          "faithfulness": {
+            "title": "Faithfulness",
+            "type": "null"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "method": {
+            "const": "MOCK_FIXED_FIXTURE",
+            "default": "MOCK_FIXED_FIXTURE",
+            "title": "Method",
+            "type": "string"
+          },
+          "purpose": {
+            "const": "synthetic-wellbeing-screening",
+            "default": "synthetic-wellbeing-screening",
+            "title": "Purpose",
+            "type": "string"
+          },
+          "reliability_status": {
+            "const": "NOT_EVALUATED",
+            "default": "NOT_EVALUATED",
+            "title": "Reliability Status",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_name": {
+            "const": "xai",
+            "default": "xai",
+            "title": "Service Name",
+            "type": "string"
+          },
+          "service_version": {
+            "const": "0.1.0",
+            "default": "0.1.0",
+            "title": "Service Version",
+            "type": "string"
+          },
+          "stability": {
+            "title": "Stability",
+            "type": "null"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "case_id",
+          "correlation_id",
+          "idempotency_key",
+          "evidence"
+        ],
+        "title": "ExplanationResponse",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_name": {
+            "title": "Service Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "service_name",
+          "status"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "InferenceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "calibrated": {
+            "const": false,
+            "default": false,
+            "title": "Calibrated",
+            "type": "boolean"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "consent_status": {
+            "const": "ACTIVE",
+            "default": "ACTIVE",
+            "title": "Consent Status",
+            "type": "string"
+          },
+          "consent_version": {
+            "const": "dev-notice-1",
+            "default": "dev-notice-1",
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "dataset_version": {
+            "const": "synthetic-fixtures-1",
+            "default": "synthetic-fixtures-1",
+            "title": "Dataset Version",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "emotional_tone": {
+            "const": "synthetic-neutral",
+            "default": "synthetic-neutral",
+            "title": "Emotional Tone",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "model_version": {
+            "const": "mock-1",
+            "default": "mock-1",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "purpose": {
+            "const": "synthetic-wellbeing-screening",
+            "default": "synthetic-wellbeing-screening",
+            "title": "Purpose",
+            "type": "string"
+          },
+          "review_priority": {
+            "const": "HUMAN_REVIEW_REQUIRED",
+            "default": "HUMAN_REVIEW_REQUIRED",
+            "title": "Review Priority",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_name": {
+            "const": "nlp",
+            "default": "nlp",
+            "title": "Service Name",
+            "type": "string"
+          },
+          "service_version": {
+            "const": "0.1.0",
+            "default": "0.1.0",
+            "title": "Service Version",
+            "type": "string"
+          },
+          "stress_language_signals": {
+            "items": {
+              "const": "synthetic-busy-timetable",
+              "type": "string"
+            },
+            "title": "Stress Language Signals",
+            "type": "array"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "wellbeing_indicator": {
+            "const": "synthetic-academic-pressure",
+            "default": "synthetic-academic-pressure",
+            "title": "Wellbeing Indicator",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "correlation_id",
+          "idempotency_key",
+          "stress_language_signals",
+          "confidence"
+        ],
+        "title": "InferenceResponse",
+        "type": "object"
+      },
+      "PreprocessResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "anonymized_text": {
+            "title": "Anonymized Text",
+            "type": "string"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "consent_status": {
+            "const": "ACTIVE",
+            "default": "ACTIVE",
+            "title": "Consent Status",
+            "type": "string"
+          },
+          "consent_version": {
+            "const": "dev-notice-1",
+            "default": "dev-notice-1",
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "dataset_version": {
+            "const": "synthetic-fixtures-1",
+            "default": "synthetic-fixtures-1",
+            "title": "Dataset Version",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "language": {
+            "enum": [
+              "en",
+              "si",
+              "romanized-si",
+              "mixed",
+              "uncertain"
+            ],
+            "title": "Language",
+            "type": "string"
+          },
+          "normalized_text": {
+            "title": "Normalized Text",
+            "type": "string"
+          },
+          "pipeline_version": {
+            "const": "mock-1",
+            "default": "mock-1",
+            "title": "Pipeline Version",
+            "type": "string"
+          },
+          "purpose": {
+            "const": "synthetic-wellbeing-screening",
+            "default": "synthetic-wellbeing-screening",
+            "title": "Purpose",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_name": {
+            "const": "preprocessing",
+            "default": "preprocessing",
+            "title": "Service Name",
+            "type": "string"
+          },
+          "service_version": {
+            "const": "0.1.0",
+            "default": "0.1.0",
+            "title": "Service Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "token_offsets": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Token Offsets",
+            "type": "array"
+          },
+          "tokens": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tokens",
+            "type": "array"
+          },
+          "transformations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Transformations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "case_id",
+          "correlation_id",
+          "idempotency_key",
+          "anonymized_text",
+          "normalized_text",
+          "language",
+          "tokens",
+          "token_offsets",
+          "transformations"
+        ],
+        "title": "PreprocessResponse",
+        "type": "object"
+      },
+      "ServiceError": {
+        "additionalProperties": false,
+        "properties": {
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "error_code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message": {
+            "const": "Request could not be completed safely.",
+            "default": "Request could not be completed safely.",
+            "title": "Message",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "error_code",
+          "correlation_id"
+        ],
+        "title": "ServiceError",
+        "type": "object"
+      },
+      "VersionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "mode": {
+            "enum": [
+              "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+              "SYNTHETIC_DEVELOPMENT_ONLY"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_name": {
+            "title": "Service Name",
+            "type": "string"
+          },
+          "service_version": {
+            "const": "0.1.0",
+            "default": "0.1.0",
+            "title": "Service Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "service_name",
+          "mode"
+        ],
+        "title": "VersionResponse",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "xai — SYNTHETIC DEVELOPMENT ONLY",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/internal/v1/explain": {
+      "post": {
+        "operationId": "explain_internal_v1_explain_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExplanationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExplanationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Explain"
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "ready_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Ready"
+      }
+    },
+    "/version": {
+      "get": {
+        "operationId": "version_version_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Version"
+      }
+    }
+  }
+}
