@@ -1,0 +1,120 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "AUTH_REQUIRED",
+        "AUTH_INVALID",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONSENT_REQUIRED",
+        "CONSENT_INVALID",
+        "CONTRACT_INVALID",
+        "CONFLICT",
+        "RATE_LIMITED",
+        "DEPENDENCY_UNAVAILABLE",
+        "DOWNSTREAM_FAILED",
+        "DOWNSTREAM_TIMEOUT",
+        "RETRY_EXHAUSTED",
+        "INTERNAL_ERROR"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "WorkflowState": {
+      "enum": [
+        "RECEIVED",
+        "CONSENT_VERIFIED",
+        "PREPROCESSING",
+        "INFERENCE",
+        "EXPLANATION",
+        "READY_FOR_REVIEW",
+        "UNDER_REVIEW",
+        "COMPLETED",
+        "FAILED",
+        "WITHDRAWAL_REQUESTED",
+        "WITHDRAWN"
+      ],
+      "title": "WorkflowState",
+      "type": "string"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/WorkflowExecution.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attempts": {
+      "default": 0,
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Attempts",
+      "type": "integer"
+    },
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "idempotency_key": {
+      "format": "uuid",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "processing_status": {
+      "$ref": "#/$defs/WorkflowState"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "correlation_id",
+    "processing_status",
+    "created_at",
+    "updated_at",
+    "idempotency_key"
+  ],
+  "title": "WorkflowExecution",
+  "type": "object"
+}

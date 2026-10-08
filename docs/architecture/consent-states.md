@@ -1,0 +1,35 @@
+# Consent state model
+
+The owner-only `GET /api/v1/consents/{id}/lifecycle` returns the separate consent state,
+optional case, explicit-withdrawal timestamp and disposal reason. `POST
+/api/v1/consents/{id}/withdraw` accepts the existing `WithdrawalRequest` both before
+and after submission. Accepted consent (including elapsed acceptance) can be withdrawn
+before submission; unaccepted PENDING/REJECTED/INVALID consent returns 409. Missing
+or foreign records return 404. Repeats return the first receipt, regardless of request key.
+
+For an unlinked consent, withdrawal locks consent and rechecks whether a case appeared.
+If submission won that race, it releases the consent lock and takes the case lock before
+the consent lock. The existing case-withdrawal helper then performs disposal atomically.
+This prevents a consent-to-case lock inversion. Once withdrawal commits, the consent
+gate prevents new work and any existing job is cancelled.
+
+Disposal reasons are `RETENTION`, `OWNER_WITHDRAWAL` or `LEGACY_DISPOSAL` for records
+whose historical cause cannot be established. The first disposal reason is preserved
+when an owner later withdraws. Expiry is a policy deadline, not an explicit withdrawal;
+it does not create an owner receipt. The portal reads the receipt timestamp rather
+than the legacy case status to decide whether the owner has already withdrawn.
+
+The demonstration retains only in-memory browser references. Losing those references
+or expiring the one-hour account/session can prevent further owner access. No recovery
+identity, participant notice approval or institutional retention policy is introduced.
+See [five-stage evidence](../evidence/c1-lifecycle-evaluation.md).
+
+PENDING → ACTIVE or REJECTED after a recorded decision. ACTIVE → EXPIRED, WITHDRAWN or INVALID. REJECTED, WITHDRAWN, INVALID and EXPIRED cannot become ACTIVE; a new consent record is required. The bootstrap endpoint records only ACTIVE or REJECTED; other states are represented and tested as governance/expiry conditions. ACTIVE with an elapsed expires_at is treated as expired on reads and every gate.
+
+Processing requires current ACTIVE status, `dev-notice-1`, matching `synthetic-wellbeing-screening` purpose and a future UTC expiry. Missing records, foreign ownership, wrong purpose, bad version and elapsed expiry all block processing. One active decision authorizes one case in this bootstrap. Retries use the same case, purpose and consent; a fresh submission needs a fresh decision.
+
+An authenticated owner may withdraw an existing case even when its consent has expired or retention has already disposed of its evidence. The first explicit withdrawal sets the linked consent to WITHDRAWN and records one withdrawal receipt and one minimal WITHDRAWAL audit event. Retention alone does not record an owner's decision. The existing workflow WITHDRAWN status represents disposed cases as well as explicitly withdrawn cases; it must not be used to decide whether a withdrawal receipt exists.
+
+The case lock is acquired before the consent lock. Repeating withdrawal for that case, with either the same or a new request key, returns the existing case receipt without duplicating withdrawal, disposal or audit events. The first withdrawal key is retained. Authentication and case ownership remain required; expired account/session recovery is outside this step. No consent contents are added to logs or audit events.
+
+Submission conflict recovery follows the same consent gate as ordinary matching duplicates: after rollback, locate the existing request, verify its fingerprint and ownership, lock its case, then recheck current consent with `check_case_consent`. Missing consent, non-ACTIVE states, elapsed expiry (including equality), wrong purpose/version and disposed/expired cases cannot return a successful recovered submission. Changed fingerprints remain conflicts and foreign ownership remains denied. This maps C1 proposal FR-02/FR-06 and NFR-03 to `tests/integration/test_submission_recovery.py`; see [recovery evidence](../evidence/c1-submission-recovery.md) for the fault-injection method and limits.

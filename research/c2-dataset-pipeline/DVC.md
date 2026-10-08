@@ -1,0 +1,3 @@
+# DVC preparation
+
+No remote or dataset is configured. DVC is intentionally not installed into the shared runtime or initialized because the dataset pipeline is a future owner workspace. C2 should pin a compatible DVC toolchain in its development dependencies, then run `dvc init --subdir` from this workspace. Review generated metadata. Configure the institution-approved private remote using `dvc remote add --local` so access configuration remains untracked. Never commit credentials or run real-data stages in public CI. Releases require approved consent, residual-PII/leakage checks, licence review, checksums and named human approval.

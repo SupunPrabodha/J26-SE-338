@@ -1,0 +1,31 @@
+{
+  "name": "j26-se-338",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "engines": { "node": ">=22.22.2 <23" },
+  "workspaces": ["apps/*", "packages/typescript-common"],
+  "scripts": {
+    "lint": "eslint apps packages/typescript-common tests/frontend scripts/*.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "build": "npm run build --workspaces --if-present",
+    "contracts:types": "node scripts/generate-types.mjs",
+    "contracts:check": "node scripts/generate-types.mjs --check"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "10.12.0",
+    "@eslint/js": "10.0.1",
+    "typescript-eslint": "8.71.1",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "jsdom": "30.1.2",
+    "json-schema-to-typescript": "16.0.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

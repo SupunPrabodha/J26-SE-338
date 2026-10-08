@@ -1,0 +1,44 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/HumanReviewAction.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "enum": [
+        "START_REVIEW",
+        "COMPLETE_REVIEW"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "idempotency_key": {
+      "format": "uuid",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "action",
+    "idempotency_key"
+  ],
+  "title": "HumanReviewAction",
+  "type": "object"
+}
