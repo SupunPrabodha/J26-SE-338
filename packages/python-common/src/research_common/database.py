@@ -92,6 +92,7 @@ class Case(Entity, Base):
     error_code: Mapped[str | None] = mapped_column(String(40))
     inference: Mapped[dict | None] = mapped_column(JSON)
     explanation: Mapped[dict | None] = mapped_column(JSON)
+    provenance: Mapped[dict | None] = mapped_column(JSON)
     expires_at: Mapped[object] = mapped_column(UTCDateTime, index=True)
     __table_args__ = (
         CheckConstraint(
@@ -141,6 +142,13 @@ class Retention(Entity, Base):
     __tablename__ = "workflow_retention"
     case_id: Mapped[str] = mapped_column(ForeignKey("workflow_cases.id"), unique=True)
     status: Mapped[str] = mapped_column(String(20), default="COMPLETED")
+    reason: Mapped[str] = mapped_column(String(30), default="RETENTION")
+
+
+class ConsentWithdrawal(Entity, Base):
+    __tablename__ = "linkage_consent_withdrawals"
+    consent_id: Mapped[str] = mapped_column(ForeignKey("linkage_consents.id"), unique=True)
+    idempotency_key: Mapped[str] = mapped_column(String(36))
 
 
 class Audit(Base):
@@ -152,6 +160,8 @@ class Audit(Base):
     status: Mapped[str] = mapped_column(String(40))
     created_at: Mapped[object] = mapped_column(UTCDateTime, default=now)
     service_version: Mapped[str] = mapped_column(String(20), default="0.1.0")
+    policy_expires_at: Mapped[object | None] = mapped_column(UTCDateTime)
+    trace_id: Mapped[str | None] = mapped_column(String(36))
 
 
 @lru_cache
@@ -170,4 +180,19 @@ def engine():
 
 def session():
     with Session(engine(), expire_on_commit=False) as db:
-        yield db
+        try:
+            yield db
+        except Exception:
+            db.rollback()
+            persist_pending_audit(db)
+            raise
+        else:
+            persist_pending_audit(db)
+
+
+def persist_pending_audit(db):
+    from research_common.audit import flush_pending
+
+    if db.info.get("pending_audit"):
+        flush_pending(db)
+        db.commit()

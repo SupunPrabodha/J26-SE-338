@@ -1,5 +1,29 @@
 # Consent state model
 
+The owner-only `GET /api/v1/consents/{id}/lifecycle` returns the separate consent state,
+optional case, explicit-withdrawal timestamp and disposal reason. `POST
+/api/v1/consents/{id}/withdraw` accepts the existing `WithdrawalRequest` both before
+and after submission. Accepted consent (including elapsed acceptance) can be withdrawn
+before submission; unaccepted PENDING/REJECTED/INVALID consent returns 409. Missing
+or foreign records return 404. Repeats return the first receipt, regardless of request key.
+
+For an unlinked consent, withdrawal locks consent and rechecks whether a case appeared.
+If submission won that race, it releases the consent lock and takes the case lock before
+the consent lock. The existing case-withdrawal helper then performs disposal atomically.
+This prevents a consent-to-case lock inversion. Once withdrawal commits, the consent
+gate prevents new work and any existing job is cancelled.
+
+Disposal reasons are `RETENTION`, `OWNER_WITHDRAWAL` or `LEGACY_DISPOSAL` for records
+whose historical cause cannot be established. The first disposal reason is preserved
+when an owner later withdraws. Expiry is a policy deadline, not an explicit withdrawal;
+it does not create an owner receipt. The portal reads the receipt timestamp rather
+than the legacy case status to decide whether the owner has already withdrawn.
+
+The demonstration retains only in-memory browser references. Losing those references
+or expiring the one-hour account/session can prevent further owner access. No recovery
+identity, participant notice approval or institutional retention policy is introduced.
+See [five-stage evidence](../evidence/c1-lifecycle-evaluation.md).
+
 PENDING → ACTIVE or REJECTED after a recorded decision. ACTIVE → EXPIRED, WITHDRAWN or INVALID. REJECTED, WITHDRAWN, INVALID and EXPIRED cannot become ACTIVE; a new consent record is required. The bootstrap endpoint records only ACTIVE or REJECTED; other states are represented and tested as governance/expiry conditions. ACTIVE with an elapsed expires_at is treated as expired on reads and every gate.
 
 Processing requires current ACTIVE status, `dev-notice-1`, matching `synthetic-wellbeing-screening` purpose and a future UTC expiry. Missing records, foreign ownership, wrong purpose, bad version and elapsed expiry all block processing. One active decision authorizes one case in this bootstrap. Retries use the same case, purpose and consent; a fresh submission needs a fresh decision.
