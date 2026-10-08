@@ -1,9 +1,12 @@
 # C1 lifecycle, audit, reliability and proxy evaluation
 
 Date: 2026-10-08, Asia/Colombo. Branch: `feature/c1-consent-orchestration`.
-Baseline remains `112efa0`; this increment is uncommitted. Earlier withdrawal and recovery
-fixes are already in `1be25b3` and `112efa0`. No commit, push, merge, reset or history rewrite
-was performed. Only fixed synthetic fixtures and existing C2–C4 mocks are used.
+This historical increment was developed from `112efa0` and is now committed as `c5a433b`
+(`feat: Add synthetic trace evaluation and PostgreSQL race checks`). Earlier withdrawal
+and recovery fixes are in `1be25b3` and `112efa0`. The verification below belongs to that
+increment; it is not a new run of the later UI work. See the
+[PP1 readiness report](c1-pp1-readiness.md) for the subsequent audit and UI verification.
+Only fixed synthetic fixtures and existing C2–C4 mocks are used.
 This is non-diagnostic screening support, interpreted by authorized counsellors. It does
 not replace professional counselling or authorize autonomous intervention.
 

@@ -9,7 +9,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 test("visible non-diagnostic and synthetic-only notice", () => {
   render(<SafetyNotice />);
-  expect(screen.getByText(/MOCK · SYNTHETIC/)).toBeVisible();
+  expect(screen.getByText(/Screening support, with people in control/)).toBeVisible();
   expect(screen.getByText(/does not provide clinical diagnosis/)).toBeVisible();
   expect(screen.getByText(/Do not enter real student information/)).toBeVisible();
 });
@@ -41,6 +41,7 @@ test("wrong role is denied and signed out", async () => {
     return { ok: true, status: 200, json: async () => ({ role: "ADMIN" }) };
   }));
   render(<Dashboard />);
+  await screen.findByLabelText("Development username");
   fireEvent.change(screen.getByLabelText("Development username"), { target: { value: "synthetic" } });
   fireEvent.change(screen.getByLabelText("Password"), { target: { value: crypto.randomUUID() } });
   fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
