@@ -1,0 +1,126 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/LifecycleAuditEvent.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case Id"
+    },
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "event_id": {
+      "format": "uuid",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "enum": [
+        "AUTH_LOGIN",
+        "AUTH_FAILURE",
+        "AUTH_LOGOUT",
+        "AUTH_REFRESH",
+        "SESSION_REVOKED",
+        "CONSENT_RECORDED",
+        "CONSENT_EXPIRED",
+        "OPERATION_BLOCKED",
+        "SUBMISSION",
+        "SUBMISSION_REPLAY",
+        "WORKFLOW_TRANSITION",
+        "JOB_RETRY",
+        "JOB_TERMINAL",
+        "JOB_CLAIM",
+        "HUMAN_REVIEW",
+        "WITHDRAWAL",
+        "RETENTION",
+        "ASSIGNMENT"
+      ],
+      "title": "Event Type",
+      "type": "string"
+    },
+    "policy_expires_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Expires At"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "service_name": {
+      "const": "orchestrator",
+      "default": "orchestrator",
+      "title": "Service Name",
+      "type": "string"
+    },
+    "service_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Service Version",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    }
+  },
+  "required": [
+    "correlation_id",
+    "event_type",
+    "status"
+  ],
+  "title": "LifecycleAuditEvent",
+  "type": "object"
+}

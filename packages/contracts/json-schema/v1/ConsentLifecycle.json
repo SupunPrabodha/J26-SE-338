@@ -1,0 +1,250 @@
+{
+  "$defs": {
+    "ConsentRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "consent_id": {
+          "format": "uuid",
+          "title": "Consent Id",
+          "type": "string"
+        },
+        "consent_status": {
+          "$ref": "#/$defs/ConsentState"
+        },
+        "consent_version": {
+          "title": "Consent Version",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "purpose": {
+          "title": "Purpose",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "consent_id",
+        "consent_status",
+        "consent_version",
+        "purpose",
+        "created_at",
+        "expires_at"
+      ],
+      "title": "ConsentRecord",
+      "type": "object"
+    },
+    "ConsentState": {
+      "enum": [
+        "PENDING",
+        "ACTIVE",
+        "EXPIRED",
+        "WITHDRAWN",
+        "REJECTED",
+        "INVALID"
+      ],
+      "title": "ConsentState",
+      "type": "string"
+    },
+    "ErrorCode": {
+      "enum": [
+        "AUTH_REQUIRED",
+        "AUTH_INVALID",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONSENT_REQUIRED",
+        "CONSENT_INVALID",
+        "CONTRACT_INVALID",
+        "CONFLICT",
+        "RATE_LIMITED",
+        "DEPENDENCY_UNAVAILABLE",
+        "DOWNSTREAM_FAILED",
+        "DOWNSTREAM_TIMEOUT",
+        "RETRY_EXHAUSTED",
+        "INTERNAL_ERROR"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "PseudonymousCase": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "format": "uuid",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "correlation_id": {
+          "format": "uuid",
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "processing_status": {
+          "$ref": "#/$defs/WorkflowState"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "correlation_id",
+        "processing_status",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "PseudonymousCase",
+      "type": "object"
+    },
+    "WorkflowState": {
+      "enum": [
+        "RECEIVED",
+        "CONSENT_VERIFIED",
+        "PREPROCESSING",
+        "INFERENCE",
+        "EXPLANATION",
+        "READY_FOR_REVIEW",
+        "UNDER_REVIEW",
+        "COMPLETED",
+        "FAILED",
+        "WITHDRAWAL_REQUESTED",
+        "WITHDRAWN"
+      ],
+      "title": "WorkflowState",
+      "type": "string"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/ConsentLifecycle.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "case": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PseudonymousCase"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "consent": {
+      "$ref": "#/$defs/ConsentRecord"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "disposal_reason": {
+      "anyOf": [
+        {
+          "enum": [
+            "RETENTION",
+            "OWNER_WITHDRAWAL",
+            "LEGACY_DISPOSAL"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Disposal Reason"
+    },
+    "explicitly_withdrawn_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Explicitly Withdrawn At"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "consent"
+  ],
+  "title": "ConsentLifecycle",
+  "type": "object"
+}

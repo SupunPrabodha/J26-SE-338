@@ -19,6 +19,12 @@ Shared development foundation for SLIIT IT4010. This is non-diagnostic screening
 
 The transactional PostgreSQL job worker implements the narrow asynchronous foundation; Redis provides service-token/rate-limit/health state. See [architecture](docs/architecture/overview.md), [trust boundaries](docs/architecture/trust-boundaries.md), [source conflicts](docs/governance/source-review.md) and [ADRs](docs/adr/).
 
+The current C1 increment adds pre-submission withdrawal, separate consent/disposal status,
+synthetic provenance, audit trace checks and PostgreSQL reliability evaluation. See
+[C1 evidence, exact demo commands and remaining gaps](docs/evidence/c1-lifecycle-evaluation.md)
+and the [audit catalogue](docs/security/audit-catalogue.md). Performance figures are a
+mock-based core proxy, not end-to-end latency or completed research evaluation.
+
 ## Quick start
 
 Prerequisites: Python 3.12, Node.js 22 LTS (22.22.2+ for host tooling; tested with 22.23.3), npm, Git, Docker and Compose with Linux containers. Container bases are pinned by digest. Dependencies are pinned in `pyproject.toml`, `uv.lock`, `requirements.lock`, `package.json` and `package-lock.json`.
