@@ -37,7 +37,6 @@ REVIEW_ISSUES = {
     "very_short_text",
     "duplicate_text",
     "privacy_review_required",
-    "missing_transformations",
 }
 
 
@@ -77,9 +76,6 @@ def assess_records(records: Iterable[QualityRecord]) -> tuple[QualityResult, ...
 
         if record.requires_privacy_review:
             issues.append("privacy_review_required")
-
-        if not record.transformations:
-            issues.append("missing_transformations")
 
         if any(issue in BLOCKING_ISSUES for issue in issues):
             status = QualityStatus.REJECT

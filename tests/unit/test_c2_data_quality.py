@@ -104,16 +104,16 @@ def test_privacy_risk_requires_review():
     assert "privacy_review_required" in result.issues
 
 
-def test_missing_transformations_requires_review():
+def test_text_without_pii_can_pass_without_transformations():
     record = QualityRecord(
         record_id="SYN-001",
-        anonymized_text="Synthetic record without transformations.",
+        anonymized_text="Synthetic record without personal identifiers.",
     )
 
     result = assess_records([record])[0]
 
-    assert result.status == QualityStatus.REVIEW
-    assert "missing_transformations" in result.issues
+    assert result.status == QualityStatus.PASS
+    assert result.issues == ()
 
 
 def test_summary_passes_without_rejected_records():
