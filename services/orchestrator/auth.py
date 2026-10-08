@@ -7,10 +7,11 @@ import jwt
 from fastapi import Depends, Request, Response
 from fastapi.security import APIKeyCookie
 from pwdlib import PasswordHash
+from research_common.audit import record as audit
 from research_common.config import settings
-from research_common.database import Account, Audit, AuthSession, session
+from research_common.database import Account, AuthSession, session
 from research_common.web import SafeError, redis_client
-from research_contracts import AuditEvent, ErrorCode, Role, now
+from research_contracts import ErrorCode, Role, now
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
@@ -19,25 +20,6 @@ dummy_password_hash = passwords.hash(secrets.token_urlsafe(32))
 ISSUER = "j26-development-identity"
 AUDIENCE = "j26-orchestrator"
 access_cookie = APIKeyCookie(name="j26_access", auto_error=False)
-
-
-def audit(db, request, event, status, case_id=None):
-    item = AuditEvent(
-        case_id=case_id,
-        correlation_id=request.state.correlation_id,
-        event_type=event,
-        status=status,
-    )
-    db.add(
-        Audit(
-            id=str(item.event_id),
-            case_id=str(case_id) if case_id else None,
-            correlation_id=str(item.correlation_id),
-            event_type=item.event_type,
-            status=item.status,
-            created_at=item.created_at,
-        )
-    )
 
 
 def claims(account, jti, audience=AUDIENCE, lifetime=None):
@@ -187,6 +169,8 @@ def refresh(request, response, db):
         select(AuthSession).where(AuthSession.refresh_hash == digest(token)).with_for_update()
     )
     if not record:
+        audit(db, request, "AUTH_FAILURE", "REFRESH_DENIED")
+        db.commit()
         raise SafeError(ErrorCode.AUTH_INVALID, 401)
     account = db.get(Account, record.account_id)
     if record.revoked or record.expires_at <= now() or not account_valid(account):
@@ -195,10 +179,12 @@ def refresh(request, response, db):
             .where(AuthSession.family_id == record.family_id)
             .values(revoked=True)
         )
+        audit(db, request, "SESSION_REVOKED", "REFRESH_DENIED", once="revoke:" + record.family_id)
         db.commit()
         raise SafeError(ErrorCode.AUTH_INVALID, 401)
     record.revoked = True
     issue(db, account, response, record.family_id)
+    audit(db, request, "AUTH_REFRESH", "ROTATED")
     db.commit()
     return account
 
@@ -220,5 +206,6 @@ def logout(request: Request, response: Response, db):
         response.delete_cookie(
             name, path="/api/v1", secure=settings().cookie_secure, httponly=True, samesite="strict"
         )
-    audit(db, request, "AUTH_LOGOUT", "SUCCESS")
+    if record:
+        audit(db, request, "AUTH_LOGOUT", "SUCCESS", once="logout:" + record.family_id)
     db.commit()

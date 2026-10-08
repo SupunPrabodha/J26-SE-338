@@ -1,0 +1,83 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/ServiceProvenance.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "explainer_version": {
+      "const": "mock-1",
+      "title": "Explainer Version",
+      "type": "string"
+    },
+    "model_dataset_version": {
+      "const": "synthetic-fixtures-1",
+      "title": "Model Dataset Version",
+      "type": "string"
+    },
+    "model_version": {
+      "const": "mock-1",
+      "title": "Model Version",
+      "type": "string"
+    },
+    "nlp_service_version": {
+      "const": "0.1.0",
+      "title": "Nlp Service Version",
+      "type": "string"
+    },
+    "pipeline_version": {
+      "const": "mock-1",
+      "title": "Pipeline Version",
+      "type": "string"
+    },
+    "preprocessing_dataset_version": {
+      "const": "synthetic-fixtures-1",
+      "title": "Preprocessing Dataset Version",
+      "type": "string"
+    },
+    "preprocessing_service_version": {
+      "const": "0.1.0",
+      "title": "Preprocessing Service Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "xai_service_version": {
+      "const": "0.1.0",
+      "title": "Xai Service Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "correlation_id",
+    "preprocessing_service_version",
+    "pipeline_version",
+    "preprocessing_dataset_version",
+    "nlp_service_version",
+    "model_version",
+    "model_dataset_version",
+    "xai_service_version",
+    "explainer_version"
+  ],
+  "title": "ServiceProvenance",
+  "type": "object"
+}

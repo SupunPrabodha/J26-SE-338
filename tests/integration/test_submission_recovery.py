@@ -154,7 +154,10 @@ def recovery_request(student_client, monkeypatch, caplog):
             assert evidence["integrity_errors"] == evidence["rollbacks"] == 1
         else:
             assert evidence["integrity_errors"] == evidence["rollbacks"] == 0
-        assert row_counts() == baseline
+        counts = row_counts()
+        assert counts[:-1] == baseline[:-1]
+        # A successful replay adds one bounded audit receipt; no domain rows change.
+        assert counts[-1] == baseline[-1] + (1 if result.status_code == 202 else 0)
 
         # Inspect output without emitting any input, token or linkage value.
         with Session(engine()) as db:

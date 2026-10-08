@@ -132,6 +132,13 @@ class WorkflowExecution(PseudonymousCase):
     attempts: Annotated[int, Field(ge=0, le=3)] = 0
 
 
+class ConsentLifecycle(Contract):
+    consent: ConsentRecord
+    case: PseudonymousCase | None = None
+    explicitly_withdrawn_at: AwareDatetime | None = None
+    disposal_reason: Literal["RETENTION", "OWNER_WITHDRAWAL", "LEGACY_DISPOSAL"] | None = None
+
+
 class ServiceContext(Contract):
     case_id: UUID
     correlation_id: UUID
@@ -236,6 +243,43 @@ class AuditEvent(Contract):
     created_at: AwareDatetime = Field(default_factory=now)
     service_name: Literal["orchestrator"] = "orchestrator"
     service_version: Literal["0.1.0"] = "0.1.0"
+
+
+class LifecycleAuditEvent(AuditEvent):
+    event_type: Literal[
+        "AUTH_LOGIN",
+        "AUTH_FAILURE",
+        "AUTH_LOGOUT",
+        "AUTH_REFRESH",
+        "SESSION_REVOKED",
+        "CONSENT_RECORDED",
+        "CONSENT_EXPIRED",
+        "OPERATION_BLOCKED",
+        "SUBMISSION",
+        "SUBMISSION_REPLAY",
+        "WORKFLOW_TRANSITION",
+        "JOB_RETRY",
+        "JOB_TERMINAL",
+        "JOB_CLAIM",
+        "HUMAN_REVIEW",
+        "WITHDRAWAL",
+        "RETENTION",
+        "ASSIGNMENT",
+    ]
+    policy_expires_at: AwareDatetime | None = None
+    trace_id: UUID | None = None
+
+
+class ServiceProvenance(Contract):
+    correlation_id: UUID
+    preprocessing_service_version: Literal["0.1.0"]
+    pipeline_version: Literal["mock-1"]
+    preprocessing_dataset_version: Literal["synthetic-fixtures-1"]
+    nlp_service_version: Literal["0.1.0"]
+    model_version: Literal["mock-1"]
+    model_dataset_version: Literal["synthetic-fixtures-1"]
+    xai_service_version: Literal["0.1.0"]
+    explainer_version: Literal["mock-1"]
 
 
 class ServiceError(Contract):
