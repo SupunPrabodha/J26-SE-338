@@ -245,7 +245,9 @@ def submit(
             )
         )
         if existing and existing.request_hash == fingerprint:
-            return case_response(own_case(db, existing.case_id, account))
+            case = own_case(db, existing.case_id, account)
+            check_case_consent(db, case)
+            return case_response(case)
         raise SafeError(ErrorCode.CONFLICT, 409) from None
     return case_response(case)
 
