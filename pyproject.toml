@@ -29,6 +29,7 @@ package = false
 
 [tool.uv.sources]
 en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
+presidio-anonymizer = { git = "https://github.com/data-privacy-stack/presidio.git", subdirectory = "presidio-anonymizer", rev = "5e2fcea990aa3b99660d2aea9121d0ba74a8940b" }
 
 [tool.pytest.ini_options]
 pythonpath = ["packages/contracts/src", "packages/python-common/src", "services"]
