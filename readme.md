@@ -25,6 +25,10 @@ synthetic provenance, audit trace checks and PostgreSQL reliability evaluation. 
 and the [audit catalogue](docs/security/audit-catalogue.md). Performance figures are a
 mock-based core proxy, not end-to-end latency or completed research evaluation.
 
+The [consolidated PP1 readiness report](docs/evidence/c1-pp1-readiness.md) links the
+source-derived requirements audit, updated demonstration UI, current verification,
+startup/demo sequence and remaining research gaps.
+
 ## Quick start
 
 Prerequisites: Python 3.12, Node.js 22 LTS (22.22.2+ for host tooling; tested with 22.23.3), npm, Git, Docker and Compose with Linux containers. Container bases are pinned by digest. Dependencies are pinned in `pyproject.toml`, `uv.lock`, `requirements.lock`, `package.json` and `package-lock.json`.
