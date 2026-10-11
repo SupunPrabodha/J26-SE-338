@@ -92,10 +92,7 @@ def evaluate_anonymizer(
         true_positives,
         true_positives + false_negatives,
     )
-    f1_score = _safe_ratio(
-        2 * precision * recall,
-        precision + recall,
-    )
+    f1_score = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
     exact_match_rate = _safe_ratio(
         exact_matches,
         len(case_list),
@@ -126,7 +123,10 @@ def build_evaluation_summary(
         "true_positives": metrics.true_positives,
         "false_positives": metrics.false_positives,
         "false_negatives": metrics.false_negatives,
-        "residual_pii_count": metrics.false_negatives,
+        "missing_placeholder_count": metrics.false_negatives,
+        "metric_basis": "placeholder_type_and_count",
+        "zero_denominator_policy": "Undefined precision/recall = 1; F1 = 0 when both are zero. Empty evaluation exact-match rate = 1; release gate rejects empty evaluation.",
+        "limitation": "Missing placeholder counts are not verified residual PII.",
         "exact_matches": metrics.exact_matches,
         "review_required": metrics.review_required,
         "precision": metrics.precision,

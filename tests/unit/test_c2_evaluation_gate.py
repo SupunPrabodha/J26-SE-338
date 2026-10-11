@@ -152,7 +152,7 @@ def test_gate_summary_contains_aggregate_evidence_only():
 
     assert summary["status"] == "PASSED"
     assert summary["metrics"]["total_cases"] == 20
-    assert summary["metrics"]["residual_pii_count"] == 0
+    assert summary["metrics"]["missing_placeholder_count"] == 0
     assert "synthetic_text" not in serialized
     assert "detected_values" not in serialized
     assert "original_text" not in serialized

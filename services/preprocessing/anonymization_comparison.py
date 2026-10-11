@@ -2,6 +2,8 @@
 
 Metrics compare placeholder counts, not entity spans.
 They must not be treated as proof that all PII was removed.
+For actual original-span evaluation use preprocessing.span_evaluation;
+generate measured supervisor evidence with preprocessing.benchmark_report.
 """
 
 import re
@@ -151,7 +153,8 @@ def build_comparison_summary(
         ),
         "zero_denominator_policy": (
             "Undefined precision or recall is represented as 1.0; "
-            "interpret alongside TP, FP and FN counts."
+            "F1 is zero when both are zero. Empty comparisons are rejected; "
+            "interpret alongside TP, FP and FN counts. Existing placeholders are included in these legacy counts."
         ),
         "strategies": [
             {

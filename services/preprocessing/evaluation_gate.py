@@ -77,7 +77,8 @@ def build_gate_summary(
             "recall": metrics.recall,
             "f1_score": metrics.f1_score,
             "exact_match_rate": metrics.exact_match_rate,
-            "residual_pii_count": metrics.false_negatives,
+            "missing_placeholder_count": metrics.false_negatives,
+            "metric_basis": "placeholder_type_and_count",
         },
         "thresholds": {
             "minimum_precision": thresholds.minimum_precision,
@@ -87,6 +88,7 @@ def build_gate_summary(
             "maximum_residual_pii": (thresholds.maximum_residual_pii),
         },
         "governance_note": (
+            "Legacy maximum_residual_pii threshold checks missing placeholder counts, not verified residual PII. "
             "Threshold values must be approved and documented before "
             "release; this module does not invent research results."
         ),

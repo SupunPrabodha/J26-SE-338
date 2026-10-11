@@ -39,45 +39,7 @@ RESIDUAL_RISK_PATTERN = re.compile(r"(?:@|\b[A-Za-z]{2}\d{6,10}\b|(?<!\d)\+?\d[\
 
 
 def anonymize_text(text: str) -> AnonymizationResult:
-    anonymized_text = text
-    transformations: list[str] = []
+    from preprocessing.span_evaluation import regex_trace
 
-    replacements = (
-        (EMAIL_PATTERN, "[EMAIL]", "mask:email"),
-        (PHONE_PATTERN, "[PHONE]", "mask:phone"),
-        (STUDENT_ID_PATTERN, "[STUDENT_ID]", "mask:student-id"),
-        (TITLED_NAME_PATTERN, "[PERSON]", "mask:person"),
-    )
-
-    for pattern, placeholder, transformation in replacements:
-        anonymized_text, count = pattern.subn(
-            placeholder,
-            anonymized_text,
-        )
-        if count:
-            transformations.append(transformation)
-
-    contextual_replacements = (
-        (ENGLISH_NAME_PATTERN, r"\1[PERSON]", "mask:person"),
-        (ENGLISH_SELF_NAME_PATTERN, r"\1[PERSON]", "mask:person"),
-        (ROMANIZED_NAME_PATTERN, r"\1[PERSON]", "mask:person"),
-        (SINHALA_NAME_PATTERN, r"\1[PERSON]", "mask:person"),
-        (SINHALA_SELF_NAME_PATTERN, r"\1[PERSON]", "mask:person"),
-        (ENGLISH_LOCATION_PATTERN, r"\1[LOCATION]", "mask:location"),
-    )
-
-    for pattern, replacement, transformation in contextual_replacements:
-        anonymized_text, count = pattern.subn(
-            replacement,
-            anonymized_text,
-        )
-        if count:
-            transformations.append(transformation)
-
-    unique_transformations = tuple(dict.fromkeys(transformations))
-
-    return AnonymizationResult(
-        anonymized_text=anonymized_text,
-        transformations=unique_transformations,
-        requires_review=bool(RESIDUAL_RISK_PATTERN.search(anonymized_text)),
-    )
+    masked, transformations, _ = regex_trace(text)
+    return AnonymizationResult(masked, transformations, bool(RESIDUAL_RISK_PATTERN.search(masked)))

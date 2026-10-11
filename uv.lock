@@ -472,7 +472,7 @@ requires-dist = [
     { name = "httpx", specifier = "==0.28.1" },
     { name = "opentelemetry-api", specifier = "==1.45.1" },
     { name = "presidio-analyzer", specifier = "==2.2.364" },
-    { name = "presidio-anonymizer", git = "https://github.com/data-privacy-stack/presidio.git?subdirectory=presidio-anonymizer&rev=5e2fcea990aa3b99660d2aea9121d0ba74a8940b" },
+    { name = "presidio-anonymizer", url = "https://github.com/data-privacy-stack/presidio/archive/5e2fcea990aa3b99660d2aea9121d0ba74a8940b.tar.gz", subdirectory = "presidio-anonymizer" },
     { name = "psycopg", extras = ["binary"], specifier = "==3.3.6" },
     { name = "pwdlib", extras = ["argon2"], specifier = "==0.3.1" },
     { name = "pydantic", specifier = "==2.13.5" },
@@ -808,10 +808,22 @@ wheels = [
 [[package]]
 name = "presidio-anonymizer"
 version = "2.2.364"
-source = { git = "https://github.com/data-privacy-stack/presidio.git?subdirectory=presidio-anonymizer&rev=5e2fcea990aa3b99660d2aea9121d0ba74a8940b#5e2fcea990aa3b99660d2aea9121d0ba74a8940b" }
+source = { url = "https://github.com/data-privacy-stack/presidio/archive/5e2fcea990aa3b99660d2aea9121d0ba74a8940b.tar.gz", subdirectory = "presidio-anonymizer" }
 dependencies = [
     { name = "cryptography" },
 ]
+sdist = { hash = "sha256:f413b7538388b7705d61214d5d1bb39dafce0a7d7808dd6c8528dc6d84c6be1b" }
+
+[package.metadata]
+requires-dist = [
+    { name = "azure-health-deidentification", marker = "extra == 'ahds'", specifier = ">=1.1.0b1,<2.0.0" },
+    { name = "azure-identity", marker = "extra == 'ahds'", specifier = ">=1.25.3,<2.0.0" },
+    { name = "cryptography", specifier = ">=50.0.0,<51.0.0" },
+    { name = "flask", marker = "extra == 'server'", specifier = ">=1.1,<4.0.0" },
+    { name = "gunicorn", marker = "sys_platform != 'win32' and extra == 'server'", specifier = ">=20.0.0,<26.0.0" },
+    { name = "waitress", marker = "sys_platform == 'win32' and extra == 'server'", specifier = ">=2.0.0,<4.0.0" },
+]
+provides-extras = ["server", "ahds"]
 
 [[package]]
 name = "psycopg"

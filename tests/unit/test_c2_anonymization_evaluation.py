@@ -149,7 +149,7 @@ def test_summary_contains_aggregate_metrics_only():
     serialized = json.dumps(summary)
 
     assert summary["evaluation_scope"] == "disposable_synthetic_fixtures"
-    assert summary["residual_pii_count"] == 0
+    assert summary["missing_placeholder_count"] == 0
     assert sensitive_synthetic_text not in serialized
     assert "synthetic_text" not in serialized
     assert "expected_anonymized_text" not in serialized

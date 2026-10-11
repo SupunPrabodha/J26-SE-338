@@ -43,10 +43,23 @@ class PipelineResult:
 
 def run_preprocessing_pipeline(
     records: Iterable[PipelineInput],
+    *,
+    strategy: str = "regex",
 ) -> PipelineResult:
     """Run anonymization, quality checks, and the release privacy gate."""
+    if strategy not in {"regex", "presidio", "hybrid"}:
+        raise ValueError("Unknown anonymization strategy")
+    anonymizer = anonymize_text
+    if strategy == "presidio":
+        from preprocessing.presidio_anonymization import anonymize_with_presidio
+
+        anonymizer = anonymize_with_presidio
+    elif strategy == "hybrid":
+        from preprocessing.hybrid_anonymization import anonymize_with_hybrid
+
+        anonymizer = anonymize_with_hybrid
     input_records = list(records)
-    anonymized_results = [anonymize_text(record.text) for record in input_records]
+    anonymized_results = [anonymizer(record.text) for record in input_records]
 
     quality_records = [
         QualityRecord(

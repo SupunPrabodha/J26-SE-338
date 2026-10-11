@@ -4,10 +4,11 @@ from collections import Counter
 from dataclasses import dataclass
 from functools import lru_cache
 
+import tldextract
 from presidio_analyzer import AnalyzerEngine, Pattern, PatternRecognizer
 from presidio_analyzer.nlp_engine import NlpEngineProvider
+from presidio_analyzer.predefined_recognizers import EmailRecognizer
 from presidio_anonymizer import AnonymizerEngine
-from presidio_anonymizer.entities import OperatorConfig
 
 from preprocessing.anonymization import (
     PHONE_PATTERN,
@@ -41,6 +42,17 @@ TRANSFORMATION_NAMES = {
 }
 
 
+class _OfflineEmailRecognizer(EmailRecognizer):
+    """Keep Presidio email rules, using the locked dependency's bundled suffix list."""
+
+    def __init__(self):
+        super().__init__(name="OfflineEmailRecognizer")
+        self.extract = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None)
+
+    def validate_result(self, pattern_text: str):
+        return self.extract(pattern_text).fqdn != ""
+
+
 @lru_cache(maxsize=1)
 def _get_engines():
     nlp_configuration = {
@@ -53,6 +65,12 @@ def _get_engines():
         ],
     }
 
+    import spacy
+
+    if not spacy.util.is_package("en_core_web_sm"):
+        raise RuntimeError(
+            "Required English spaCy model en_core_web_sm is unavailable; install locked dependencies."
+        )
     provider = NlpEngineProvider(
         nlp_configuration=nlp_configuration,
     )
@@ -62,6 +80,8 @@ def _get_engines():
         nlp_engine=nlp_engine,
         supported_languages=["en"],
     )
+    analyzer.registry.remove_recognizer("EmailRecognizer")
+    analyzer.registry.add_recognizer(_OfflineEmailRecognizer())
 
     analyzer.registry.add_recognizer(
         PatternRecognizer(
@@ -98,47 +118,22 @@ def anonymize_with_presidio(
     text: str,
 ) -> PresidioAnonymizationResult:
     """Anonymize text without returning or logging detected PII values."""
-    analyzer, anonymizer = _get_engines()
+    from preprocessing.span_evaluation import ALIASES, EntitySpan, render, select_presidio
 
-    analyzer_results = analyzer.analyze(
-        text=text,
-        language="en",
-        entities=list(ENTITY_PLACEHOLDERS),
-    )
-
-    unique_results = {}
-    for result in analyzer_results:
-        key = (
-            result.start,
-            result.end,
-            result.entity_type,
-        )
-        existing = unique_results.get(key)
-        if existing is None or result.score > existing.score:
-            unique_results[key] = result
-
-    safe_results = list(unique_results.values())
+    safe_results = select_presidio(text)
     entity_counts = Counter(result.entity_type for result in safe_results)
-
-    anonymized_result = anonymizer.anonymize(
-        text=text,
-        analyzer_results=safe_results,
-        operators={
-            entity_type: OperatorConfig(
-                "replace",
-                {"new_value": placeholder},
-            )
-            for entity_type, placeholder in ENTITY_PLACEHOLDERS.items()
-        },
+    spans = tuple(
+        EntitySpan(r.start, r.end, ALIASES.get(r.entity_type, r.entity_type)) for r in safe_results
     )
+    masked = render(text, spans)
 
     transformations = tuple(
         TRANSFORMATION_NAMES[entity_type] for entity_type in sorted(entity_counts)
     )
 
     return PresidioAnonymizationResult(
-        anonymized_text=anonymized_result.text,
+        anonymized_text=masked,
         entity_counts=tuple(sorted(entity_counts.items())),
         transformations=transformations,
-        requires_review=bool(RESIDUAL_RISK_PATTERN.search(anonymized_result.text)),
+        requires_review=bool(RESIDUAL_RISK_PATTERN.search(masked)),
     )
