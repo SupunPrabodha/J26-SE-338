@@ -1,5 +1,23 @@
 # Reproducing the C2 anonymization comparison
 
+For a clearer research selection report, introducing the tools and presenting precision, recall and F1 as percentages:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/run.py preprocessing.benchmark_report --pdf-from-results artifacts/c2-anonymization/results.json --selection-summary --output artifacts/c2-anonymization/selection-report
+```
+
+This creates `artifacts/c2-anonymization/selection-report/comparison.pdf`. It explains the provisional choice, alternatives, language/entity evidence, masking tradeoffs and limitations in three main pages, with a supporting provenance/runtime page. Percentage and runtime rounding affects presentation only; the original JSON is preserved and embedded exactly. F1 is labelled as a balanced detection score, not general accuracy or anonymity. No measurement runs during conversion. The detailed report remains separate.
+
+To convert the **existing** recorded results into a research-panel PDF without measuring again:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/run.py preprocessing.benchmark_report --pdf-from-results artifacts/c2-anonymization/results.json --output artifacts/c2-anonymization
+```
+
+This creates `artifacts/c2-anonymization/comparison.pdf` and leaves `results.json` and `comparison.md` untouched. It uses recorded metrics, timings, versions, benchmark ID and measurement fingerprints, rather than inspecting today's environment or Git revision. Numbers are not rounded during conversion. The original JSON is embedded byte-for-byte as `results.json`, with its SHA256 printed in the PDF. Only the current aggregate schema is accepted; unknown fixture/span fields, invalid metrics and missing candidates are rejected. Presidio is labelled the provisional recommendation; production selection remains pending and Regex remains default. The English PDF has repeated table headers, page numbers, comparisons, masking errors, runtime, rationale, limitations and reproduction instructions. Future normal benchmark runs now automatically create PDF alongside JSON/Markdown; **do not run the measurement command merely to export a PDF**.
+
+PDF dependencies are pinned through uv: ReportLab and pypdf for generation/attachment, with PyMuPDF in the development group for page rendering and verification. The hashed requirements export retains the fixed Presidio archive source. Updating these dependencies does not alter the historical requirements hash in the measured JSON. Verification details are in [PDF export evidence](../../docs/evidence/c2-pdf-export.md).
+
 Run from the repository root with the existing locked environment:
 
 ```powershell

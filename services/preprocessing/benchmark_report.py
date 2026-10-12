@@ -282,7 +282,30 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("artifacts/c2-anonymization"))
     parser.add_argument("--repetitions", type=int, default=20)
     parser.add_argument("--cold", choices=STRATEGIES)
+    parser.add_argument(
+        "--pdf-from-results",
+        type=Path,
+        help="Convert recorded aggregate JSON to PDF without running the benchmark",
+    )
+    parser.add_argument(
+        "--selection-summary",
+        action="store_true",
+        help="Create a plain-English tool-selection report with percentage scores",
+    )
     args = parser.parse_args()
+    if args.selection_summary and not args.pdf_from_results:
+        parser.error("Selection summary requires existing --pdf-from-results")
+    if args.pdf_from_results:
+        if args.cold:
+            parser.error("PDF conversion cannot be combined with cold measurement")
+        if args.selection_summary:
+            from preprocessing.selection_pdf import export_selection_pdf as export_pdf
+        else:
+            from preprocessing.pdf_report import export_pdf
+
+        export_pdf(args.pdf_from_results, args.output / "comparison.pdf")
+        print(f"Converted existing measured results to {args.output / 'comparison.pdf'}")
+        return
     if args.cold:
         start = perf_counter()
         anonymizer(args.cold)("Contact cold.fixture@example.com.")
@@ -295,7 +318,10 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "results.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
     (args.output / "comparison.md").write_text(markdown(data, command), encoding="utf-8")
-    print(f"Generated aggregate results.json and comparison.md in {args.output}")
+    from preprocessing.pdf_report import export_pdf
+
+    export_pdf(args.output / "results.json", args.output / "comparison.pdf")
+    print(f"Generated aggregate results.json, comparison.md and comparison.pdf in {args.output}")
 
 
 if __name__ == "__main__":
