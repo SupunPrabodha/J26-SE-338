@@ -5,6 +5,8 @@ from collections import Counter
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
+from preprocessing.data_quality import record_id_key, text_input_issues
+
 FORBIDDEN_COLUMNS = frozenset(
     {
         "original_text",
@@ -40,26 +42,50 @@ def assess_release(
     records: Iterable[Mapping[str, object]],
 ) -> ReleaseGateResult:
     """Return aggregate privacy evidence without exposing record text."""
+    if (
+        fieldnames is None
+        or isinstance(fieldnames, (str, bytes))
+        or records is None
+        or isinstance(records, (str, bytes))
+    ):
+        raise ValueError("Release fields and records must be iterables.")
+    try:
+        columns = list(fieldnames)
+        record_list = list(records)
+    except TypeError:
+        raise ValueError("Release fields and records must be iterables.") from None
     available_columns = {
-        str(fieldname).strip() for fieldname in fieldnames if str(fieldname).strip()
+        fieldname.strip()
+        for fieldname in columns
+        if isinstance(fieldname, str) and fieldname.strip()
     }
 
     missing_columns = sorted(REQUIRED_COLUMNS - available_columns)
     unsafe_columns = sorted(FORBIDDEN_COLUMNS & available_columns)
-    record_list = list(records)
 
     counts: Counter[str] = Counter()
     seen_record_ids: set[str] = set()
 
     counts["missing_required_columns"] = len(missing_columns)
     counts["forbidden_columns"] = len(unsafe_columns)
+    counts["invalid_fieldnames"] = sum(not isinstance(fieldname, str) for fieldname in columns)
 
     for record in record_list:
-        record_id = str(record.get("record_id") or "").strip()
-        anonymized_text = str(record.get("anonymized_text") or "").strip()
+        if not isinstance(record, Mapping):
+            counts["malformed_record"] += 1
+            continue
+        record_id, id_issues = record_id_key(record.get("record_id"))
+        counts.update(id_issues)
+        text = record.get("anonymized_text")
+        text_issues = text_input_issues(text)
+        if text_issues:
+            counts["invalid_anonymized_text"] += 1
+            anonymized_text = ""
+        else:
+            anonymized_text = text.strip()
 
         if not record_id:
-            counts["missing_record_id"] += 1
+            pass  # Already counted missing/invalid ID without string coercion.
         elif record_id in seen_record_ids:
             counts["duplicate_record_id"] += 1
         else:
@@ -85,6 +111,10 @@ def assess_release(
         issues.append("forbidden_columns_present")
 
     issue_mapping = {
+        "invalid_fieldnames": "invalid_fieldnames",
+        "malformed_record": "malformed_record",
+        "invalid_record_id": "invalid_record_id",
+        "invalid_anonymized_text": "invalid_anonymized_text",
         "missing_record_id": "missing_record_id",
         "duplicate_record_id": "duplicate_record_id",
         "empty_anonymized_text": "empty_anonymized_text",

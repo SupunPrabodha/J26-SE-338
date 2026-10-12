@@ -5,10 +5,15 @@ from dataclasses import dataclass
 
 from preprocessing.anonymization import anonymize_text
 from preprocessing.data_quality import (
+    DEFAULT_QUALITY_POLICY,
+    QualityPolicy,
     QualityRecord,
     QualityStatus,
     assess_records,
     build_quality_summary,
+    quality_blocking_reasons,
+    text_input_issues,
+    text_review_signals,
 )
 from preprocessing.privacy_gate import (
     assess_release,
@@ -18,8 +23,8 @@ from preprocessing.privacy_gate import (
 
 @dataclass(frozen=True)
 class PipelineInput:
-    record_id: str
-    text: str
+    record_id: str | None = None
+    text: str | None = None
 
 
 @dataclass(frozen=True)
@@ -45,8 +50,9 @@ def run_preprocessing_pipeline(
     records: Iterable[PipelineInput],
     *,
     strategy: str = "regex",
+    quality_policy: QualityPolicy = DEFAULT_QUALITY_POLICY,
 ) -> PipelineResult:
-    """Run anonymization, quality checks, and the release privacy gate."""
+    """Run automated prerequisites; release_ready never authorizes human release."""
     if strategy not in {"regex", "presidio", "hybrid"}:
         raise ValueError("Unknown anonymization strategy")
     anonymizer = anonymize_text
@@ -58,43 +64,55 @@ def run_preprocessing_pipeline(
         from preprocessing.hybrid_anonymization import anonymize_with_hybrid
 
         anonymizer = anonymize_with_hybrid
-    input_records = list(records)
-    anonymized_results = [anonymizer(record.text) for record in input_records]
-
-    quality_records = [
-        QualityRecord(
-            record_id=input_record.record_id,
-            anonymized_text=anonymized.anonymized_text,
-            transformations=anonymized.transformations,
-            requires_privacy_review=anonymized.requires_review,
+    if not isinstance(quality_policy, QualityPolicy):
+        raise ValueError("Quality policy must be a validated QualityPolicy.")
+    if records is None or isinstance(records, (str, bytes)):
+        raise ValueError("Pipeline records must be an iterable of records.")
+    try:
+        input_records = list(records)
+    except TypeError:
+        raise ValueError("Pipeline records must be an iterable of records.") from None
+    quality_records = []
+    for record in input_records:
+        if not isinstance(record, PipelineInput):
+            quality_records.append(QualityRecord(None, None, input_issues=("malformed_record",)))
+            continue
+        issues = text_input_issues(record.text)
+        if issues:
+            quality_records.append(QualityRecord(record.record_id, record.text))
+            continue
+        anonymized = anonymizer(record.text)
+        quality_records.append(
+            QualityRecord(
+                record.record_id,
+                anonymized.anonymized_text,
+                anonymized.transformations,
+                anonymized.requires_review,
+                text_review_signals(record.text),
+            )
         )
-        for input_record, anonymized in zip(
-            input_records,
-            anonymized_results,
-            strict=True,
-        )
-    ]
 
-    quality_results = assess_records(quality_records)
+    quality_results = assess_records(quality_records, policy=quality_policy)
 
     outputs = tuple(
         PipelineOutput(
-            record_id=input_record.record_id.strip(),
-            anonymized_text=anonymized.anonymized_text,
+            record_id=quality.record_id,
+            anonymized_text=anonymized.anonymized_text
+            if not text_input_issues(anonymized.anonymized_text)
+            else "",
             transformations=anonymized.transformations,
             quality_status=quality.status,
             quality_issues=quality.issues,
-            requires_privacy_review=anonymized.requires_review,
+            requires_privacy_review=anonymized.requires_privacy_review,
         )
-        for input_record, anonymized, quality in zip(
-            input_records,
-            anonymized_results,
+        for anonymized, quality in zip(
+            quality_records,
             quality_results,
             strict=True,
         )
     )
 
-    quality_summary = build_quality_summary(quality_results)
+    quality_summary = build_quality_summary(quality_results, policy=quality_policy)
 
     release_records = [
         {
@@ -110,10 +128,7 @@ def run_preprocessing_pipeline(
     )
     privacy_summary = build_release_summary(privacy_result)
 
-    blocking_reasons: list[str] = []
-
-    if any(output.quality_status == QualityStatus.REJECT for output in outputs):
-        blocking_reasons.append("data_quality_rejected")
+    blocking_reasons = list(quality_blocking_reasons(quality_results))
 
     if any(output.requires_privacy_review for output in outputs):
         blocking_reasons.append("privacy_review_required")
@@ -144,6 +159,8 @@ def build_pipeline_summary(
         "pipeline_stage": "c2_anonymization_and_quality",
         "records_processed": len(result.records),
         "release_ready": result.release_ready,
+        "release_ready_meaning": "Automated prerequisites passed; not human release authorization.",
+        "human_release_required": True,
         "blocking_reasons": list(result.blocking_reasons),
         "transformation_counts": dict(sorted(transformation_counts.items())),
         "quality_summary": result.quality_summary,
