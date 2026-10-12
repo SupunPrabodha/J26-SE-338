@@ -10,7 +10,9 @@ from research_common.database import (
     Case,
     CaseLink,
     Consent,
+    ConsentWithdrawal,
     Job,
+    Retention,
     Review,
     ReviewAction,
     Withdrawal,
@@ -22,6 +24,7 @@ from research_contracts import (
     AccountResponse,
     AssignmentRequest,
     ConsentDecision,
+    ConsentLifecycle,
     ConsentRecord,
     ErrorCode,
     FixturesResponse,
@@ -92,7 +95,7 @@ def authorized_review(db, task_id, account):
         )
     ):
         raise SafeError(ErrorCode.NOT_FOUND, 404)
-    check_case_consent(db, case)
+    check_case_consent(db, case, "REVIEW")
     if case.status not in {"READY_FOR_REVIEW", "UNDER_REVIEW", "COMPLETED"}:
         raise SafeError(ErrorCode.NOT_FOUND, 404)
     return task, case
@@ -164,7 +167,8 @@ def record_consent(
         expires_at=account.expires_at,
     )
     db.add(consent)
-    auth.audit(db, request, "CONSENT_RECORDED", body.consent_status)
+    db.flush()
+    auth.audit(db, request, "CONSENT_RECORDED", body.consent_status, consent_id=consent.id)
     db.commit()
     return consent_response(consent)
 
@@ -175,6 +179,74 @@ def get_consent(consent_id: UUID, account=Depends(student), db: Session = Depend
     if not consent or consent.account_id != account.id:
         raise SafeError(ErrorCode.NOT_FOUND, 404)
     return consent_response(consent)
+
+
+def lifecycle_response(db, consent):
+    link = db.scalar(select(CaseLink).where(CaseLink.consent_id == consent.id))
+    case = db.get(Case, link.case_id) if link else None
+    receipt = db.scalar(select(ConsentWithdrawal).where(ConsentWithdrawal.consent_id == consent.id))
+    retained = None
+    if case:
+        receipt = db.scalar(select(Withdrawal).where(Withdrawal.case_id == case.id))
+        retained = db.scalar(select(Retention).where(Retention.case_id == case.id))
+    return ConsentLifecycle(
+        consent=consent_response(consent),
+        case=case_response(case) if case else None,
+        explicitly_withdrawn_at=receipt.created_at if receipt else None,
+        disposal_reason=retained.reason if retained else None,
+    )
+
+
+@app.get("/api/v1/consents/{consent_id}/lifecycle", response_model=ConsentLifecycle)
+def consent_lifecycle(consent_id: UUID, account=Depends(student), db: Session = Depends(session)):
+    consent = db.get(Consent, str(consent_id))
+    if not consent or consent.account_id != account.id:
+        raise SafeError(ErrorCode.NOT_FOUND, 404)
+    return lifecycle_response(db, consent)
+
+
+@app.post("/api/v1/consents/{consent_id}/withdraw", response_model=ConsentLifecycle)
+def withdraw_consent(
+    consent_id: UUID,
+    body: WithdrawalRequest,
+    request: Request,
+    account=Depends(student),
+    db: Session = Depends(session),
+):
+    consent = db.get(Consent, str(consent_id))
+    if not consent or consent.account_id != account.id:
+        raise SafeError(ErrorCode.NOT_FOUND, 404)
+    link = db.scalar(select(CaseLink).where(CaseLink.consent_id == consent.id))
+    if not link:
+        consent = db.scalar(
+            select(Consent)
+            .where(Consent.id == str(consent_id))
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        # A submitter may have created a case while this request waited for consent.
+        link = db.scalar(select(CaseLink).where(CaseLink.consent_id == consent.id))
+        if not link:
+            prior = db.scalar(
+                select(ConsentWithdrawal).where(ConsentWithdrawal.consent_id == consent.id)
+            )
+            if not prior:
+                if consent.status not in {"ACTIVE", "EXPIRED"}:
+                    raise SafeError(ErrorCode.CONFLICT, 409)
+                consent.status = "WITHDRAWN"
+                db.add(
+                    ConsentWithdrawal(
+                        consent_id=consent.id, idempotency_key=str(body.idempotency_key)
+                    )
+                )
+                auth.audit(db, request, "WITHDRAWAL", "BEFORE_SUBMISSION", consent_id=consent.id)
+                db.commit()
+            return lifecycle_response(db, consent)
+        # Never acquire a case lock while holding its consent lock.
+        db.commit()
+    withdraw(UUID(link.case_id), body, request, account, db)
+    db.refresh(consent)
+    return lifecycle_response(db, consent)
 
 
 @app.post("/api/v1/submissions", response_model=PseudonymousCase, status_code=202)
@@ -194,14 +266,16 @@ def submit(
     )
     if existing:
         case = own_case(db, existing.case_id, account)
-        check_case_consent(db, case)
+        check_case_consent(db, case, "SUBMISSION")
         if existing.request_hash != fingerprint:
             raise SafeError(ErrorCode.CONFLICT, 409)
+        auth.audit(db, request, "SUBMISSION_REPLAY", "DUPLICATE", case.id, once="replay:" + case.id)
+        db.commit()
         return case_response(case)
     consent = db.scalar(select(Consent).where(Consent.id == str(body.consent_id)).with_for_update())
     if consent and consent.account_id != account.id:
         raise SafeError(ErrorCode.NOT_FOUND, 404)
-    active_consent(consent)
+    active_consent(consent, db, request)
     existing = db.scalar(select(CaseLink).where(CaseLink.consent_id == consent.id))
     if existing:
         if (
@@ -212,7 +286,11 @@ def submit(
             # Release the consent lock before acquiring the case lock (global lock order).
             db.commit()
             case = own_case(db, existing.case_id, account)
-            check_case_consent(db, case)
+            check_case_consent(db, case, "SUBMISSION")
+            auth.audit(
+                db, request, "SUBMISSION_REPLAY", "CONCURRENT", case.id, once="replay:" + case.id
+            )
+            db.commit()
             return case_response(case)
         raise SafeError(ErrorCode.CONFLICT, 409)
     case = Case(
@@ -234,6 +312,7 @@ def submit(
         Job(case_id=case.id, fixture_id=body.fixture_id, idempotency_key=str(body.idempotency_key))
     )
     auth.audit(db, request, "WORKFLOW_TRANSITION", "RECEIVED", case.id)
+    auth.audit(db, request, "SUBMISSION", "ACCEPTED", case.id)
     try:
         db.commit()
     except IntegrityError:
@@ -245,7 +324,13 @@ def submit(
             )
         )
         if existing and existing.request_hash == fingerprint:
-            return case_response(own_case(db, existing.case_id, account))
+            case = own_case(db, existing.case_id, account)
+            check_case_consent(db, case, "SUBMISSION")
+            auth.audit(
+                db, request, "SUBMISSION_REPLAY", "RECOVERED", case.id, once="replay:" + case.id
+            )
+            db.commit()
+            return case_response(case)
         raise SafeError(ErrorCode.CONFLICT, 409) from None
     return case_response(case)
 
@@ -274,7 +359,7 @@ def withdraw(
             .with_for_update()
         )
         consent.status = "WITHDRAWN"
-        dispose(db, case, request)
+        dispose(db, case, request, reason="OWNER_WITHDRAWAL")
         db.add(Withdrawal(case_id=case.id, idempotency_key=str(body.idempotency_key)))
         auth.audit(db, request, "WITHDRAWAL", "WITHDRAWN", case.id)
         db.commit()

@@ -1,7 +1,7 @@
 # C1 step 1: record owner withdrawal after retention
 
 Date: 2026-10-07 (Asia/Colombo). Branch: `feature/c1-consent-orchestration`.
-Baseline: `d5699d326bb14785df48b3610c97f65d72708a03`. Changes are left uncommitted for review.
+Baseline: `d5699d326bb14785df48b3610c97f65d72708a03`. Implemented in commit `1be25b3ea335b1284483fc977f30b9262d1e2364` (`fix(c1): record withdrawal after retention cleanup`).
 
 ## Objective and source traceability
 
@@ -69,6 +69,4 @@ Retain this note, the code/test diff, aggregate test counts and the smoke PASS c
 
 SQLite tests verify sequential behavior; the PostgreSQL smoke verifies two concurrent requests in the retained-case scenario. This is not exhaustive concurrency or load evaluation. Hosted CI, full browser automation, UAT and participant evaluation were not run. C2–C4 remain development-only mocks; all outputs remain non-diagnostic, counsellor-assisted screening support.
 
-Proposed commit message after review: `fix(c1): record withdrawal after retention cleanup`.
-No commit, push or merge is performed in this step. Stop here for the owner's verification.
-
+The original implementation was left uncommitted for review and subsequently committed as `1be25b3ea335b1284483fc977f30b9262d1e2364`. This note records that implementation's verification; it does not claim a new test run or hosted CI result.

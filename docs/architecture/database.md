@@ -4,6 +4,15 @@ PostgreSQL 17 is the integration database. SQLite is used only for fast disposab
 
 Logical boundaries:
 
+The new, unmerged revisions `f310c1000001` and `f310c1000002` follow the existing head.
+The first adds one receipt per consent before submission and a disposal reason, marking
+existing disposal rows `LEGACY_DISPOSAL` without guessing their cause. The second adds
+nullable case provenance, an audit trace reference and an observed policy deadline.
+Existing audit rows are not rewritten; append-only triggers remain installed.
+Old rows keep null provenance/trace/deadline values. No published migration is changed.
+Downgrading these revisions loses the new fields/receipts and is tested only in disposable
+databases. Do not downgrade the preserved development volume for verification.
+
 | Prefix | Contents |
 |---|---|
 | access_ | Synthetic accounts, JWT session/revocation and hashed refresh state |

@@ -14,3 +14,20 @@ The supplied TAF (15 pages, V2.2) and Master Research Context agree on the title
 | C4 appendix discusses inherited ethics approval; other sources say participant work remains pending | No ethics approval is asserted by this repository. All participant work remains outside this bootstrap. |
 
 These differences do not block synthetic common foundations because the TAF resolves ownership and the requested bootstrap excludes collection, training, XAI research and studies.
+
+## C1 lifecycle/evaluation continuation — 2026-10-08
+
+Reviewed the supplied finalized TAF (pp7–8), Master Research Context (C1 section 6.1 and
+privacy/ethical boundaries), and C1 proposal IT23187450 (pp27–28). The master was supplied
+as `J26-SE-338_Master_Research_Context (1).docx`; this is the available document, not a
+second inferred version. C1 FR-01/02/05/06/07/08/10/11 and NFR-01/03/04/06/07 support this work.
+No new ownership conflict was found. Minimal student lifecycle UI is C1 integration work;
+the final counsellor dashboard and XAI research remain C4-owned.
+
+Proposal p28 NFR-07 provisionally targets p95 C1 overhead below 500 ms excluding AI
+inference on documented hardware. The retained core proxy also excludes HTTP/authentication
+transport and queue delay, so it is not directly comparable to the full architectural
+boundary. NFR-04's all-critical/95%-required audit target is provisional too; the 29-event
+synthetic catalogue establishes only its own exercised denominator. Stable audit IDs,
+case-first locks, a lifecycle response and mock timing boundaries are implementation
+decisions, not completed stakeholder or ethics validation.

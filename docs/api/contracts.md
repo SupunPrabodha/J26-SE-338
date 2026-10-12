@@ -19,3 +19,21 @@ python scripts/run.py pytest tests/contract
 OpenAPI is generated from the same request/response models used at runtime; drift tests compare checked-in documents byte-equivalently after canonical JSON generation. Tests also prohibit service-local BaseModel definitions. New examples should include invalid consent, incompatible versions and forbidden identity fields.
 
 All protected public APIs use HttpOnly cookies; internal APIs use audience-specific Bearer tokens. `/health`, `/ready`, `/version`, `/docs` and `/openapi.json` are development diagnostic endpoints. Public business routes are under `/api/v1`; mocks under `/internal/v1`. Errors return a safe stable error_code, correlation_id and generic message, never submitted bodies or validation input.
+
+## C1 lifecycle additions (unmerged)
+
+`ConsentLifecycle` is a new response for owner-only GET `/consents/{id}/lifecycle` and
+POST `/consents/{id}/withdraw`. It composes the unchanged ConsentRecord and PseudonymousCase
+and adds explicit-withdrawal/disposal information. The POST reuses WithdrawalRequest.
+Existing case withdrawal, submission, consent and C2–C4 wire schemas are unchanged.
+The legacy case state WITHDRAWN continues to mean disposed; new clients should use the
+lifecycle response to distinguish retention from an owner's decision.
+
+`LifecycleAuditEvent` is a separate, expanded audit model; the published AuditEvent is
+unchanged. `ServiceProvenance` is a new internal stored contract containing provider-returned
+versions and case correlation, explicitly synthetic/development-only. It contains no text.
+No Python consumer copies are generated: services import the authoritative Python package.
+JSON Schema, orchestrator OpenAPI and TypeScript declarations are generated from it.
+C2–C4 owners need no mock request/response changes, but must review real provider versions,
+provenance retention and deletion propagation before replacing mocks. These development
+literal versions deliberately do not accept an unreviewed real model version.
