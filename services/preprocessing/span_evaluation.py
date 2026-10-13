@@ -5,9 +5,11 @@ Offsets are half-open Python Unicode character offsets, not UTF-8 bytes.
 """
 
 import re
+from copy import copy
 from dataclasses import dataclass
 
 from preprocessing import anonymization as rules
+from preprocessing.contextual_detection import detect_contextual
 
 PLACEHOLDERS = re.compile(r"\[(?:EMAIL|PHONE|STUDENT_ID|PERSON|LOCATION)\]")
 ALIASES = {"EMAIL_ADDRESS": "EMAIL", "PHONE_NUMBER": "PHONE"}
@@ -29,12 +31,6 @@ def regex_trace(text: str):
         (rules.PHONE_PATTERN, "PHONE", 0, "phone"),
         (rules.STUDENT_ID_PATTERN, "STUDENT_ID", 0, "student-id"),
         (rules.TITLED_NAME_PATTERN, "PERSON", 0, "person"),
-        (rules.ENGLISH_NAME_PATTERN, "PERSON", 2, "person"),
-        (rules.ENGLISH_SELF_NAME_PATTERN, "PERSON", 2, "person"),
-        (rules.ROMANIZED_NAME_PATTERN, "PERSON", 2, "person"),
-        (rules.SINHALA_NAME_PATTERN, "PERSON", 2, "person"),
-        (rules.SINHALA_SELF_NAME_PATTERN, "PERSON", 2, "person"),
-        (rules.ENGLISH_LOCATION_PATTERN, "LOCATION", 2, "location"),
     )
     for pattern, entity, group, label in patterns:
         protected = [m.span() for m in PLACEHOLDERS.finditer(text)]
@@ -50,6 +46,18 @@ def regex_trace(text: str):
             text = text[:start] + replacement + text[end:]
             mapping[start:end] = [None] * len(replacement)
             transformations.append(f"mask:{label}")
+    for result in sorted(detect_contextual(text), key=lambda s: s.start, reverse=True):
+        start, end = result.start, result.end
+        if any(start < m.end() and end > m.start() for m in PLACEHOLDERS.finditer(text)):
+            continue
+        original = mapping[start:end]
+        if not original or any(i is None for i in original):
+            continue
+        spans.append(EntitySpan(original[0], original[-1] + 1, result.entity_type))
+        replacement = f"[{result.entity_type}]"
+        text = text[:start] + replacement + text[end:]
+        mapping[start:end] = [None] * len(replacement)
+        transformations.append(f"mask:{result.entity_type.lower()}")
     return text, tuple(dict.fromkeys(transformations)), tuple(sorted(spans))
 
 
@@ -59,6 +67,26 @@ def select_presidio(text: str):
     analyzer, _ = _get_engines()
     results = analyzer.analyze(text=text, language="en", entities=list(ENTITY_PLACEHOLDERS))
     protected = [m.span() for m in PLACEHOLDERS.finditer(text)]
+    contextual_fields = detect_contextual(text)
+    # Introductory grammar is explicitly excluded by the annotation policy.
+    # Trim only NER coverage inside a successfully parsed introduction field.
+    for contextual in contextual_fields:
+        trimmed = []
+        for result in results:
+            if result.entity_type not in {"PERSON", "LOCATION"} or not (
+                result.start < contextual.start and result.end > contextual.context_start
+            ):
+                trimmed.append(result)
+                continue
+            if result.start < contextual.context_start:
+                prefix = copy(result)
+                prefix.end = contextual.context_start
+                trimmed.append(prefix)
+            if result.end > contextual.start:
+                suffix = copy(result)
+                suffix.start = contextual.start
+                trimmed.append(suffix)
+        results = trimmed
     selected = []
     # Deterministic confidence-first overlap resolution; the same spans drive masking.
     for result in sorted(
@@ -69,6 +97,54 @@ def select_presidio(text: str):
         if any(result.start < r.end and result.end > r.start for r in selected):
             continue
         selected.append(result)
+    # A validated existing ID rule is more specific than PERSON. Resolve only
+    # PERSON/ID conflicts after the unchanged confidence-first selection. Retain
+    # all remaining PERSON coverage (including broader spans), never veto names.
+    valid_ids = {match.span() for match in rules.STUDENT_ID_PATTERN.finditer(text)}
+    for identifier in sorted(
+        (r for r in results if r.entity_type == "STUDENT_ID" and (r.start, r.end) in valid_ids),
+        key=lambda r: (-r.score, r.start, r.end),
+    ):
+        if any(identifier.start < b and identifier.end > a for a, b in protected):
+            continue
+        overlaps = [r for r in selected if identifier.start < r.end and identifier.end > r.start]
+        if not overlaps or any(r.entity_type != "PERSON" for r in overlaps):
+            continue
+        selected = [r for r in selected if r not in overlaps]
+        for person in overlaps:
+            if person.start < identifier.start:
+                prefix = copy(person)
+                prefix.end = identifier.start
+                selected.append(prefix)
+            if person.end > identifier.end:
+                suffix = copy(person)
+                suffix.start = identifier.end
+                selected.append(suffix)
+        selected.append(identifier)
+    # Explicit contextual fields resolve only overlapping unstructured NER spans.
+    # Structured entities always retain precedence. Keep neighbouring coverage
+    # outside the introduction; no global PERSON veto or threshold change.
+    from presidio_analyzer import RecognizerResult
+
+    for contextual in contextual_fields:
+        if any(contextual.start < b and contextual.end > a for a, b in protected):
+            continue
+        overlaps = [r for r in selected if contextual.start < r.end and contextual.end > r.start]
+        if any(r.entity_type not in {"PERSON", "LOCATION"} for r in overlaps):
+            continue
+        selected = [r for r in selected if r not in overlaps]
+        for previous in overlaps:
+            if previous.start < contextual.context_start:
+                prefix = copy(previous)
+                prefix.end = contextual.context_start
+                selected.append(prefix)
+            if previous.end > contextual.end:
+                suffix = copy(previous)
+                suffix.start = contextual.end
+                selected.append(suffix)
+        selected.append(
+            RecognizerResult(contextual.entity_type, contextual.start, contextual.end, 0.85)
+        )
     return sorted(selected, key=lambda r: r.start)
 
 

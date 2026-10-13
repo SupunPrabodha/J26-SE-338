@@ -47,7 +47,7 @@ from preprocessing.anonymization import anonymize_text
         ),
         (
             "මම නිමාලි.",
-            "මම [PERSON].",
+            "මම නිමාලි.",  # Bare self statements are ambiguous; explicit name intro required.
         ),
         (
             "I live in Kandy.",

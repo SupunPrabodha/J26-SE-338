@@ -5,7 +5,14 @@ from dataclasses import dataclass
 from functools import lru_cache
 
 import tldextract
-from presidio_analyzer import AnalyzerEngine, Pattern, PatternRecognizer
+from presidio_analyzer import (
+    AnalysisExplanation,
+    AnalyzerEngine,
+    EntityRecognizer,
+    Pattern,
+    PatternRecognizer,
+    RecognizerResult,
+)
 from presidio_analyzer.nlp_engine import NlpEngineProvider
 from presidio_analyzer.predefined_recognizers import EmailRecognizer
 from presidio_anonymizer import AnonymizerEngine
@@ -53,6 +60,35 @@ class _OfflineEmailRecognizer(EmailRecognizer):
         return self.extract(pattern_text).fqdn != ""
 
 
+class ContextualRecognizer(EntityRecognizer):
+    """Shared original-offset contextual fields; selection preserves structured PII."""
+
+    def __init__(self):
+        from preprocessing.contextual_detection import VERSION
+
+        super().__init__(
+            supported_entities=["PERSON", "LOCATION"], name=VERSION, supported_language="en"
+        )
+
+    def load(self):
+        pass
+
+    def analyze(self, text, entities, nlp_artifacts=None):
+        from preprocessing.contextual_detection import detect_contextual
+
+        return [
+            RecognizerResult(
+                s.entity_type,
+                s.start,
+                s.end,
+                0.85,
+                analysis_explanation=AnalysisExplanation(self.name, 0.85),
+            )
+            for s in detect_contextual(text)
+            if s.entity_type in entities
+        ]
+
+
 @lru_cache(maxsize=1)
 def _get_engines():
     nlp_configuration = {
@@ -82,6 +118,7 @@ def _get_engines():
     )
     analyzer.registry.remove_recognizer("EmailRecognizer")
     analyzer.registry.add_recognizer(_OfflineEmailRecognizer())
+    analyzer.registry.add_recognizer(ContextualRecognizer())
 
     analyzer.registry.add_recognizer(
         PatternRecognizer(

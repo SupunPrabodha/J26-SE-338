@@ -17,23 +17,8 @@ STUDENT_ID_PATTERN = re.compile(r"\b[A-Za-z]{2}\d{8}\b")
 
 TITLED_NAME_PATTERN = re.compile(r"\b(?:Dr|Mr|Mrs|Ms)\.?\s+[A-Z][a-z]+\b")
 
-ENGLISH_NAME_PATTERN = re.compile(
-    r"(\bmy name is\s+)([A-Za-z]+)",
-    re.IGNORECASE,
-)
-
-ENGLISH_SELF_NAME_PATTERN = re.compile(r"(?i:(\bi\s+am\s+|\bi['’]m\s+))([A-Z][a-z]+)")
-
-ROMANIZED_NAME_PATTERN = re.compile(
-    r"(\bmage\s+nama\s+)([A-Za-z]+)",
-    re.IGNORECASE,
-)
-
-SINHALA_NAME_PATTERN = re.compile(r"((?:මගේ|මගෙ)\s+නම\s+)([^\s.,!?]+)")
-
-SINHALA_SELF_NAME_PATTERN = re.compile(r"(මම\s+)([^\s.,!?]+)")
-
-ENGLISH_LOCATION_PATTERN = re.compile(r"(?i:(\b(?:live|stay|reside)\s+in\s+))([A-Z][A-Za-z]+)")
+# Introduction/location fields are shared with Presidio in contextual_detection.
+# Bare Sinhala self statements deliberately have no blanket next-token rule.
 
 RESIDUAL_RISK_PATTERN = re.compile(r"(?:@|\b[A-Za-z]{2}\d{6,10}\b|(?<!\d)\+?\d[\d\s-]{6,}\d(?!\d))")
 
