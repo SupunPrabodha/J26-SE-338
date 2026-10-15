@@ -53,6 +53,7 @@ export default function Dashboard() {
   return <main>
     <DemoHeader title="Counsellor review" subtitle="Assigned fictional cases, interpreted by an authorized human." />
     <SafetyNotice /><ErrorMessage message={error} />
+    <nav aria-label="Dashboard navigation"><a href="/c2-demo">Open C2 Dataset Pipeline Demo</a></nav>
     {checking ? <p role="status" className="empty">Checking your session…</p> : !authorized ? <section className="card sign-in" aria-labelledby="sign-in-title">
       <p className="eyebrow">Restricted access</p><h2 id="sign-in-title">Development sign-in</h2>
       <p>Use the synthetic counsellor credentials from your private local setup. Only assigned, consent-valid cases are available.</p>

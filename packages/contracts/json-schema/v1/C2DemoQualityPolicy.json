@@ -1,0 +1,40 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoQualityPolicy.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "comparison_case_insensitive": {
+      "title": "Comparison Case Insensitive",
+      "type": "boolean"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "short_text_review_below": {
+      "minimum": 1,
+      "title": "Short Text Review Below",
+      "type": "integer"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "short_text_review_below",
+    "comparison_case_insensitive"
+  ],
+  "title": "C2DemoQualityPolicy",
+  "type": "object"
+}

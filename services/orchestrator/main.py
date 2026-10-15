@@ -43,9 +43,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from orchestrator import auth
+from orchestrator.demo import router as demo_router
 from orchestrator.workflow import active_consent, check_case_consent, dispose, lock_case, transition
 
 app = create_app("orchestrator", database=True)
+app.include_router(demo_router)
 student = auth.require_role(Role.STUDENT)
 counsellor = auth.require_role(Role.COUNSELLOR)
 admin = auth.require_role(Role.ADMIN)

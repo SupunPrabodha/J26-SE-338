@@ -317,3 +317,153 @@ class AccountResponse(Contract):
 
 class FixturesResponse(Contract):
     fixtures: dict[str, str]
+
+
+DemoScenarioId = Literal[
+    "english-person",
+    "sinhala-person",
+    "romanized-person",
+    "code-mixed-person",
+    "english-ordinary",
+    "english",
+    "sinhala",
+    "romanized",
+    "code-mixed",
+    "short",
+    "empty",
+    "placeholder-only",
+    "duplicate",
+    "masking-collision",
+    "empty-batch",
+]
+DemoStrategy = Literal["regex", "presidio", "hybrid"]
+
+
+class C2DemoRequest(BaseModel):
+    """Browser input contains selectors only; no contract flags or text."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    scenario_id: DemoScenarioId
+    strategy: DemoStrategy = "regex"
+
+
+class C2DemoScenario(Contract):
+    scenario_id: DemoScenarioId
+    label: str
+    language_label: Literal["english", "sinhala", "romanized-si", "code-mixed", "not-applicable"]
+    record_count: int = Field(ge=0)
+
+
+class C2DemoCatalogue(Contract):
+    scenarios: list[C2DemoScenario]
+    strategies: list[DemoStrategy]
+    default_strategy: Literal["regex"] = "regex"
+    language_labels_are_fixture_metadata: Literal[True] = True
+
+
+class C2DemoLanguageIdentification(Contract):
+    """Provisional deterministic evidence, not anonymizer configuration."""
+
+    language: Literal["sinhala", "english", "romanized-si", "code-mixed", "uncertain", "unknown"]
+    status: Literal["provisional", "uncertain", "unknown"]
+    reason: Literal[
+        "no_language_letters_after_masking",
+        "sinhala_script_evidence_only",
+        "unsupported_script_evidence",
+        "sinhala_script_and_english_markers",
+        "mixed_script_without_supported_lexical_evidence",
+        "english_and_romanized_markers",
+        "multiple_romanized_markers",
+        "multiple_english_markers",
+        "insufficient_or_ambiguous_latin_evidence",
+        "explicit_romanized_name_introduction",
+        "sinhala_language_with_romanized_mixed_script_evidence",
+    ]
+    method: Literal["c2-rule-language-v1", "c2-rule-language-v1.1", "c2-rule-language-v1.2"] = "c2-rule-language-v1.1"
+    uncertain: bool
+
+
+class C2DemoRecord(Contract):
+    record_id: str
+    original_text: str
+    anonymized_text: str
+    transformations: list[str]
+    quality_status: Literal["PASS", "REVIEW", "REJECT"]
+    quality_issues: list[str]
+    requires_privacy_review: bool
+    language_identification: C2DemoLanguageIdentification | None = None
+    normalized_text: str | None = None
+    tokens: list[str] | None = None
+    token_offsets: (
+        list[Annotated[list[Annotated[int, Field(ge=0)]], Field(min_length=2, max_length=2)]] | None
+    ) = Field(
+        default=None,
+        description="Zero-based [start, end) Unicode code points in normalized_text; not UTF-16 units.",
+    )
+    normalization_method: Literal["c2-nfc-whitespace-v1"] | None = None
+    tokenization_method: Literal["c2-grapheme-words-v1"] | None = None
+    token_offset_unit: Literal["unicode_code_points"] | None = None
+
+
+class C2DemoQualityPolicy(Contract):
+    short_text_review_below: int = Field(ge=1)
+    comparison_case_insensitive: bool
+
+
+class C2DemoQualitySummary(Contract):
+    total_records: int = Field(ge=0)
+    status_counts: dict[Literal["PASS", "REVIEW", "REJECT"], int]
+    issue_counts: dict[str, int]
+    data_quality_gate: Literal["PASSED", "FAILED"]
+    blocking_reasons: list[str]
+    policy: C2DemoQualityPolicy
+    policy_status: Literal["development_only_not_research_approved"]
+    release_ready_meaning: str
+    duplicate_text_meaning: str
+    privacy_note: str
+
+
+class C2DemoPrivacySummary(Contract):
+    pipeline_stage: Literal["release_privacy_gate"]
+    total_records: int = Field(ge=0)
+    status: Literal["PASSED", "FAILED"]
+    issues: list[str]
+    issue_counts: dict[str, int]
+    privacy_note: str
+    limitation: str
+
+
+class C2DemoResponse(Contract):
+    scenario: C2DemoScenario
+    strategy: DemoStrategy
+    records: list[C2DemoRecord]
+    quality_summary: C2DemoQualitySummary
+    privacy_summary: C2DemoPrivacySummary
+    release_ready: bool
+    blocking_reasons: list[str]
+    human_release_required: Literal[True] = True
+    independent_research_validation: Literal[False] = False
+    release_ready_meaning: Literal[
+        "Automated prerequisites only; human release approval remains required."
+    ] = "Automated prerequisites only; human release approval remains required."
+
+
+class C2CustomDemoRequest(BaseModel):
+    """Ephemeral input; optional legacy hint never configures detection."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    text: Annotated[str, Field(max_length=1000)]
+    language_hint: Literal["sinhala", "english", "romanized-si", "code-mixed", "unsure"] = "unsure"
+    strategy: Literal["presidio"] = "presidio"
+
+
+class C2CustomDemoResponse(Contract):
+    language_hint: Literal["sinhala", "english", "romanized-si", "code-mixed", "unsure"]
+    strategy: Literal["presidio"] = "presidio"
+    records: list[C2DemoRecord]
+    quality_summary: C2DemoQualitySummary
+    privacy_summary: C2DemoPrivacySummary
+    release_ready: bool
+    blocking_reasons: list[str]
+    human_release_required: Literal[True] = True
+    independent_research_validation: Literal[False] = False

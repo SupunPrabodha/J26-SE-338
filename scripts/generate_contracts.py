@@ -7,6 +7,7 @@ from pathlib import Path
 
 import research_contracts as contracts
 from orchestrator.main import app
+from preprocessing.main import app as preprocessing_app
 from research_common.mocks import mock_app
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,7 +18,10 @@ def artifacts():
     for name, value in vars(contracts).items():
         if (
             inspect.isclass(value)
-            and issubclass(value, contracts.Contract)
+            and (
+                issubclass(value, contracts.Contract)
+                or value in (contracts.C2DemoRequest, contracts.C2CustomDemoRequest)
+            )
             and value is not contracts.Contract
         ):
             schema = value.model_json_schema()
@@ -26,7 +30,8 @@ def artifacts():
             result[f"packages/contracts/json-schema/v1/{name}.json"] = schema
     for name, service in [
         ("orchestrator", app),
-        *[(name, mock_app(name)) for name in ("preprocessing", "nlp", "xai")],
+        ("preprocessing", preprocessing_app),
+        *[(name, mock_app(name)) for name in ("nlp", "xai")],
     ]:
         result[f"packages/contracts/openapi/{name}.v1.json"] = service.openapi()
     return result
@@ -42,7 +47,7 @@ def main():
                 changed.append(path)
         else:
             destination.parent.mkdir(parents=True, exist_ok=True)
-            destination.write_text(output, encoding="utf-8")
+            destination.write_bytes(output.encode("utf-8"))
     if changed:
         raise SystemExit("Contract drift: " + ", ".join(changed))
     print(

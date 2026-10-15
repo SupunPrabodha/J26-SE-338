@@ -13,6 +13,7 @@ from preprocessing.contextual_detection import detect_contextual
 
 PLACEHOLDERS = re.compile(r"\[(?:EMAIL|PHONE|STUDENT_ID|PERSON|LOCATION)\]")
 ALIASES = {"EMAIL_ADDRESS": "EMAIL", "PHONE_NUMBER": "PHONE"}
+SELECTION_VERSION = "c2-contextual-fields-v1.1+c2-romanized-predicate-v1+c2-role-kinship-v3+c2-location-case-v1+c2-relationship-review-v1"
 
 
 @dataclass(frozen=True, order=True)
@@ -30,7 +31,6 @@ def regex_trace(text: str):
         (rules.EMAIL_PATTERN, "EMAIL", 0, "email"),
         (rules.PHONE_PATTERN, "PHONE", 0, "phone"),
         (rules.STUDENT_ID_PATTERN, "STUDENT_ID", 0, "student-id"),
-        (rules.TITLED_NAME_PATTERN, "PERSON", 0, "person"),
     )
     for pattern, entity, group, label in patterns:
         protected = [m.span() for m in PLACEHOLDERS.finditer(text)]
@@ -68,6 +68,14 @@ def select_presidio(text: str):
     results = analyzer.analyze(text=text, language="en", entities=list(ENTITY_PLACEHOLDERS))
     protected = [m.span() for m in PLACEHOLDERS.finditer(text)]
     contextual_fields = detect_contextual(text)
+    from preprocessing.person_context import (
+        grammatical_suffix,
+        parse_contexts,
+        protected_introductions,
+    )
+
+    new_fields = set(parse_contexts(text)[0])
+    protected.extend(protected_introductions(text))
     # Introductory grammar is explicitly excluded by the annotation policy.
     # Trim only NER coverage inside a successfully parsed introduction field.
     for contextual in contextual_fields:
@@ -138,13 +146,19 @@ def select_presidio(text: str):
                 prefix = copy(previous)
                 prefix.end = contextual.context_start
                 selected.append(prefix)
-            if previous.end > contextual.end:
+            if previous.end > contextual.end and not (
+                (contextual.start, contextual.end, contextual.context_start) in new_fields
+                and grammatical_suffix(text, contextual.end, previous.end)
+            ):
                 suffix = copy(previous)
                 suffix.start = contextual.end
                 selected.append(suffix)
         selected.append(
             RecognizerResult(contextual.entity_type, contextual.start, contextual.end, 0.85)
         )
+    from preprocessing.romanized_predicate import select_without_predicates
+
+    selected = select_without_predicates(text, analyzer, selected, contextual_fields)
     return sorted(selected, key=lambda r: r.start)
 
 

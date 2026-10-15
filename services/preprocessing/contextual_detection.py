@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 import regex
 
-VERSION = "c2-contextual-fields-v1"
+VERSION = "c2-contextual-fields-v1.1"
 WORD = r"\p{L}[\p{L}\p{M}\u200c\u200d]*(?:[-'’]\p{L}[\p{L}\p{M}\u200c\u200d]*)*"
 TOKEN = regex.compile(WORD)
 # Clause boundaries, not a global veto on possible names.
@@ -16,7 +16,7 @@ BOUNDARY = regex.compile(
     r"(?i:and|but|i|feel|feels|live|lives|mata|mt|mama|mage|mge|gana|dukai|duki|email|phone|call|contact|student)|මට|මම|මගේ|මගෙ|නිසා|ගැන|සහ|ජීවත්"
 )
 INTRO = regex.compile(
-    r"(?<![\p{L}\p{M}\p{N}_])(?:(?i:my\s+name\s+is|(?:mage|mge)\s+nama)|(?:මගේ|මගෙ)\s+නම)\s+"
+    r"(?<![\p{L}\p{M}\p{N}_])(?:(?i:my\s+name\s+is|(?:mage|mge|eyge)\s+nama)|(?:මගේ|මගෙ)\s+නම)\s+"
 )
 ENGLISH_SELF = regex.compile(r"(?<![\p{L}\p{M}\p{N}_])(?i:i\s+am|i['’]m)\s+(?=[A-Z])")
 LOCATION_INTRO = regex.compile(r"(?<![\p{L}\p{M}\p{N}_])(?i:(?:live|stay|reside)\s+in)\s+(?=[A-Z])")
@@ -113,4 +113,11 @@ def detect_contextual(text):
         value = ADDRESS_VALUE.match(text, match.end())
         if value and (value.end() == len(text) or text[value.end()] in ".!?;\r\n"):
             found.append(ContextSpan(value.start(), value.end(), "LOCATION", match.start()))
+    from preprocessing.person_context import parse_contexts
+
+    names, _ = parse_contexts(text)
+    found.extend(ContextSpan(start, end, "PERSON", intro) for start, end, intro in names)
+    from preprocessing.location_case import detect_locations
+
+    found.extend(detect_locations(text))
     return tuple(s for s in found if text[s.end - 1] not in "\u200c\u200d")

@@ -1,0 +1,140 @@
+{
+  "$defs": {
+    "C2DemoQualityPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison_case_insensitive": {
+          "title": "Comparison Case Insensitive",
+          "type": "boolean"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "short_text_review_below": {
+          "minimum": 1,
+          "title": "Short Text Review Below",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "short_text_review_below",
+        "comparison_case_insensitive"
+      ],
+      "title": "C2DemoQualityPolicy",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoQualitySummary.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blocking_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blocking Reasons",
+      "type": "array"
+    },
+    "data_quality_gate": {
+      "enum": [
+        "PASSED",
+        "FAILED"
+      ],
+      "title": "Data Quality Gate",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "duplicate_text_meaning": {
+      "title": "Duplicate Text Meaning",
+      "type": "string"
+    },
+    "issue_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Issue Counts",
+      "type": "object"
+    },
+    "policy": {
+      "$ref": "#/$defs/C2DemoQualityPolicy"
+    },
+    "policy_status": {
+      "const": "development_only_not_research_approved",
+      "title": "Policy Status",
+      "type": "string"
+    },
+    "privacy_note": {
+      "title": "Privacy Note",
+      "type": "string"
+    },
+    "release_ready_meaning": {
+      "title": "Release Ready Meaning",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "propertyNames": {
+        "enum": [
+          "PASS",
+          "REVIEW",
+          "REJECT"
+        ]
+      },
+      "title": "Status Counts",
+      "type": "object"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "total_records": {
+      "minimum": 0,
+      "title": "Total Records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "total_records",
+    "status_counts",
+    "issue_counts",
+    "data_quality_gate",
+    "blocking_reasons",
+    "policy",
+    "policy_status",
+    "release_ready_meaning",
+    "duplicate_text_meaning",
+    "privacy_note"
+  ],
+  "title": "C2DemoQualitySummary",
+  "type": "object"
+}

@@ -1,1 +1,14 @@
 @import "../../../packages/typescript-common/src/styles.css";
+
+.c2-demo { display: grid; gap: 20px; }
+.c2-demo .page-header, .c2-demo .feedback { margin: 0; }
+.c2-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.c2-description { margin: 12px 0; }
+.c2-synthetic { border: 1px solid #b9d8d2; border-left: 4px solid var(--teal); }
+.c2-text { white-space: pre-wrap; overflow-wrap: anywhere; background: #f4f7f8; border: 1px solid var(--border); border-radius: 8px; padding: 18px; min-height: 100px; font-size: 1rem; line-height: 1.9; }
+.c2-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.c2-counts > div { background: #f4f7f8; padding: 12px; border-radius: 8px; }
+.c2-counts dd { font-size: 1.4rem; }
+.c2-roadmap ul { padding: 0; list-style: none; margin: 0; }
+.c2-roadmap li { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); padding: 12px 0; }
+@media (max-width: 650px) { .c2-columns { grid-template-columns: 1fr; gap: 8px; } .c2-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

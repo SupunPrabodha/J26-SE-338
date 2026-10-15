@@ -65,9 +65,13 @@ class ContextualRecognizer(EntityRecognizer):
 
     def __init__(self):
         from preprocessing.contextual_detection import VERSION
+        from preprocessing.location_case import VERSION as LOCATION_VERSION
+        from preprocessing.person_context import VERSION as PERSON_VERSION
 
         super().__init__(
-            supported_entities=["PERSON", "LOCATION"], name=VERSION, supported_language="en"
+            supported_entities=["PERSON", "LOCATION"],
+            name=f"{VERSION}+{PERSON_VERSION}+{LOCATION_VERSION}",
+            supported_language="en",
         )
 
     def load(self):
@@ -155,6 +159,7 @@ def anonymize_with_presidio(
     text: str,
 ) -> PresidioAnonymizationResult:
     """Anonymize text without returning or logging detected PII values."""
+    from preprocessing.person_context import requires_context_review, requires_unresolved_review
     from preprocessing.span_evaluation import ALIASES, EntitySpan, render, select_presidio
 
     safe_results = select_presidio(text)
@@ -172,5 +177,7 @@ def anonymize_with_presidio(
         anonymized_text=masked,
         entity_counts=tuple(sorted(entity_counts.items())),
         transformations=transformations,
-        requires_review=bool(RESIDUAL_RISK_PATTERN.search(masked)),
+        requires_review=bool(RESIDUAL_RISK_PATTERN.search(masked))
+        or requires_context_review(masked)
+        or requires_unresolved_review(text),
     )

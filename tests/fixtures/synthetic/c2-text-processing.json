@@ -1,0 +1,400 @@
+{
+  "processed": {
+    "schema_version": "1.0.0",
+    "synthetic": true,
+    "development_only": true,
+    "language_hint": "unsure",
+    "strategy": "presidio",
+    "records": [
+      {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "record_id": "synthetic-custom",
+        "original_text": "  I do NOT feel well.\n\tI can't sleep! 🙂 [PERSON] ක්‍රියා 👩🏽‍💻",
+        "anonymized_text": "  I do NOT feel well.\n\tI can't sleep! 🙂 [PERSON] ක්‍රියා 👩🏽‍💻",
+        "transformations": [],
+        "quality_status": "PASS",
+        "quality_issues": [],
+        "requires_privacy_review": false,
+        "language_identification": {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "language": "code-mixed",
+          "status": "provisional",
+          "reason": "sinhala_script_and_english_markers",
+          "method": "c2-rule-language-v1",
+          "uncertain": false
+        },
+        "normalized_text": "I do NOT feel well. I can't sleep! 🙂 [PERSON] ක්‍රියා 👩🏽‍💻",
+        "tokens": [
+          "I",
+          "do",
+          "NOT",
+          "feel",
+          "well",
+          ".",
+          "I",
+          "can't",
+          "sleep",
+          "!",
+          "🙂",
+          "[PERSON]",
+          "ක්‍රියා",
+          "👩🏽‍💻"
+        ],
+        "token_offsets": [
+          [
+            0,
+            1
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            9,
+            13
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            18,
+            19
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            22,
+            27
+          ],
+          [
+            28,
+            33
+          ],
+          [
+            33,
+            34
+          ],
+          [
+            35,
+            36
+          ],
+          [
+            37,
+            45
+          ],
+          [
+            46,
+            53
+          ],
+          [
+            54,
+            58
+          ]
+        ],
+        "normalization_method": "c2-nfc-whitespace-v1",
+        "tokenization_method": "c2-grapheme-words-v1",
+        "token_offset_unit": "unicode_code_points"
+      }
+    ],
+    "quality_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "total_records": 1,
+      "status_counts": {
+        "PASS": 1,
+        "REVIEW": 0,
+        "REJECT": 0
+      },
+      "issue_counts": {},
+      "data_quality_gate": "PASSED",
+      "blocking_reasons": [],
+      "policy": {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "short_text_review_below": 3,
+        "comparison_case_insensitive": true
+      },
+      "policy_status": "development_only_not_research_approved",
+      "release_ready_meaning": "Automated prerequisites only; human release approval remains required.",
+      "duplicate_text_meaning": "Possible duplicate or masking collision; original equivalence is not asserted.",
+      "privacy_note": "Aggregate metadata only; submitted text and record identifiers are excluded."
+    },
+    "privacy_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "pipeline_stage": "release_privacy_gate",
+      "total_records": 1,
+      "status": "PASSED",
+      "issues": [],
+      "issue_counts": {},
+      "privacy_note": "Aggregate metadata only; submitted and detected text is excluded.",
+      "limitation": "Automated checks cover supported structured identifiers and bounded name-context signals. Indirect identifiers still require controlled human review."
+    },
+    "release_ready": true,
+    "blocking_reasons": [],
+    "human_release_required": true,
+    "independent_research_validation": false
+  },
+  "empty": {
+    "schema_version": "1.0.0",
+    "synthetic": true,
+    "development_only": true,
+    "language_hint": "unsure",
+    "strategy": "presidio",
+    "records": [
+      {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "record_id": "synthetic-custom",
+        "original_text": "",
+        "anonymized_text": "",
+        "transformations": [],
+        "quality_status": "REJECT",
+        "quality_issues": [
+          "empty_text"
+        ],
+        "requires_privacy_review": false,
+        "language_identification": {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "language": "unknown",
+          "status": "unknown",
+          "reason": "no_language_letters_after_masking",
+          "method": "c2-rule-language-v1",
+          "uncertain": true
+        },
+        "normalized_text": "",
+        "tokens": [],
+        "token_offsets": [],
+        "normalization_method": "c2-nfc-whitespace-v1",
+        "tokenization_method": "c2-grapheme-words-v1",
+        "token_offset_unit": "unicode_code_points"
+      }
+    ],
+    "quality_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "total_records": 1,
+      "status_counts": {
+        "PASS": 0,
+        "REVIEW": 0,
+        "REJECT": 1
+      },
+      "issue_counts": {
+        "empty_text": 1
+      },
+      "data_quality_gate": "FAILED",
+      "blocking_reasons": [
+        "data_quality_rejected"
+      ],
+      "policy": {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "short_text_review_below": 3,
+        "comparison_case_insensitive": true
+      },
+      "policy_status": "development_only_not_research_approved",
+      "release_ready_meaning": "Automated prerequisites only; human release approval remains required.",
+      "duplicate_text_meaning": "Possible duplicate or masking collision; original equivalence is not asserted.",
+      "privacy_note": "Aggregate metadata only; submitted text and record identifiers are excluded."
+    },
+    "privacy_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "pipeline_stage": "release_privacy_gate",
+      "total_records": 1,
+      "status": "FAILED",
+      "issues": [
+        "empty_anonymized_text"
+      ],
+      "issue_counts": {
+        "empty_anonymized_text": 1
+      },
+      "privacy_note": "Aggregate metadata only; submitted and detected text is excluded.",
+      "limitation": "Automated checks cover supported structured identifiers and bounded name-context signals. Indirect identifiers still require controlled human review."
+    },
+    "release_ready": false,
+    "blocking_reasons": [
+      "data_quality_rejected",
+      "release_privacy_gate_failed"
+    ],
+    "human_release_required": true,
+    "independent_research_validation": false
+  },
+  "review": {
+    "schema_version": "1.0.0",
+    "synthetic": true,
+    "development_only": true,
+    "language_hint": "unsure",
+    "strategy": "presidio",
+    "records": [
+      {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "record_id": "synthetic-custom",
+        "original_text": "ape grp leader supun. eyge girlfriend Neluni . ey hrim npurui",
+        "anonymized_text": "ape grp leader [PERSON]. eyge girlfriend [LOCATION] . ey hrim npurui",
+        "transformations": [
+          "presidio:location",
+          "presidio:person"
+        ],
+        "quality_status": "REVIEW",
+        "quality_issues": [
+          "privacy_review_required"
+        ],
+        "requires_privacy_review": true,
+        "language_identification": {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "language": "romanized-si",
+          "status": "provisional",
+          "reason": "multiple_romanized_markers",
+          "method": "c2-rule-language-v1",
+          "uncertain": false
+        },
+        "normalized_text": "ape grp leader [PERSON]. eyge girlfriend [LOCATION] . ey hrim npurui",
+        "tokens": [
+          "ape",
+          "grp",
+          "leader",
+          "[PERSON]",
+          ".",
+          "eyge",
+          "girlfriend",
+          "[LOCATION]",
+          ".",
+          "ey",
+          "hrim",
+          "npurui"
+        ],
+        "token_offsets": [
+          [
+            0,
+            3
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            8,
+            14
+          ],
+          [
+            15,
+            23
+          ],
+          [
+            23,
+            24
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            30,
+            40
+          ],
+          [
+            41,
+            51
+          ],
+          [
+            52,
+            53
+          ],
+          [
+            54,
+            56
+          ],
+          [
+            57,
+            61
+          ],
+          [
+            62,
+            68
+          ]
+        ],
+        "normalization_method": "c2-nfc-whitespace-v1",
+        "tokenization_method": "c2-grapheme-words-v1",
+        "token_offset_unit": "unicode_code_points"
+      }
+    ],
+    "quality_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "total_records": 1,
+      "status_counts": {
+        "PASS": 0,
+        "REVIEW": 1,
+        "REJECT": 0
+      },
+      "issue_counts": {
+        "privacy_review_required": 1
+      },
+      "data_quality_gate": "FAILED",
+      "blocking_reasons": [
+        "data_quality_review_required"
+      ],
+      "policy": {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "short_text_review_below": 3,
+        "comparison_case_insensitive": true
+      },
+      "policy_status": "development_only_not_research_approved",
+      "release_ready_meaning": "Automated prerequisites only; human release approval remains required.",
+      "duplicate_text_meaning": "Possible duplicate or masking collision; original equivalence is not asserted.",
+      "privacy_note": "Aggregate metadata only; submitted text and record identifiers are excluded."
+    },
+    "privacy_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "pipeline_stage": "release_privacy_gate",
+      "total_records": 1,
+      "status": "FAILED",
+      "issues": [
+        "privacy_review_required"
+      ],
+      "issue_counts": {
+        "privacy_review_required": 1
+      },
+      "privacy_note": "Aggregate metadata only; submitted and detected text is excluded.",
+      "limitation": "Automated checks cover supported structured identifiers and bounded name-context signals. Indirect identifiers still require controlled human review."
+    },
+    "release_ready": false,
+    "blocking_reasons": [
+      "data_quality_review_required",
+      "privacy_review_required",
+      "release_privacy_gate_failed"
+    ],
+    "human_release_required": true,
+    "independent_research_validation": false
+  }
+}

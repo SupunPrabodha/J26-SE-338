@@ -1,0 +1,260 @@
+{
+  "$defs": {
+    "C2DemoLanguageIdentification": {
+      "additionalProperties": false,
+      "description": "Provisional deterministic evidence, not anonymizer configuration.",
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "language": {
+          "enum": [
+            "sinhala",
+            "english",
+            "romanized-si",
+            "code-mixed",
+            "uncertain",
+            "unknown"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "method": {
+          "default": "c2-rule-language-v1.1",
+          "enum": [
+            "c2-rule-language-v1",
+            "c2-rule-language-v1.1",
+            "c2-rule-language-v1.2"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "no_language_letters_after_masking",
+            "sinhala_script_evidence_only",
+            "unsupported_script_evidence",
+            "sinhala_script_and_english_markers",
+            "mixed_script_without_supported_lexical_evidence",
+            "english_and_romanized_markers",
+            "multiple_romanized_markers",
+            "multiple_english_markers",
+            "insufficient_or_ambiguous_latin_evidence",
+            "explicit_romanized_name_introduction",
+            "sinhala_language_with_romanized_mixed_script_evidence"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "provisional",
+            "uncertain",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "uncertain": {
+          "title": "Uncertain",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "language",
+        "status",
+        "reason",
+        "uncertain"
+      ],
+      "title": "C2DemoLanguageIdentification",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoRecord.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "anonymized_text": {
+      "title": "Anonymized Text",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "language_identification": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/C2DemoLanguageIdentification"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "normalization_method": {
+      "anyOf": [
+        {
+          "const": "c2-nfc-whitespace-v1",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalization Method"
+    },
+    "normalized_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalized Text"
+    },
+    "original_text": {
+      "title": "Original Text",
+      "type": "string"
+    },
+    "quality_issues": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Quality Issues",
+      "type": "array"
+    },
+    "quality_status": {
+      "enum": [
+        "PASS",
+        "REVIEW",
+        "REJECT"
+      ],
+      "title": "Quality Status",
+      "type": "string"
+    },
+    "record_id": {
+      "title": "Record Id",
+      "type": "string"
+    },
+    "requires_privacy_review": {
+      "title": "Requires Privacy Review",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "token_offset_unit": {
+      "anyOf": [
+        {
+          "const": "unicode_code_points",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Token Offset Unit"
+    },
+    "token_offsets": {
+      "anyOf": [
+        {
+          "items": {
+            "items": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Zero-based [start, end) Unicode code points in normalized_text; not UTF-16 units.",
+      "title": "Token Offsets"
+    },
+    "tokenization_method": {
+      "anyOf": [
+        {
+          "const": "c2-grapheme-words-v1",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tokenization Method"
+    },
+    "tokens": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tokens"
+    },
+    "transformations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Transformations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "record_id",
+    "original_text",
+    "anonymized_text",
+    "transformations",
+    "quality_status",
+    "quality_issues",
+    "requires_privacy_review"
+  ],
+  "title": "C2DemoRecord",
+  "type": "object"
+}

@@ -1,0 +1,46 @@
+.c2-demo { width: calc(100% - 48px); max-width: 1120px; margin: 40px auto; padding: 0; gap: 24px; font-size: 16px; line-height: 1.65; }
+.c2-demo h1 { font-size: clamp(1.9rem, 3vw, 2.5rem); }
+.c2-demo h2 { font-size: 1.2rem; }
+.c2-demo .card { padding: 28px; border-radius: 16px; box-shadow: 0 8px 28px #17324706; }
+.c2-workbench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.c2-workbench > .card { position: static; }
+.c2-full-width { width: 100%; }
+.c2-notifications { min-width: 0; position: sticky; top: 12px; z-index: 10; }
+.c2-original-record { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+.c2-notifications .error { margin: 0; }
+.c2-demo .c2-before-after { grid-template-columns: 1fr; gap: 16px; }
+.c2-demo .c2-text, .c2-normalized-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1rem; line-height: 1.9; padding: 18px; background: #f4f7f8; border: 1px solid var(--border); border-radius: 10px; }
+.c2-derived { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; }
+.c2-tokens { display: flex; flex-wrap: wrap; list-style: none; gap: 8px; padding: 0; margin: 12px 0; }
+.c2-tokens li { max-width: 100%; overflow-wrap: anywhere; background: #edf4f8; border: 1px solid #d6e2eb; border-radius: 8px; padding: 5px 10px; font-size: .9rem; }
+.c2-table-scroll { overflow-x: auto; }
+.c2-demo table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+.c2-demo th, .c2-demo td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.c2-demo summary { padding: 8px 0; }
+.c2-demo .c2-sign-in { border-top: 3px solid var(--teal); }
+.c2-demo .c2-sign-in .hint { margin-bottom: 0; }
+.c2-demo .c2-sign-in label { margin-top: 10px; }
+.c2-demo .c2-record + .c2-record { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 22px; }
+.c2-demo .c2-roadmap > summary { padding: 4px 0; }
+.c2-demo .c2-roadmap[open] > summary { margin-bottom: 12px; }
+.c2-custom { margin: 1rem 0; }
+.c2-custom textarea { width: 100%; box-sizing: border-box; font: inherit; line-height: 1.7; padding: .75rem; resize: vertical; }
+.c2-demo .c2-stepper { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); list-style: none; padding: 0; gap: 0; }
+.c2-demo .c2-stepper li { position: relative; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; gap: .7rem; font-size: .85rem; padding: .4rem; border-bottom: 0; min-width: 0; }
+.c2-stepper li::before { content: ""; position: absolute; height: 3px; top: 2rem; left: -50%; width: 100%; background: #cbd5e1; }
+.c2-stepper li:first-child::before { display: none; }
+.c2-stepper .c2-step-complete + .c2-step-complete::before { background: #16805c; }
+.c2-step-circle { position: relative; z-index: 1; display: grid; place-items: center; width: 3.25rem; height: 3.25rem; border-radius: 50%; background: #e2e8f0; color: #334155; font-size: 1.15rem; font-weight: bold; border: 3px solid white; }
+.c2-step-complete .c2-step-circle { background: #16805c; color: white; }
+.c2-step-review .c2-step-circle { background: #8a5a08; color: white; }
+.c2-step-error .c2-step-circle { background: #ad2531; color: white; }
+.c2-processing { display: flex; align-items: center; gap: .75rem; }
+.c2-spinner { width: 1.25rem; height: 1.25rem; border-radius: 50%; border: 3px solid #cbd5e1; border-top-color: #1766b5; animation: c2-spin 1s linear infinite; }
+.c2-toast { padding: 1rem; border-left: 4px solid #1766b5; background: #eef5fc; border-radius: 8px; }
+.c2-toast-review { border-left-color: #8a5a08; background: #fff7e6; }
+@keyframes c2-spin { to { transform: rotate(360deg); } }
+@media (max-width: 800px) { .c2-demo .c2-stepper { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 1rem; } .c2-stepper li:nth-child(5)::before { display: none; } }
+@media (max-width: 900px) { .c2-workbench { grid-template-columns: 1fr; } .c2-workbench > .card { position: static; } }
+@media (max-width: 650px) { .c2-demo { width: calc(100% - 32px); margin: 24px auto; gap: 18px; } .c2-demo .card { padding: 20px; } .c2-demo .detail-heading { align-items: flex-start; } }
+@media (max-width: 480px) { .c2-demo .c2-stepper { grid-template-columns: repeat(2, minmax(0, 1fr)); } .c2-stepper li:nth-child(odd)::before { display: none; } }
+@media (prefers-reduced-motion: reduce) { .c2-spinner { animation: none; } }

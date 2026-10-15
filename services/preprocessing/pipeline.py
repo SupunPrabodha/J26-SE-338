@@ -15,9 +15,17 @@ from preprocessing.data_quality import (
     text_input_issues,
     text_review_signals,
 )
+from preprocessing.language_id import LanguageIdentification, identify_language
 from preprocessing.privacy_gate import (
     assess_release,
     build_release_summary,
+)
+from preprocessing.text_processing import (
+    NORMALIZATION_METHOD,
+    OFFSET_UNIT,
+    TOKENIZATION_METHOD,
+    normalize_text,
+    tokenize_text,
 )
 
 
@@ -35,6 +43,13 @@ class PipelineOutput:
     quality_status: QualityStatus
     quality_issues: tuple[str, ...]
     requires_privacy_review: bool
+    language_identification: LanguageIdentification
+    normalized_text: str
+    tokens: tuple[str, ...]
+    token_offsets: tuple[tuple[int, int], ...]
+    normalization_method: str
+    tokenization_method: str
+    token_offset_unit: str
 
 
 @dataclass(frozen=True)
@@ -94,23 +109,33 @@ def run_preprocessing_pipeline(
 
     quality_results = assess_records(quality_records, policy=quality_policy)
 
-    outputs = tuple(
-        PipelineOutput(
-            record_id=quality.record_id,
-            anonymized_text=anonymized.anonymized_text
-            if not text_input_issues(anonymized.anonymized_text)
-            else "",
-            transformations=anonymized.transformations,
-            quality_status=quality.status,
-            quality_issues=quality.issues,
-            requires_privacy_review=anonymized.requires_privacy_review,
+    outputs_list = []
+    for anonymized, quality in zip(quality_records, quality_results, strict=True):
+        masked_text = (
+            anonymized.anonymized_text if not text_input_issues(anonymized.anonymized_text) else ""
         )
-        for anonymized, quality in zip(
-            quality_records,
-            quality_results,
-            strict=True,
+        # Complete quality first; Language ID uses untouched anonymized text.
+        language = identify_language(masked_text)
+        normalized = normalize_text(masked_text)
+        tokens, offsets = tokenize_text(normalized)
+        outputs_list.append(
+            PipelineOutput(
+                record_id=quality.record_id,
+                anonymized_text=masked_text,
+                transformations=anonymized.transformations,
+                quality_status=quality.status,
+                quality_issues=quality.issues,
+                requires_privacy_review=anonymized.requires_privacy_review,
+                language_identification=language,
+                normalized_text=normalized,
+                tokens=tokens,
+                token_offsets=offsets,
+                normalization_method=NORMALIZATION_METHOD,
+                tokenization_method=TOKENIZATION_METHOD,
+                token_offset_unit=OFFSET_UNIT,
+            )
         )
-    )
+    outputs = tuple(outputs_list)
 
     quality_summary = build_quality_summary(quality_results, policy=quality_policy)
 
@@ -118,6 +143,7 @@ def run_preprocessing_pipeline(
         {
             "record_id": output.record_id,
             "anonymized_text": output.anonymized_text,
+            "requires_privacy_review": output.requires_privacy_review,
         }
         for output in outputs
     ]

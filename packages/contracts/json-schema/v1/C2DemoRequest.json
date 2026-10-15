@@ -1,0 +1,44 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Browser input contains selectors only; no contract flags or text.",
+  "properties": {
+    "scenario_id": {
+      "enum": [
+        "english-person",
+        "sinhala-person",
+        "romanized-person",
+        "code-mixed-person",
+        "english-ordinary",
+        "english",
+        "sinhala",
+        "romanized",
+        "code-mixed",
+        "short",
+        "empty",
+        "placeholder-only",
+        "duplicate",
+        "masking-collision",
+        "empty-batch"
+      ],
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "strategy": {
+      "default": "regex",
+      "enum": [
+        "regex",
+        "presidio",
+        "hybrid"
+      ],
+      "title": "Strategy",
+      "type": "string"
+    }
+  },
+  "required": [
+    "scenario_id"
+  ],
+  "title": "C2DemoRequest",
+  "type": "object"
+}

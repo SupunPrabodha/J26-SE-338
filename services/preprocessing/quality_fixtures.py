@@ -225,6 +225,7 @@ def build_quality_scenarios():
                 ("REVIEW",),
                 (("privacy_review_required",),),
                 True,
+                True,  # Existing review flag now also fails the separate privacy gate.
             ),
             QualityScenario(
                 "pipeline_invalid_text",

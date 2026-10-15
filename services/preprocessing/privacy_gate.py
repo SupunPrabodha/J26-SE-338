@@ -6,6 +6,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
 from preprocessing.data_quality import record_id_key, text_input_issues
+from preprocessing.person_context import requires_context_review
 
 FORBIDDEN_COLUMNS = frozenset(
     {
@@ -84,6 +85,12 @@ def assess_release(
         else:
             anonymized_text = text.strip()
 
+        review = record.get("requires_privacy_review", False)
+        if type(review) is not bool:
+            counts["invalid_privacy_review_flag"] += 1
+        elif review or (anonymized_text and requires_context_review(anonymized_text)):
+            counts["privacy_review_required"] += 1
+
         if not record_id:
             pass  # Already counted missing/invalid ID without string coercion.
         elif record_id in seen_record_ids:
@@ -121,6 +128,8 @@ def assess_release(
         "residual_email": "residual_email",
         "residual_phone": "residual_phone",
         "residual_student_id": "residual_student_id",
+        "invalid_privacy_review_flag": "invalid_privacy_review_flag",
+        "privacy_review_required": "privacy_review_required",
     }
 
     for count_name, issue_name in issue_mapping.items():
@@ -147,7 +156,7 @@ def build_release_summary(result: ReleaseGateResult) -> dict[str, object]:
         "issue_counts": dict(result.issue_counts),
         "privacy_note": ("Aggregate metadata only; submitted and detected text is excluded."),
         "limitation": (
-            "Automated checks cover supported structured identifiers. "
+            "Automated checks cover supported structured identifiers and bounded name-context signals. "
             "Indirect identifiers still require controlled human review."
         ),
     }

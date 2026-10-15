@@ -55,7 +55,7 @@ from preprocessing.anonymization import anonymize_text
         ),
         (
             "Dr. Silva is my lecturer.",
-            "[PERSON] is my lecturer.",
+            "Dr. [PERSON] is my lecturer.",  # Name-only span preserves the honorific.
         ),
     ],
 )

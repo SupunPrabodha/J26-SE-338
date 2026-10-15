@@ -11,10 +11,10 @@ export function SafetyNotice() {
   </aside>;
 }
 
-export function DemoHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return <header className="page-header"><div><p className="eyebrow">J26-SE-338 · Component 1</p>
+export function DemoHeader({ title, subtitle, component = "Component 1", badge = "Synthetic demonstration · Mock services" }: { title: string; subtitle: string; component?: string; badge?: string }) {
+  return <header className="page-header"><div><p className="eyebrow">J26-SE-338 · {component}</p>
     <h1>{title}</h1><p className="subtitle">{subtitle}</p></div>
-    <span className="badge">Synthetic demonstration · Mock services</span></header>;
+    <span className="badge">{badge}</span></header>;
 }
 
 export function reviewLabel(state?: string, unavailable = false) {

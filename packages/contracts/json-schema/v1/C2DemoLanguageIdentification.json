@@ -1,0 +1,86 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoLanguageIdentification.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Provisional deterministic evidence, not anonymizer configuration.",
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "language": {
+      "enum": [
+        "sinhala",
+        "english",
+        "romanized-si",
+        "code-mixed",
+        "uncertain",
+        "unknown"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "method": {
+      "default": "c2-rule-language-v1.1",
+      "enum": [
+        "c2-rule-language-v1",
+        "c2-rule-language-v1.1",
+        "c2-rule-language-v1.2"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "reason": {
+      "enum": [
+        "no_language_letters_after_masking",
+        "sinhala_script_evidence_only",
+        "unsupported_script_evidence",
+        "sinhala_script_and_english_markers",
+        "mixed_script_without_supported_lexical_evidence",
+        "english_and_romanized_markers",
+        "multiple_romanized_markers",
+        "multiple_english_markers",
+        "insufficient_or_ambiguous_latin_evidence",
+        "explicit_romanized_name_introduction",
+        "sinhala_language_with_romanized_mixed_script_evidence"
+      ],
+      "title": "Reason",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "provisional",
+        "uncertain",
+        "unknown"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "uncertain": {
+      "title": "Uncertain",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "language",
+    "status",
+    "reason",
+    "uncertain"
+  ],
+  "title": "C2DemoLanguageIdentification",
+  "type": "object"
+}

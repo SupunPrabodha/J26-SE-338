@@ -1,0 +1,142 @@
+{
+  "corrected": {
+    "schema_version": "1.0.0",
+    "synthetic": true,
+    "development_only": true,
+    "language_hint": "romanized-si",
+    "strategy": "presidio",
+    "records": [
+      {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "record_id": "synthetic-custom",
+        "original_text": "ape supervisor MS. Aprna . Ape group leader supun",
+        "anonymized_text": "ape supervisor MS. [PERSON] . Ape group leader [PERSON]",
+        "transformations": [
+          "presidio:person"
+        ],
+        "quality_status": "PASS",
+        "quality_issues": [],
+        "requires_privacy_review": false
+      }
+    ],
+    "quality_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "total_records": 1,
+      "status_counts": {
+        "PASS": 1,
+        "REVIEW": 0,
+        "REJECT": 0
+      },
+      "issue_counts": {},
+      "data_quality_gate": "PASSED",
+      "blocking_reasons": [],
+      "policy": {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "short_text_review_below": 3,
+        "comparison_case_insensitive": true
+      },
+      "policy_status": "development_only_not_research_approved",
+      "release_ready_meaning": "Automated prerequisites only; human release approval remains required.",
+      "duplicate_text_meaning": "Possible duplicate or masking collision; original equivalence is not asserted.",
+      "privacy_note": "Aggregate metadata only; submitted text and record identifiers are excluded."
+    },
+    "privacy_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "pipeline_stage": "release_privacy_gate",
+      "total_records": 1,
+      "status": "PASSED",
+      "issues": [],
+      "issue_counts": {},
+      "privacy_note": "Aggregate metadata only; submitted and detected text is excluded.",
+      "limitation": "Automated checks cover supported structured identifiers and bounded name-context signals. Indirect identifiers still require controlled human review."
+    },
+    "release_ready": true,
+    "blocking_reasons": [],
+    "human_release_required": true,
+    "independent_research_validation": false
+  },
+  "review": {
+    "schema_version": "1.0.0",
+    "synthetic": true,
+    "development_only": true,
+    "language_hint": "english",
+    "strategy": "presidio",
+    "records": [
+      {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "record_id": "synthetic-custom",
+        "original_text": "Our supervisor avira123.",
+        "anonymized_text": "Our supervisor avira123.",
+        "transformations": [],
+        "quality_status": "REVIEW",
+        "quality_issues": [
+          "privacy_review_required"
+        ],
+        "requires_privacy_review": true
+      }
+    ],
+    "quality_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "total_records": 1,
+      "status_counts": {
+        "PASS": 0,
+        "REVIEW": 1,
+        "REJECT": 0
+      },
+      "issue_counts": {
+        "privacy_review_required": 1
+      },
+      "data_quality_gate": "FAILED",
+      "blocking_reasons": [
+        "data_quality_review_required"
+      ],
+      "policy": {
+        "schema_version": "1.0.0",
+        "synthetic": true,
+        "development_only": true,
+        "short_text_review_below": 3,
+        "comparison_case_insensitive": true
+      },
+      "policy_status": "development_only_not_research_approved",
+      "release_ready_meaning": "Automated prerequisites only; human release approval remains required.",
+      "duplicate_text_meaning": "Possible duplicate or masking collision; original equivalence is not asserted.",
+      "privacy_note": "Aggregate metadata only; submitted text and record identifiers are excluded."
+    },
+    "privacy_summary": {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "pipeline_stage": "release_privacy_gate",
+      "total_records": 1,
+      "status": "FAILED",
+      "issues": [
+        "privacy_review_required"
+      ],
+      "issue_counts": {
+        "privacy_review_required": 1
+      },
+      "privacy_note": "Aggregate metadata only; submitted and detected text is excluded.",
+      "limitation": "Automated checks cover supported structured identifiers and bounded name-context signals. Indirect identifiers still require controlled human review."
+    },
+    "release_ready": false,
+    "blocking_reasons": [
+      "data_quality_review_required",
+      "privacy_review_required",
+      "release_privacy_gate_failed"
+    ],
+    "human_release_required": true,
+    "independent_research_validation": false
+  }
+}

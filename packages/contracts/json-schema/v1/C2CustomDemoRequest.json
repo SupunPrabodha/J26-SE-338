@@ -1,0 +1,36 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C2CustomDemoRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Ephemeral input; optional legacy hint never configures detection.",
+  "properties": {
+    "language_hint": {
+      "default": "unsure",
+      "enum": [
+        "sinhala",
+        "english",
+        "romanized-si",
+        "code-mixed",
+        "unsure"
+      ],
+      "title": "Language Hint",
+      "type": "string"
+    },
+    "strategy": {
+      "const": "presidio",
+      "default": "presidio",
+      "title": "Strategy",
+      "type": "string"
+    },
+    "text": {
+      "maxLength": 1000,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text"
+  ],
+  "title": "C2CustomDemoRequest",
+  "type": "object"
+}

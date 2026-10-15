@@ -1,0 +1,76 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoPrivacySummary.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "issue_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Issue Counts",
+      "type": "object"
+    },
+    "issues": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "limitation": {
+      "title": "Limitation",
+      "type": "string"
+    },
+    "pipeline_stage": {
+      "const": "release_privacy_gate",
+      "title": "Pipeline Stage",
+      "type": "string"
+    },
+    "privacy_note": {
+      "title": "Privacy Note",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "PASSED",
+        "FAILED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "total_records": {
+      "minimum": 0,
+      "title": "Total Records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "pipeline_stage",
+    "total_records",
+    "status",
+    "issues",
+    "issue_counts",
+    "privacy_note",
+    "limitation"
+  ],
+  "title": "C2DemoPrivacySummary",
+  "type": "object"
+}
