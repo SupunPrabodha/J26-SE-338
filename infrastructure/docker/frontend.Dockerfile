@@ -2,7 +2,6 @@ FROM node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472
 ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
 COPY package.json package-lock.json ./
-COPY apps/student-portal/package.json apps/student-portal/package.json
 COPY apps/counsellor-dashboard/package.json apps/counsellor-dashboard/package.json
 COPY packages/typescript-common/package.json packages/typescript-common/package.json
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --fetch-timeout=60000
@@ -19,5 +18,5 @@ ENV APP=${APP}
 COPY --from=build --chown=node:node /app/apps/${APP}/.next/standalone ./
 COPY --from=build --chown=node:node /app/apps/${APP}/.next/static ./apps/${APP}/.next/static
 USER node
-EXPOSE 3000 3001
+EXPOSE 3001
 CMD ["sh", "-c", "exec node apps/$APP/server.js"]

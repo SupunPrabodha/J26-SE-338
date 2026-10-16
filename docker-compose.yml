@@ -20,9 +20,9 @@ x-python: &python
   restart: unless-stopped
   init: true
   stop_grace_period: 30s
-  networks: [internal]
-  security_opt: [no-new-privileges:true]
-  cap_drop: [ALL]
+  networks: [ internal ]
+  security_opt: [ no-new-privileges:true ]
+  cap_drop: [ ALL ]
   logging:
     driver: local
     options: { max-size: "5m", max-file: "2" }
@@ -34,11 +34,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       POSTGRES_DB: ${POSTGRES_DB}
-    volumes: [postgres-data:/var/lib/postgresql/data]
-    networks: [internal]
+    volumes: [ postgres-data:/var/lib/postgresql/data ]
+    networks: [ internal ]
     restart: unless-stopped
     healthcheck:
-      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      test: [ CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"' ]
       interval: 5s
       timeout: 3s
       retries: 15
@@ -46,24 +46,24 @@ services:
     image: redis:8-alpine@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
-    command: [sh, -c, 'exec redis-server --requirepass "$$REDIS_PASSWORD" --save "" --appendonly no --maxmemory 128mb --maxmemory-policy noeviction']
-    networks: [internal]
+    command: [ sh, -c, 'exec redis-server --requirepass "$$REDIS_PASSWORD" --save "" --appendonly no --maxmemory 128mb --maxmemory-policy noeviction' ]
+    networks: [ internal ]
     restart: unless-stopped
     healthcheck:
-      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      test: [ CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG' ]
       interval: 5s
       timeout: 3s
       retries: 15
   orchestrator:
     <<: *python
-    networks: [internal, edge]
+    networks: [ internal, edge ]
     environment:
       <<: *platform-env
       SERVICE_NAME: orchestrator
       DEV_COUNSELLOR_PASSWORD: ${DEV_COUNSELLOR_PASSWORD:?DEV_COUNSELLOR_PASSWORD must be set}
       DEV_ADMIN_USERNAME: ${DEV_ADMIN_USERNAME}
       DEV_ADMIN_PASSWORD: ${DEV_ADMIN_PASSWORD:?DEV_ADMIN_PASSWORD must be set}
-    ports: [127.0.0.1:8000:8000]
+    ports: [ 127.0.0.1:8000:8000 ]
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -96,9 +96,9 @@ services:
     environment:
       <<: *platform-env
       SERVICE_NAME: worker
-    command: [python, -m, orchestrator.worker]
+    command: [ python, -m, orchestrator.worker ]
     healthcheck:
-      test: [CMD, python, -c, "from research_common.web import redis_client; assert redis_client().get('j26:worker:heartbeat')"]
+      test: [ CMD, python, -c, "from research_common.web import redis_client; assert redis_client().get('j26:worker:heartbeat')" ]
       interval: 15s
       timeout: 4s
       start_period: 30s
@@ -108,24 +108,6 @@ services:
       preprocessing: { condition: service_healthy }
       nlp: { condition: service_healthy }
       xai: { condition: service_healthy }
-  student-portal:
-    image: j26-student-portal:0.1.0-dev
-    environment: { PORT: "3000" }
-    build:
-      context: .
-      dockerfile: infrastructure/docker/frontend.Dockerfile
-      args: { APP: student-portal }
-    ports: [127.0.0.1:3000:3000]
-    networks: [internal, edge]
-    restart: unless-stopped
-    init: true
-    depends_on:
-      orchestrator: { condition: service_healthy }
-    healthcheck:
-      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
-      interval: 10s
-      timeout: 5s
-      start_period: 30s
   counsellor-dashboard:
     image: j26-counsellor-dashboard:0.1.0-dev
     environment: { PORT: "3001" }
@@ -133,14 +115,14 @@ services:
       context: .
       dockerfile: infrastructure/docker/frontend.Dockerfile
       args: { APP: counsellor-dashboard }
-    ports: [127.0.0.1:3001:3001]
-    networks: [internal, edge]
+    ports: [ 127.0.0.1:3001:3001 ]
+    networks: [ internal, edge ]
     restart: unless-stopped
     init: true
     depends_on:
       orchestrator: { condition: service_healthy }
     healthcheck:
-      test: [CMD, node, -e, "fetch('http://127.0.0.1:3001').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test: [ CMD, node, -e, "fetch('http://127.0.0.1:3001').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))" ]
       interval: 10s
       timeout: 5s
       start_period: 30s
