@@ -6,8 +6,9 @@ import sys
 from pathlib import Path
 
 import research_contracts as contracts
-from orchestrator.main import app
+from orchestrator.main import app as orchestrator_app
 from research_common.mocks import mock_app
+from xai.main import app as xai_app
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -25,8 +26,10 @@ def artifacts():
             schema["$id"] = f"https://j26.invalid/contracts/1.0.0/{name}.json"
             result[f"packages/contracts/json-schema/v1/{name}.json"] = schema
     for name, service in [
-        ("orchestrator", app),
-        *[(name, mock_app(name)) for name in ("preprocessing", "nlp", "xai")],
+        ("orchestrator", orchestrator_app),
+        ("preprocessing", mock_app("preprocessing")),
+        ("nlp", mock_app("nlp")),
+        ("xai", xai_app),
     ]:
         result[f"packages/contracts/openapi/{name}.v1.json"] = service.openapi()
     return result

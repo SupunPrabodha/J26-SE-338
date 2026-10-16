@@ -317,3 +317,54 @@ class AccountResponse(Contract):
 
 class FixturesResponse(Contract):
     fixtures: dict[str, str]
+
+
+class C4EncoderCheckRequest(Contract):
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+
+
+class C4EncoderCheckResponse(Contract):
+    model_id: Literal["FacebookAI/xlm-roberta-base"] = "FacebookAI/xlm-roberta-base"
+    status_message: Literal[
+        "Base encoder connected — wellbeing classification unavailable."
+    ] = "Base encoder connected — wellbeing classification unavailable."
+    encoder_executed: Literal[True] = True
+    token_count: int
+    truncated: bool
+    embedding_shape: list[int]
+    hidden_dimension: int = 768
+
+
+class FeatureContribution(Contract):
+    token: str
+    weight: float
+    direction: Literal["supports", "opposes"]
+    abs_weight: float
+
+
+class C4ExplanationRequest(Contract):
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    method: Literal["LIME", "SHAP"]
+    target_class: str | None = None
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+
+
+class C4ExplanationResponse(Contract):
+    method: Literal["LIME", "SHAP"]
+    status: Literal["READY", "AWAITING_CLASSIFIER_CONNECTION"]
+    status_message: str
+    model_version: str | None = None
+    target_class: str | None = None
+    target_class_probability: float | None = None
+    base_value: float | None = None
+    output_value: float | None = None
+    contributions: list[FeatureContribution] = []
+    tokens: list[str] = []
+    weights: list[float] = []
+    computation_bounds: dict[str, int] = {}
+
