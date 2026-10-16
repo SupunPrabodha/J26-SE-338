@@ -1,0 +1,70 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4EncoderCheckResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "embedding_shape": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Embedding Shape",
+      "type": "array"
+    },
+    "encoder_executed": {
+      "const": true,
+      "default": true,
+      "title": "Encoder Executed",
+      "type": "boolean"
+    },
+    "hidden_dimension": {
+      "default": 768,
+      "title": "Hidden Dimension",
+      "type": "integer"
+    },
+    "model_id": {
+      "const": "FacebookAI/xlm-roberta-base",
+      "default": "FacebookAI/xlm-roberta-base",
+      "title": "Model Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status_message": {
+      "const": "Base encoder connected — wellbeing classification unavailable.",
+      "default": "Base encoder connected — wellbeing classification unavailable.",
+      "title": "Status Message",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "token_count": {
+      "title": "Token Count",
+      "type": "integer"
+    },
+    "truncated": {
+      "title": "Truncated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "token_count",
+    "truncated",
+    "embedding_shape"
+  ],
+  "title": "C4EncoderCheckResponse",
+  "type": "object"
+}

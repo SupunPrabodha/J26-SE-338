@@ -1,0 +1,197 @@
+{
+  "$defs": {
+    "FeatureContribution": {
+      "additionalProperties": false,
+      "properties": {
+        "abs_weight": {
+          "title": "Abs Weight",
+          "type": "number"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "direction": {
+          "enum": [
+            "supports",
+            "opposes"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "token": {
+          "title": "Token",
+          "type": "string"
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "token",
+        "weight",
+        "direction",
+        "abs_weight"
+      ],
+      "title": "FeatureContribution",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C4ExplanationResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "base_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Base Value"
+    },
+    "computation_bounds": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "default": {},
+      "title": "Computation Bounds",
+      "type": "object"
+    },
+    "contributions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/FeatureContribution"
+      },
+      "title": "Contributions",
+      "type": "array"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "method": {
+      "enum": [
+        "LIME",
+        "SHAP"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "model_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Version"
+    },
+    "output_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Value"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "AWAITING_CLASSIFIER_CONNECTION"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "status_message": {
+      "title": "Status Message",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "target_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Class"
+    },
+    "target_class_probability": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Class Probability"
+    },
+    "tokens": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Tokens",
+      "type": "array"
+    },
+    "weights": {
+      "default": [],
+      "items": {
+        "type": "number"
+      },
+      "title": "Weights",
+      "type": "array"
+    }
+  },
+  "required": [
+    "method",
+    "status",
+    "status_message"
+  ],
+  "title": "C4ExplanationResponse",
+  "type": "object"
+}

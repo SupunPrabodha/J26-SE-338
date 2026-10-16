@@ -1,0 +1,53 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/FeatureContribution.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "abs_weight": {
+      "title": "Abs Weight",
+      "type": "number"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "direction": {
+      "enum": [
+        "supports",
+        "opposes"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "token": {
+      "title": "Token",
+      "type": "string"
+    },
+    "weight": {
+      "title": "Weight",
+      "type": "number"
+    }
+  },
+  "required": [
+    "token",
+    "weight",
+    "direction",
+    "abs_weight"
+  ],
+  "title": "FeatureContribution",
+  "type": "object"
+}
