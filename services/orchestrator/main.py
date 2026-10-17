@@ -107,6 +107,7 @@ def review_response(task, case):
         case=case_response(case),
         inference=case.inference,
         explanation=case.explanation,
+        preprocessing=getattr(case, "preprocessing", None),
     )
 
 

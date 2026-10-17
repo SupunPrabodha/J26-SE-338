@@ -286,9 +286,10 @@ def process_job(job_id, attempt, adapter=call_service):
         )
 
         def finish(db, case, job):
-            case.inference, case.explanation = (
+            case.inference, case.explanation, case.preprocessing = (
                 inference.model_dump(mode="json"),
                 explanation.model_dump(mode="json"),
+                pre.model_dump(mode="json"),
             )
             case.error_code = None
             case.provenance = ServiceProvenance(

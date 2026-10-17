@@ -205,6 +205,7 @@ class ReviewTask(Contract):
     inference: InferenceResponse
     explanation: ExplanationResponse
     human_review_required: Literal[True] = True
+    preprocessing: PreprocessResponse | None = None
 
 
 class HumanReviewAction(Contract):

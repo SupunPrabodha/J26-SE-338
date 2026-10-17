@@ -1,4 +1,6 @@
 @import "../../../packages/typescript-common/src/styles.css";
+@import "./styles/LimeExplanation.css";
+@import "./styles/ShapExplanation.css";
 
 /* =========================================================================
    Component 4: Counsellor Dashboard & XAI Styles

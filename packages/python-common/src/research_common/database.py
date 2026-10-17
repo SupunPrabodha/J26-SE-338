@@ -90,6 +90,7 @@ class Case(Entity, Base):
     correlation_id: Mapped[str] = mapped_column(String(36), unique=True)
     status: Mapped[str] = mapped_column(String(30), default="RECEIVED", index=True)
     error_code: Mapped[str | None] = mapped_column(String(40))
+    preprocessing: Mapped[dict | None] = mapped_column(JSON)
     inference: Mapped[dict | None] = mapped_column(JSON)
     explanation: Mapped[dict | None] = mapped_column(JSON)
     provenance: Mapped[dict | None] = mapped_column(JSON)

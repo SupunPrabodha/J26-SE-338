@@ -1,0 +1,1079 @@
+/* ==========================================================================
+   LIME EXPLANATION STYLESHEET (PIXEL PERFECT MATCH TO UI MOCKUP)
+   ========================================================================== */
+
+.lime-page-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+
+.lime-sidebar {
+  width: 228px;
+  background-color: #0c111d;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px 18px 14px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lime-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px 18px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
+.lime-brand-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lime-brand-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.lime-brand-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.lime-brand-tagline {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.lime-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.lime-nav-heading {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+  padding: 14px 10px 6px 10px;
+}
+
+.lime-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 12.5px;
+  font-weight: 500;
+  border-radius: 7px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease-in-out;
+}
+
+.lime-nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #f1f5f9;
+}
+
+.lime-nav-btn-active {
+  background-color: #4f46e5;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+
+.lime-nav-icon {
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+/* Sidebar Model Card */
+.lime-sidebar-model-card {
+  margin-top: auto;
+  background: #151b2c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.lime-model-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 3px;
+}
+
+.lime-model-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.lime-model-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.lime-model-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lime-status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+/* ==========================================================================
+   MAIN CONTENT AREA
+   ========================================================================== */
+
+.lime-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px 28px 32px 28px;
+  overflow-y: auto;
+  max-width: 1540px;
+}
+
+/* Top Header */
+.lime-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 16px;
+}
+
+.lime-header-title-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.lime-main-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lime-main-subtitle {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+.lime-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lime-header-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.lime-header-pill:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.lime-user-avatar-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #3b82f6;
+  border: 1px solid #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lime-user-text-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.lime-user-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.lime-user-role {
+  font-size: 10.5px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   GRID LAYOUT & CARDS
+   ========================================================================== */
+
+.lime-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lime-row {
+  display: grid;
+  gap: 16px;
+}
+
+.lime-row-3-cols {
+  grid-template-columns: 1fr 1.08fr 1.02fr;
+}
+
+.lime-row-2-cols-split {
+  grid-template-columns: 0.9fr 1.1fr;
+}
+
+.lime-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 15px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.lime-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.lime-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lime-card-icon {
+  color: #1e293b;
+  flex-shrink: 0;
+}
+
+.lime-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.lime-info-icon-small {
+  color: #94a3b8;
+  cursor: pointer;
+  display: inline-flex;
+  margin-left: 4px;
+}
+
+.lime-info-icon-small:hover {
+  color: #4f46e5;
+}
+
+/* ==========================================================================
+   ROW 1: INPUT TEXT | MODEL PREDICTION | EXPLANATION SUMMARY
+   ========================================================================== */
+
+/* Card 1: Input Text */
+.lime-card-input-text .lime-input-box {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.lime-input-line-1,
+.lime-input-line-2 {
+  font-size: 12.5px;
+  color: #1e293b;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+}
+
+.lime-input-line-2 {
+  margin-top: 4px;
+}
+
+.lime-input-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11.5px;
+  margin-bottom: 10px;
+}
+
+.lime-meta-label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.lime-meta-pill-sinhala {
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #ffedd5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.lime-meta-pill-english {
+  background: #f5f3ff;
+  color: #6366f1;
+  border: 1px solid #ede9fe;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.lime-input-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #0f172a;
+  font-weight: 600;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.lime-explained-class-val {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* Card 2: Model Prediction */
+.lime-card-orig-prediction .lime-prediction-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.lime-stress-label {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ef4444;
+  letter-spacing: -0.02em;
+}
+
+.lime-confidence-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  padding: 6px 14px;
+  min-width: 70px;
+}
+
+.lime-score-percent {
+  font-size: 19px;
+  font-weight: 800;
+  color: #dc2626;
+  line-height: 1;
+}
+
+.lime-score-sublabel {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.lime-spectrum-slider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.lime-spectrum-labels-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.lime-spectrum-left-label {
+  color: #dc2626;
+}
+
+.lime-spectrum-right-label {
+  color: #15803d;
+}
+
+.lime-spectrum-bar-track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%);
+  display: flex;
+  align-items: center;
+}
+
+.lime-spectrum-indicator-pin {
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 14px;
+  background-color: #0f172a;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transform: translateX(-50%);
+}
+
+.lime-spectrum-ticks-bottom {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Card 3: Explanation Summary */
+.lime-card-explanation-summary .lime-summary-body-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.lime-gauge-wrap {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lime-gauge-svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.lime-summary-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.lime-legend-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.lime-legend-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lime-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lime-dot-red {
+  background-color: #ef4444;
+}
+
+.lime-dot-green {
+  background-color: #16a34a;
+}
+
+.lime-dot-gray {
+  background-color: #cbd5e1;
+}
+
+.lime-legend-item-val {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.lime-strength-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.lime-strength-label {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.lime-strength-badge {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   ROW 2: LIME FEATURE IMPORTANCE & TEXT HIGHLIGHTS BREAKDOWN
+   ========================================================================= */
+
+/* Left Card: Feature Importance Table */
+.lime-card-features {
+  min-height: 440px;
+}
+
+.lime-features-table-wrap {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.lime-features-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.lime-features-table th {
+  padding: 6px 8px;
+  color: #0f172a;
+  font-weight: 700;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 10.5px;
+}
+
+.lime-features-table td {
+  padding: 4px 8px;
+  vertical-align: middle;
+}
+
+.lime-row-pos {
+  background-color: #fff5f5;
+}
+
+.lime-row-neg {
+  background-color: #f2fbf6;
+}
+
+.lime-feat-name {
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  width: 120px;
+}
+
+.lime-feat-weight {
+  text-align: left;
+  font-family: inherit;
+  font-weight: 600;
+  width: 80px;
+}
+
+.lime-weight-pos {
+  color: #0f172a;
+}
+
+.lime-weight-neg {
+  color: #15803d;
+}
+
+.lime-feat-bar-col {
+  width: 140px;
+  text-align: left;
+}
+
+.lime-feat-bar-track {
+  height: 9px;
+  border-radius: 999px;
+  background-color: transparent;
+  display: flex;
+}
+
+.lime-feat-bar-fill-red {
+  height: 100%;
+  background-color: #dc2626;
+  border-radius: 999px;
+}
+
+.lime-feat-bar-fill-green {
+  height: 100%;
+  background-color: #16a34a;
+  border-radius: 999px;
+}
+
+.lime-table-legend-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  color: #475569;
+  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.lime-table-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lime-legend-square {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.lime-square-red {
+  background-color: #ef4444;
+}
+
+.lime-square-green {
+  background-color: #16a34a;
+}
+
+.lime-download-csv-row {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.lime-download-csv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid #e0e7ff;
+  color: #4f46e5;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 7px;
+  transition: all 0.15s;
+}
+
+.lime-download-csv-btn:hover {
+  background-color: #f5f3ff;
+  border-color: #c7d2fe;
+}
+
+/* Right Section: Highlights & Process & Prediction */
+.lime-right-column-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Card: Text with LIME Highlights */
+.lime-card-highlights {
+  padding: 14px 16px;
+}
+
+.lime-highlight-text-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.lime-chip-word {
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-weight: 500;
+}
+
+.lime-chip-strong-red {
+  background-color: #dc2626;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.lime-chip-soft-pink {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fee2e2;
+}
+
+.lime-chip-soft-green {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+}
+
+.lime-chip-punctuation {
+  color: #0f172a;
+  font-weight: 700;
+  padding: 0 2px;
+}
+
+.lime-highlights-legend-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.lime-highlight-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lime-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.lime-swatch-dark-red {
+  background-color: #dc2626;
+}
+
+.lime-swatch-pink {
+  background-color: #fca5a5;
+}
+
+.lime-swatch-gray {
+  background-color: #cbd5e1;
+}
+
+.lime-swatch-light-green {
+  background-color: #86efac;
+}
+
+.lime-swatch-dark-green {
+  background-color: #16a34a;
+}
+
+/* Sub-row 2 sub-cards: LIME Process Summary & Prediction Probability */
+.lime-sub-cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 14px;
+}
+
+/* Process Summary Timeline */
+.lime-card-process {
+  padding: 12px 14px;
+}
+
+.lime-process-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  margin-top: 4px;
+}
+
+.lime-process-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  border-left: 1px dashed #cbd5e1;
+}
+
+.lime-process-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.lime-step-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #6366f1;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.lime-step-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.lime-step-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.lime-step-desc {
+  font-size: 9.5px;
+  color: #64748b;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+/* Prediction Probability (Local) & Info Table */
+.lime-card-local-pred {
+  padding: 12px 14px;
+}
+
+.lime-local-prob-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.lime-prob-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.lime-prob-label {
+  width: 70px;
+  font-size: 10.5px;
+}
+
+.lime-prob-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #f1f5f9;
+  overflow: hidden;
+}
+
+.lime-prob-fill-red {
+  height: 100%;
+  background-color: #dc2626;
+  border-radius: 999px;
+}
+
+.lime-prob-fill-green {
+  height: 100%;
+  background-color: #16a34a;
+  border-radius: 999px;
+}
+
+.lime-prob-val {
+  width: 28px;
+  text-align: right;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Local Info Grid (2 Columns, 4 Rows) */
+.lime-local-info-box {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.lime-info-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.lime-info-grid-2x4 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 12px;
+}
+
+.lime-info-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+}
+
+.lime-info-lbl {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.lime-info-val {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   ROW 3: HOW TO READ LIME EXPLANATION
+   ========================================================================== */
+
+.lime-card-how-to {
+  padding: 14px 16px;
+}
+
+.lime-how-to-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.lime-how-to-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.lime-how-to-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.lime-icon-red {
+  color: #ef4444;
+}
+
+.lime-icon-green {
+  color: #10b981;
+}
+
+.lime-icon-blue {
+  color: #6366f1;
+}
+
+.lime-how-to-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.lime-how-to-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+  margin-bottom: 2px;
+}
+
+.lime-how-to-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.lime-how-to-desc strong {
+  font-weight: 700;
+}
+
+.lime-text-red {
+  color: #ef4444;
+}
+
+.lime-text-green {
+  color: #15803d;
+}
+
+/* ==========================================================================
+   RESPONSIVENESS
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .lime-row-3-cols,
+  .lime-row-2-cols-split,
+  .lime-sub-cards-row,
+  .lime-how-to-columns {
+    grid-template-columns: 1fr;
+  }
+}

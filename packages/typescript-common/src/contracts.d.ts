@@ -646,6 +646,7 @@ export interface ReviewTask {
   explanation: ExplanationResponse;
   human_review_required?: HumanReviewRequired;
   inference: InferenceResponse;
+  preprocessing?: PreprocessResponse | null;
   schema_version?: SchemaVersion24;
   synthetic?: Synthetic24;
   task_id: TaskId;
