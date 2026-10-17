@@ -89,6 +89,9 @@ services:
       SERVICE_NAME: xai
       XAI_SECRET: ${XAI_SECRET:?XAI_SECRET must be set}
       REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379/0
+      HF_HOME: /home/research/.cache/huggingface
+    volumes:
+      - hf-cache:/home/research/.cache/huggingface
     depends_on:
       redis: { condition: service_healthy }
   worker:
@@ -133,3 +136,4 @@ networks:
     internal: true
 volumes:
   postgres-data:
+  hf-cache:

@@ -1,8 +1,8 @@
 FROM python:3.12-slim-bookworm@sha256:34386ef0cb081344d7ec1c103ba398e6e9f64e9ab3a1509accc92a4e24a07258
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app/packages/contracts/src:/app/packages/python-common/src:/app/services
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app/packages/contracts/src:/app/packages/python-common/src:/app/services HF_HOME=/home/research/.cache/huggingface
 WORKDIR /app
 COPY requirements.lock .
-RUN pip install --no-cache-dir --require-hashes -r requirements.lock && useradd --create-home --uid 10001 research
+RUN pip install --no-cache-dir --require-hashes -r requirements.lock && useradd --create-home --uid 10001 research && mkdir -p /home/research/.cache/huggingface && chown -R research:research /home/research
 COPY packages/contracts/src packages/contracts/src
 COPY packages/python-common/src packages/python-common/src
 COPY services services
