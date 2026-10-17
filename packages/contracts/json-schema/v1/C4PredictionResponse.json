@@ -1,0 +1,103 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4PredictionResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidence": {
+      "title": "Confidence",
+      "type": "number"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "max_sequence_length": {
+      "default": 512,
+      "title": "Max Sequence Length",
+      "type": "integer"
+    },
+    "model_id": {
+      "default": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+      "title": "Model Id",
+      "type": "string"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
+    "model_version": {
+      "default": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+      "title": "Model Version",
+      "type": "string"
+    },
+    "predicted_sentiment": {
+      "enum": [
+        "Negative",
+        "Neutral",
+        "Positive"
+      ],
+      "title": "Predicted Sentiment",
+      "type": "string"
+    },
+    "probabilities": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Probabilities",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "default": "READY",
+      "enum": [
+        "READY",
+        "FAILED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "status_message": {
+      "default": "Prediction completed successfully.",
+      "title": "Status Message",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "token_count": {
+      "title": "Token Count",
+      "type": "integer"
+    },
+    "truncated": {
+      "title": "Truncated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "predicted_sentiment",
+    "confidence",
+    "probabilities",
+    "token_count",
+    "truncated"
+  ],
+  "title": "C4PredictionResponse",
+  "type": "object"
+}

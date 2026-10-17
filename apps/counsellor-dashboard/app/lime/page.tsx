@@ -3,60 +3,90 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
-import type { C4ExplanationResponse, FeatureContribution } from "@j26/common/contracts";
+import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
 
 export default function LimePage() {
-  const { selectedTask, selectedTaskId, tasks, selectTask } = useReviewCase();
+  const {
+    selectedTask,
+    selectedTaskId,
+    tasks,
+    selectTask,
+    selectedSentimentClass,
+    setSelectedSentimentClass,
+  } = useReviewCase();
 
   const [isBusy, setIsBusy] = useState(false);
+  const [isPredicting, setIsPredicting] = useState(false);
   const [error, setError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [explanation, setExplanation] = useState<C4ExplanationResponse | null>(null);
+  const [prediction, setPrediction] = useState<C4PredictionResponse | null>(null);
   const [isClassifierConnected, setIsClassifierConnected] = useState(false);
 
-  // Ignore late responses across case changes
+  // Ignore late responses across case/model changes
   const activeRequestRef = useRef(0);
 
-  // Clear previous results whenever the selected case/task changes
+  // Clear previous results whenever the selected case or target class changes
   useEffect(() => {
     activeRequestRef.current += 1;
     setExplanation(null);
     setError("");
     setStatusMessage("");
-  }, [selectedTaskId]);
+  }, [selectedTaskId, selectedSentimentClass]);
 
   const submissionText = selectedTask?.preprocessing?.anonymized_text ?? null;
   const caseLanguage = selectedTask?.preprocessing?.language ?? "English (Code-mixed)";
-  const targetClass = selectedTask?.inference?.wellbeing_indicator || "High Stress";
+  const targetClass = selectedSentimentClass;
 
-  // Check classifier status on mount
+  // Check classifier status and fetch predictions whenever case text changes
   useEffect(() => {
     let mounted = true;
-    fetch("/api/c4-explain", {
+    if (!submissionText) {
+      setPrediction(null);
+      return;
+    }
+
+    const currentReqId = ++activeRequestRef.current;
+    setIsPredicting(true);
+
+    fetch("/api/c4-predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: "probe connection",
-        method: "LIME",
+        text: submissionText,
+        language: caseLanguage,
       }),
     })
       .then(async (res) => {
-        if (!mounted) return;
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
         if (res.ok) {
-          const data = (await res.json()) as C4ExplanationResponse;
-          setIsClassifierConnected(data.status === "READY");
+          const data = (await res.json()) as C4PredictionResponse;
+          setPrediction(data);
+          setIsClassifierConnected(true);
+          if (data.predicted_sentiment) {
+            setSelectedSentimentClass(data.predicted_sentiment);
+          }
         } else {
+          const errJson = await res.json().catch(() => ({}));
+          setError(errJson.error || `Prediction check failed (${res.status})`);
           setIsClassifierConnected(false);
         }
       })
-      .catch(() => {
-        if (mounted) setIsClassifierConnected(false);
+      .catch((err) => {
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
+        setError(err.message || "Could not connect to sentiment classifier");
+        setIsClassifierConnected(false);
+      })
+      .finally(() => {
+        if (mounted && currentReqId === activeRequestRef.current) {
+          setIsPredicting(false);
+        }
       });
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [submissionText, caseLanguage, setSelectedSentimentClass]);
 
   async function handleRunLime() {
     if (!submissionText) {
@@ -67,7 +97,7 @@ export default function LimePage() {
     const currentReqId = ++activeRequestRef.current;
     setIsBusy(true);
     setError("");
-    setStatusMessage("Running LIME explanation with whitespace Unicode preservation...");
+    setStatusMessage(`Running LIME explanation for "${targetClass}" with whitespace Unicode preservation...`);
 
     try {
       const res = await fetch("/api/c4-explain", {
@@ -82,7 +112,7 @@ export default function LimePage() {
       });
 
       if (currentReqId !== activeRequestRef.current) {
-        // Stale response: a new case was selected while this was computing
+        // Stale response: a new case or class was selected while this was computing
         return;
       }
 
@@ -99,7 +129,7 @@ export default function LimePage() {
         setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
       } else {
         setIsClassifierConnected(true);
-        setStatusMessage("LIME explanation computed successfully.");
+        setStatusMessage(`LIME explanation for "${targetClass}" computed successfully.`);
       }
     } catch (err) {
       if (currentReqId === activeRequestRef.current) {
@@ -138,8 +168,6 @@ export default function LimePage() {
   const greenDash = (negPct / 100) * circ;
 
   const maxAbsWeight = contributions.reduce((max, c) => Math.max(max, c.abs_weight), 0);
-  const strengthScore = totalWeight > 0 ? totalWeight.toFixed(2) : "0.00";
-  const strengthLabel = totalWeight > 0.6 ? "Strong" : totalWeight > 0.25 ? "Moderate" : "Subtle";
 
   const handleDownloadCsv = () => {
     if (!hasResults || contributions.length === 0) return;
@@ -156,7 +184,7 @@ export default function LimePage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `lime_attributions_${selectedTaskId || "case"}.csv`);
+    link.setAttribute("download", `lime_attributions_${selectedTaskId || "case"}_${targetClass}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -175,7 +203,7 @@ export default function LimePage() {
     {
       num: 2,
       title: "Get Model Predictions",
-      desc: "Obtain classification probabilities for the target class across perturbed instances.",
+      desc: `Obtain classification probabilities for "${targetClass}" across perturbed instances.`,
     },
     {
       num: 3,
@@ -185,7 +213,7 @@ export default function LimePage() {
     {
       num: 4,
       title: "Extract Explanations",
-      desc: "Extract signed token weights to isolate specific vocabulary driving the prediction.",
+      desc: `Extract signed token weights to isolate specific vocabulary driving the "${targetClass}" prediction.`,
     },
   ];
 
@@ -199,12 +227,12 @@ export default function LimePage() {
           <div className="lime-header-title-block">
             <h1 className="lime-main-title">LIME Feature Attribution</h1>
             <p className="lime-main-subtitle">
-              Local Interpretable Model-agnostic Explanations for individual prediction.
+              Local Interpretable Model-agnostic Explanations for individual sentiment prediction.
             </p>
           </div>
 
           <div className="lime-header-actions">
-            {/* Case selector dropdown if multiple tasks available */}
+            {/* Case selector dropdown */}
             {tasks.length > 1 ? (
               <div className="lime-header-pill" title="Assigned review cases">
                 <span style={{ fontSize: "11px", fontWeight: 600, color: "#64748b" }}>Case:</span>
@@ -222,9 +250,9 @@ export default function LimePage() {
                     outline: "none",
                   }}
                 >
-                  {tasks.map((t) => (
+                  {tasks.map((t, idx) => (
                     <option key={t.task_id} value={t.task_id}>
-                      {String(t.task_id).slice(0, 8)}... ({t.inference?.wellbeing_indicator || "Screening"})
+                      Case {idx + 1} ({String(t.task_id).slice(0, 8)}...)
                     </option>
                   ))}
                 </select>
@@ -243,7 +271,7 @@ export default function LimePage() {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z" />
               </svg>
               <span>{caseLanguage}</span>
             </div>
@@ -264,7 +292,7 @@ export default function LimePage() {
           </div>
         </header>
 
-        {/* Screening Support Banner */}
+        {/* Screening Support Banner & Non-Diagnostic Notice */}
         <aside
           style={{
             background: "#eff6ff",
@@ -279,6 +307,9 @@ export default function LimePage() {
           aria-label="Non-diagnostic boundary"
         >
           <strong>Mandatory Practice Notice:</strong> Screening support only. Requires counsellor-assisted interpretation and does not replace professional counselling.
+          <span style={{ display: "block", color: "#475569", marginTop: "3px", fontSize: "10.5px" }}>
+            Model: Temporary sentiment model — C4 development (cardiffnlp/twitter-xlm-roberta-base-sentiment). Outputs represent sentiment classification for explanation development, not clinical diagnoses. Does not claim validated Sinhala, Romanized Sinhala, or code-mixed diagnostic accuracy.
+          </span>
         </aside>
 
         {error && (
@@ -340,9 +371,6 @@ export default function LimePage() {
                     <p className="lime-input-line-2" style={{ color: "#94a3b8", fontSize: "11px", marginTop: "4px" }}>
                       Current C1 ReviewTask contract provides inference &amp; explanation receipts, but excludes raw/preprocessed submission text.
                     </p>
-                    <p style={{ fontSize: "10px", color: "#b91c1c", marginTop: "6px" }}>
-                      Contract extension required: extend ReviewTask with PreprocessResponse
-                    </p>
                   </div>
                 )}
               </div>
@@ -354,7 +382,7 @@ export default function LimePage() {
 
               <div className="lime-input-bottom-row">
                 <span>Tokens: {tokenCount}</span>
-                <span>Explained Class: <span className="lime-explained-class-val">{targetClass}</span></span>
+                <span>Explaining Class: <span className="lime-explained-class-val">{targetClass}</span></span>
               </div>
 
               {/* Action row with compute button */}
@@ -380,11 +408,11 @@ export default function LimePage() {
                     transition: "all 0.15s ease",
                   }}
                 >
-                  {isBusy ? "Computing LIME..." : "Compute LIME Attributions"}
+                  {isBusy ? "Computing LIME..." : `Compute LIME for "${targetClass}"`}
                 </button>
                 {!submissionText && (
                   <p style={{ fontSize: "10px", color: "#64748b", marginTop: "5px", textAlign: "center" }}>
-                    Explanation action disabled: submission text is unavailable in the current ReviewTask contract and C3 classifier connection is pending.
+                    Explanation action disabled: submission text is unavailable in the current ReviewTask contract.
                   </p>
                 )}
               </div>
@@ -401,59 +429,98 @@ export default function LimePage() {
                   </svg>
                   <h3 className="lime-card-title">Model Prediction</h3>
                 </div>
+                <span style={{ fontSize: "9.5px", color: "#6366f1", fontWeight: 600 }}>Temporary sentiment model</span>
               </div>
 
-              {explanation && explanation.target_class_probability != null ? (
+              {prediction ? (
                 <>
                   <div className="lime-prediction-main-row">
-                    <div className="lime-stress-label">{explanation.target_class || targetClass}</div>
+                    <div>
+                      <span style={{ fontSize: "10.5px", color: "#64748b", display: "block" }}>Predicted Sentiment:</span>
+                      <div
+                        className="lime-stress-label"
+                        style={{
+                          color:
+                            prediction.predicted_sentiment === "Negative"
+                              ? "#ef4444"
+                              : prediction.predicted_sentiment === "Positive"
+                              ? "#16a34a"
+                              : "#3b82f6",
+                        }}
+                      >
+                        {prediction.predicted_sentiment}
+                      </div>
+                    </div>
                     <div className="lime-confidence-badge">
                       <span className="lime-score-percent">
-                        {Math.round(explanation.target_class_probability * 100)}%
+                        {Math.round(prediction.confidence * 100)}%
                       </span>
                       <span className="lime-score-sublabel">Confidence</span>
                     </div>
                   </div>
-                  <div className="lime-spectrum-slider-wrap">
-                    <div className="lime-spectrum-labels-top">
-                      <span className="lime-spectrum-left-label">{explanation.target_class || targetClass}</span>
-                      <span className="lime-spectrum-right-label">Low Stress</span>
+
+                  {/* Checkpoint Probabilities Distribution */}
+                  <div style={{ marginTop: "10px", marginBottom: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10.5px", marginBottom: "4px", fontWeight: 600 }}>
+                      <span style={{ color: "#ef4444" }}>Negative: {Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%</span>
+                      <span style={{ color: "#3b82f6" }}>Neutral: {Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%</span>
+                      <span style={{ color: "#16a34a" }}>Positive: {Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%</span>
                     </div>
-                    <div className="lime-spectrum-bar-track">
-                      <div
-                        className="lime-spectrum-indicator-pin"
-                        style={{
-                          left: `${Math.max(5, Math.min(95, Math.round((1 - explanation.target_class_probability) * 100)))}%`,
-                        }}
-                      ></div>
+                    <div style={{ height: "8px", width: "100%", background: "#f1f5f9", borderRadius: "999px", overflow: "hidden", display: "flex" }}>
+                      <div style={{ width: `${Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%`, background: "#ef4444" }} title={`Negative: ${(prediction.probabilities["Negative"] ?? 0).toFixed(4)}`}></div>
+                      <div style={{ width: `${Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%`, background: "#93c5fd" }} title={`Neutral: ${(prediction.probabilities["Neutral"] ?? 0).toFixed(4)}`}></div>
+                      <div style={{ width: `${Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%`, background: "#16a34a" }} title={`Positive: ${(prediction.probabilities["Positive"] ?? 0).toFixed(4)}`}></div>
                     </div>
-                    <div className="lime-spectrum-ticks-bottom">
-                      <span>0%</span>
-                      <span>25%</span>
-                      <span>50%</span>
-                      <span>75%</span>
-                      <span>100%</span>
-                    </div>
+                  </div>
+
+                  <div style={{ fontSize: "10px", color: "#64748b", marginTop: "8px", borderTop: "1px solid #f1f5f9", paddingTop: "6px", display: "flex", justifyContent: "space-between" }}>
+                    <span>Tokens: <strong>{prediction.token_count}</strong> {prediction.truncated ? "(Truncated)" : "(≤512)"}</span>
+                    <span>Revision: <strong>{prediction.model_revision?.slice(0, 7) || "main"}</strong></span>
                   </div>
                 </>
+              ) : isPredicting ? (
+                <div style={{ padding: "18px 0", textAlign: "center" }}>
+                  <p style={{ fontSize: "11.5px", color: "#6366f1", margin: 0 }}>Evaluating checkpoint predictions...</p>
+                </div>
               ) : (
-                <div style={{ padding: "16px 0", textAlign: "center" }}>
-                  <div className="lime-stress-label" style={{ fontSize: "16px", color: "#64748b", marginBottom: "8px" }}>
-                    Pending C3 integration
+                <div style={{ padding: "18px 0", textAlign: "center" }}>
+                  <div className="lime-stress-label" style={{ fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>
+                    No Prediction Available
                   </div>
                   <p style={{ fontSize: "11px", color: "#94a3b8", margin: 0 }}>
-                    Model Prediction: Pending C3 integration
+                    Select a valid case to load model predictions.
                   </p>
-                  <p style={{ fontSize: "10.5px", color: "#94a3b8", marginTop: "4px" }}>
-                    Awaiting C3 classifier integration for live probability distribution.
-                  </p>
-                  <div className="lime-spectrum-slider-wrap" style={{ marginTop: "14px", opacity: 0.35 }}>
-                    <div className="lime-spectrum-bar-track">
-                      <div className="lime-spectrum-indicator-pin" style={{ left: "50%" }}></div>
-                    </div>
-                  </div>
                 </div>
               )}
+
+              {/* Sentiment Class Selector for LIME / SHAP Explanation */}
+              <div style={{ marginTop: "10px", borderTop: "1px solid #f1f5f9", paddingTop: "8px" }}>
+                <span style={{ fontSize: "10.5px", fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>
+                  Explained Sentiment Class (shared with SHAP):
+                </span>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  {(["Negative", "Neutral", "Positive"] as const).map((cls) => (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => setSelectedSentimentClass(cls)}
+                      style={{
+                        flex: 1,
+                        padding: "4px 6px",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        borderRadius: "5px",
+                        border: targetClass === cls ? "1.5px solid #4f46e5" : "1px solid #cbd5e1",
+                        background: targetClass === cls ? "#eef2ff" : "#ffffff",
+                        color: targetClass === cls ? "#4338ca" : "#475569",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {cls}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Card 3: Explanation Summary */}
@@ -526,26 +593,23 @@ export default function LimePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="lime-strength-row">
-                    <span className="lime-strength-label">
-                      Explanation Strength: <strong>{strengthScore}</strong>
-                    </span>
-                    <span className="lime-strength-badge">{strengthLabel}</span>
+                  <div style={{ marginTop: "10px", fontSize: "11px", color: "#475569" }}>
+                    Target Probability: <strong>{explanation?.target_class_probability != null ? (explanation.target_class_probability * 100).toFixed(1) + "%" : "—"}</strong>
                   </div>
                 </>
               ) : (
                 <div style={{ textAlign: "center", padding: "26px 10px", color: "#94a3b8", fontSize: "11.5px" }}>
                   <p style={{ fontWeight: 600, color: "#64748b", margin: "0 0 4px" }}>No Summary Available</p>
-                  <p style={{ margin: 0 }}>Run attribution to generate directional balance summary.</p>
+                  <p style={{ margin: 0 }}>Compute LIME explanation to see attribution breakdown.</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ROW 2: Feature Importance (Left) & Highlights / Process (Right) */}
+          {/* ROW 2: Features Table (Signed Diverging Bar Chart) & Highlights / Diagnostics */}
           <div className="lime-row lime-row-2-cols-split">
-            {/* Card 4: LIME Feature Importance */}
-            <div className="lime-card lime-card-features">
+            {/* Card 4: LIME Feature Importance Table */}
+            <div className="lime-card lime-card-features-table">
               <div className="lime-card-header">
                 <div className="lime-card-title-group">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -553,7 +617,7 @@ export default function LimePage() {
                     <polyline points="12 6 12 12 16 14" />
                   </svg>
                   <h3 className="lime-card-title">LIME Feature Importance</h3>
-                  <span className="lime-info-icon-small" title="Local feature weights computed via sparse linear surrogate">
+                  <span className="lime-info-icon-small" title={`Feature weights for class: ${targetClass}`}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <line x1="12" y1="16" x2="12" y2="12" />
@@ -571,7 +635,7 @@ export default function LimePage() {
                         <tr>
                           <th style={{ textAlign: "left", paddingLeft: 8 }}>Feature (Word/Phrase)</th>
                           <th style={{ textAlign: "left" }}>Weight</th>
-                          <th style={{ textAlign: "left" }}>Contribution</th>
+                          <th style={{ textAlign: "left" }}>Contribution ({targetClass})</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -642,7 +706,7 @@ export default function LimePage() {
                   </p>
                   <p style={{ margin: 0, fontSize: "11px" }}>No Attribution Bar Chart Available</p>
                   <p style={{ margin: "4px 0 0", fontSize: "11px" }}>
-                    Generate LIME explanation to inspect local token weights.
+                    Generate LIME explanation to inspect token weights for {targetClass}.
                   </p>
                 </div>
               )}
@@ -666,14 +730,14 @@ export default function LimePage() {
               </div>
             </div>
 
-            {/* Right Container: Highlights + 2 Sub-cards */}
+            {/* Right Container: Highlights + Diagnostics */}
             <div className="lime-right-column-container">
               {/* Card 5: Text with LIME Highlights */}
               <div className="lime-card lime-card-highlights">
                 <div className="lime-card-header" style={{ marginBottom: 8 }}>
                   <div className="lime-card-title-group">
                     <h3 className="lime-card-title">Text with LIME Highlights</h3>
-                    <span className="lime-info-icon-small" title="Colored tokens based on their contribution direction and magnitude">
+                    <span className="lime-info-icon-small" title={`Highlight attributions for ${targetClass}`}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="16" x2="12" y2="12" />
@@ -686,7 +750,7 @@ export default function LimePage() {
                 {/* Token Chips */}
                 <div className="lime-highlight-text-box" aria-label="Attribution highlighted text">
                   {hasResults && submissionText ? (
-                    renderHighlightedTokens(submissionText, contributions)
+                    renderHighlightedTokens(submissionText, contributions, targetClass)
                   ) : (
                     <span style={{ color: "#94a3b8", fontSize: "11px" }}>
                       Attribution highlighted text will appear here once explanation is computed.
@@ -727,13 +791,6 @@ export default function LimePage() {
                   <div className="lime-card-header" style={{ marginBottom: 6 }}>
                     <div className="lime-card-title-group">
                       <h3 className="lime-card-title">LIME Process Summary</h3>
-                      <span className="lime-info-icon-small" title="LIME sampling and surrogate model workflow">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="12" y1="16" x2="12" y2="12" />
-                          <line x1="12" y1="8" x2="12.01" y2="8" />
-                        </svg>
-                      </span>
                     </div>
                   </div>
 
@@ -755,13 +812,6 @@ export default function LimePage() {
                   <div className="lime-card-header" style={{ marginBottom: 6 }}>
                     <div className="lime-card-title-group">
                       <h3 className="lime-card-title">Prediction Probability (Local)</h3>
-                      <span className="lime-info-icon-small" title="Local surrogate probability estimation">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="12" y1="16" x2="12" y2="12" />
-                          <line x1="12" y1="8" x2="12.01" y2="8" />
-                        </svg>
-                      </span>
                     </div>
                   </div>
 
@@ -843,8 +893,8 @@ export default function LimePage() {
                       </div>
                       <div className="lime-info-item">
                         <span className="lime-info-lbl">Model</span>
-                        <span className="lime-info-val">
-                          {explanation?.model_version || "Pending C3"}
+                        <span className="lime-info-val" style={{ fontSize: "9.5px" }}>
+                          twitter-xlm-roberta
                         </span>
                       </div>
                       <div className="lime-info-item">
@@ -925,7 +975,7 @@ export default function LimePage() {
   );
 }
 
-function renderHighlightedTokens(text: string, contributions: FeatureContribution[]) {
+function renderHighlightedTokens(text: string, contributions: FeatureContribution[], targetClass: string) {
   const weightMap = new Map<string, number>();
   for (const c of contributions) {
     weightMap.set(c.token.toLowerCase(), c.weight);
@@ -962,7 +1012,7 @@ function renderHighlightedTokens(text: string, contributions: FeatureContributio
       <span
         key={idx}
         className={chipClass}
-        title={weight !== undefined ? `Weight: ${weight >= 0 ? "+" : ""}${weight.toFixed(4)}` : undefined}
+        title={weight !== undefined ? `Word: "${part}" | Weight: ${weight >= 0 ? "+" : ""}${weight.toFixed(4)} (${weight >= 0 ? "Supports" : "Opposes"} ${targetClass})` : undefined}
       >
         {part}
       </span>

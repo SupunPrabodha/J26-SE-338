@@ -3,60 +3,90 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
-import type { C4ExplanationResponse, FeatureContribution } from "@j26/common/contracts";
+import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
 
 export default function ShapPage() {
-  const { selectedTask, selectedTaskId, tasks, selectTask } = useReviewCase();
+  const {
+    selectedTask,
+    selectedTaskId,
+    tasks,
+    selectTask,
+    selectedSentimentClass,
+    setSelectedSentimentClass,
+  } = useReviewCase();
 
   const [isBusy, setIsBusy] = useState(false);
+  const [isPredicting, setIsPredicting] = useState(false);
   const [error, setError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [explanation, setExplanation] = useState<C4ExplanationResponse | null>(null);
+  const [prediction, setPrediction] = useState<C4PredictionResponse | null>(null);
   const [isClassifierConnected, setIsClassifierConnected] = useState(false);
 
   // Ignore late responses across case changes
   const activeRequestRef = useRef(0);
 
-  // Clear previous results whenever the selected case/task changes
+  // Clear previous results whenever the selected case or target class changes
   useEffect(() => {
     activeRequestRef.current += 1;
     setExplanation(null);
     setError("");
     setStatusMessage("");
-  }, [selectedTaskId]);
+  }, [selectedTaskId, selectedSentimentClass]);
 
   const submissionText = selectedTask?.preprocessing?.anonymized_text ?? null;
   const caseLanguage = selectedTask?.preprocessing?.language ?? "English (Code-mixed)";
-  const targetClass = selectedTask?.inference?.wellbeing_indicator || "High Stress";
+  const targetClass = selectedSentimentClass;
 
-  // Check classifier status on mount
+  // Check classifier status and fetch predictions whenever case text changes
   useEffect(() => {
     let mounted = true;
-    fetch("/api/c4-explain", {
+    if (!submissionText) {
+      setPrediction(null);
+      return;
+    }
+
+    const currentReqId = ++activeRequestRef.current;
+    setIsPredicting(true);
+
+    fetch("/api/c4-predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: "probe connection",
-        method: "SHAP",
+        text: submissionText,
+        language: caseLanguage,
       }),
     })
       .then(async (res) => {
-        if (!mounted) return;
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
         if (res.ok) {
-          const data = (await res.json()) as C4ExplanationResponse;
-          setIsClassifierConnected(data.status === "READY");
+          const data = (await res.json()) as C4PredictionResponse;
+          setPrediction(data);
+          setIsClassifierConnected(true);
+          if (data.predicted_sentiment) {
+            setSelectedSentimentClass(data.predicted_sentiment);
+          }
         } else {
+          const errJson = await res.json().catch(() => ({}));
+          setError(errJson.error || `Prediction check failed (${res.status})`);
           setIsClassifierConnected(false);
         }
       })
-      .catch(() => {
-        if (mounted) setIsClassifierConnected(false);
+      .catch((err) => {
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
+        setError(err.message || "Could not connect to sentiment classifier");
+        setIsClassifierConnected(false);
+      })
+      .finally(() => {
+        if (mounted && currentReqId === activeRequestRef.current) {
+          setIsPredicting(false);
+        }
       });
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [submissionText, caseLanguage, setSelectedSentimentClass]);
 
   async function handleRunShap() {
     if (!submissionText) {
@@ -67,7 +97,7 @@ export default function ShapPage() {
     const currentReqId = ++activeRequestRef.current;
     setIsBusy(true);
     setError("");
-    setStatusMessage("Running SHAP additive explanation with text masker...");
+    setStatusMessage(`Running SHAP additive explanation for "${targetClass}" with text masker...`);
 
     try {
       const res = await fetch("/api/c4-explain", {
@@ -99,7 +129,7 @@ export default function ShapPage() {
         setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
       } else {
         setIsClassifierConnected(true);
-        setStatusMessage("SHAP additive explanation computed successfully.");
+        setStatusMessage(`SHAP additive explanation for "${targetClass}" computed successfully.`);
       }
     } catch (err) {
       if (currentReqId === activeRequestRef.current) {
@@ -142,7 +172,7 @@ export default function ShapPage() {
     contributions.length > 0
       ? (contributions.reduce((acc, c) => acc + c.abs_weight, 0) / contributions.length).toFixed(4)
       : "0.0000";
-  const strengthLabel = parseFloat(meanAbsShap) > 0.15 ? "Strong" : parseFloat(meanAbsShap) > 0.05 ? "Moderate" : "Subtle";
+  const strengthLabel = totalWeight > 0.6 ? "Strong" : totalWeight > 0.25 ? "Moderate" : "Subtle";
 
   const handleDownloadCsv = () => {
     if (!hasResults || contributions.length === 0) return;
@@ -159,7 +189,7 @@ export default function ShapPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `shap_values_${selectedTaskId || "case"}.csv`);
+    link.setAttribute("download", `shap_values_${selectedTaskId || "case"}_${targetClass}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -168,6 +198,7 @@ export default function ShapPage() {
   const tokenCount = submissionText ? submissionText.trim().split(/\s+/).length : 0;
   const canCompute = Boolean(submissionText);
 
+  // Base and Output values from explanation
   const baseValue = explanation?.base_value ?? 0.0;
   const outputValue = explanation?.output_value ?? (explanation?.target_class_probability ?? 0.0);
 
@@ -179,14 +210,14 @@ export default function ShapPage() {
         {/* Top Header */}
         <header className="shap-header">
           <div className="shap-header-title-block">
-            <h1 className="shap-main-title">SHAP Additive Explanations</h1>
+            <h1 className="shap-main-title">SHAP Explanation</h1>
             <p className="shap-main-subtitle">
-              SHAP (SHapley Additive exPlanations) attribute each token's contribution to the prediction.
+              SHapley Additive exPlanations for individual sentiment screening predictions.
             </p>
           </div>
 
-          <div className="lime-header-actions">
-            {/* Case selector dropdown if multiple tasks available */}
+          <div className="shap-header-actions">
+            {/* Case selector dropdown */}
             {tasks.length > 1 ? (
               <div className="shap-header-pill" title="Assigned review cases">
                 <span style={{ fontSize: "11px", fontWeight: 600, color: "#64748b" }}>Case:</span>
@@ -204,9 +235,9 @@ export default function ShapPage() {
                     outline: "none",
                   }}
                 >
-                  {tasks.map((t) => (
+                  {tasks.map((t, idx) => (
                     <option key={t.task_id} value={t.task_id}>
-                      {String(t.task_id).slice(0, 8)}... ({t.inference?.wellbeing_indicator || "Screening"})
+                      Case {idx + 1} ({String(t.task_id).slice(0, 8)}...)
                     </option>
                   ))}
                 </select>
@@ -220,7 +251,7 @@ export default function ShapPage() {
               </div>
             ) : null}
 
-            {/* Language Pill (Read-only metadata from case) */}
+            {/* Language Pill */}
             <div className="shap-header-pill" title="Language detected in submission">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -246,7 +277,7 @@ export default function ShapPage() {
           </div>
         </header>
 
-        {/* Screening Support Banner */}
+        {/* Screening Support Banner & Non-Diagnostic Notice */}
         <aside
           style={{
             background: "#eff6ff",
@@ -261,6 +292,9 @@ export default function ShapPage() {
           aria-label="Non-diagnostic boundary"
         >
           <strong>Mandatory Practice Notice:</strong> Screening support only. Requires counsellor-assisted interpretation and does not replace professional counselling.
+          <span style={{ display: "block", color: "#475569", marginTop: "3px", fontSize: "10.5px" }}>
+            Model: Temporary sentiment model — C4 development (cardiffnlp/twitter-xlm-roberta-base-sentiment). Outputs represent sentiment classification for explanation development, not clinical diagnoses. Does not claim validated Sinhala, Romanized Sinhala, or code-mixed diagnostic accuracy.
+          </span>
         </aside>
 
         {error && (
@@ -322,9 +356,6 @@ export default function ShapPage() {
                     <p className="shap-input-line-2" style={{ color: "#94a3b8", fontSize: "11px", marginTop: "4px" }}>
                       Current C1 ReviewTask contract provides inference &amp; explanation receipts, but excludes raw/preprocessed submission text.
                     </p>
-                    <p style={{ fontSize: "10px", color: "#b91c1c", marginTop: "6px" }}>
-                      Contract extension required: extend ReviewTask with PreprocessResponse
-                    </p>
                   </div>
                 )}
               </div>
@@ -336,7 +367,7 @@ export default function ShapPage() {
 
               <div className="shap-input-bottom-row">
                 <span>Tokens: {tokenCount}</span>
-                <span>Explained Class: <span className="shap-explained-class-val">{targetClass}</span></span>
+                <span>Explaining Class: <span className="shap-explained-class-val">{targetClass}</span></span>
               </div>
 
               {/* Action row with compute button */}
@@ -362,11 +393,11 @@ export default function ShapPage() {
                     transition: "all 0.15s ease",
                   }}
                 >
-                  {isBusy ? "Computing SHAP..." : "Compute SHAP Values"}
+                  {isBusy ? "Computing SHAP..." : `Compute SHAP for "${targetClass}"`}
                 </button>
                 {!submissionText && (
                   <p style={{ fontSize: "10px", color: "#64748b", marginTop: "5px", textAlign: "center" }}>
-                    Explanation action disabled: submission text is unavailable in the current ReviewTask contract and C3 classifier connection is pending.
+                    Explanation action disabled: submission text is unavailable in the current ReviewTask contract.
                   </p>
                 )}
               </div>
@@ -383,59 +414,98 @@ export default function ShapPage() {
                   </svg>
                   <h3 className="shap-card-title">Model Prediction</h3>
                 </div>
+                <span style={{ fontSize: "9.5px", color: "#6366f1", fontWeight: 600 }}>Temporary sentiment model</span>
               </div>
 
-              {explanation && explanation.target_class_probability != null ? (
+              {prediction ? (
                 <>
                   <div className="shap-prediction-main-row">
-                    <div className="shap-stress-label">{explanation.target_class || targetClass}</div>
+                    <div>
+                      <span style={{ fontSize: "10.5px", color: "#64748b", display: "block" }}>Predicted Sentiment:</span>
+                      <div
+                        className="shap-stress-label"
+                        style={{
+                          color:
+                            prediction.predicted_sentiment === "Negative"
+                              ? "#ef4444"
+                              : prediction.predicted_sentiment === "Positive"
+                              ? "#16a34a"
+                              : "#3b82f6",
+                        }}
+                      >
+                        {prediction.predicted_sentiment}
+                      </div>
+                    </div>
                     <div className="shap-confidence-badge">
                       <span className="shap-score-percent">
-                        {Math.round(explanation.target_class_probability * 100)}%
+                        {Math.round(prediction.confidence * 100)}%
                       </span>
                       <span className="shap-score-sublabel">Confidence</span>
                     </div>
                   </div>
-                  <div className="shap-spectrum-slider-wrap">
-                    <div className="shap-spectrum-labels-top">
-                      <span className="shap-spectrum-left-label">{explanation.target_class || targetClass}</span>
-                      <span className="shap-spectrum-right-label">Low Stress</span>
+
+                  {/* Checkpoint Probabilities Distribution */}
+                  <div style={{ marginTop: "10px", marginBottom: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10.5px", marginBottom: "4px", fontWeight: 600 }}>
+                      <span style={{ color: "#ef4444" }}>Negative: {Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%</span>
+                      <span style={{ color: "#3b82f6" }}>Neutral: {Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%</span>
+                      <span style={{ color: "#16a34a" }}>Positive: {Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%</span>
                     </div>
-                    <div className="shap-spectrum-bar-track">
-                      <div
-                        className="shap-spectrum-indicator-pin"
-                        style={{
-                          left: `${Math.max(5, Math.min(95, Math.round((1 - explanation.target_class_probability) * 100)))}%`,
-                        }}
-                      ></div>
+                    <div style={{ height: "8px", width: "100%", background: "#f1f5f9", borderRadius: "999px", overflow: "hidden", display: "flex" }}>
+                      <div style={{ width: `${Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%`, background: "#ef4444" }} title={`Negative: ${(prediction.probabilities["Negative"] ?? 0).toFixed(4)}`}></div>
+                      <div style={{ width: `${Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%`, background: "#93c5fd" }} title={`Neutral: ${(prediction.probabilities["Neutral"] ?? 0).toFixed(4)}`}></div>
+                      <div style={{ width: `${Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%`, background: "#16a34a" }} title={`Positive: ${(prediction.probabilities["Positive"] ?? 0).toFixed(4)}`}></div>
                     </div>
-                    <div className="shap-spectrum-ticks-bottom">
-                      <span>0%</span>
-                      <span>25%</span>
-                      <span>50%</span>
-                      <span>75%</span>
-                      <span>100%</span>
-                    </div>
+                  </div>
+
+                  <div style={{ fontSize: "10px", color: "#64748b", marginTop: "8px", borderTop: "1px solid #f1f5f9", paddingTop: "6px", display: "flex", justifyContent: "space-between" }}>
+                    <span>Tokens: <strong>{prediction.token_count}</strong> {prediction.truncated ? "(Truncated)" : "(≤512)"}</span>
+                    <span>Revision: <strong>{prediction.model_revision?.slice(0, 7) || "main"}</strong></span>
                   </div>
                 </>
+              ) : isPredicting ? (
+                <div style={{ padding: "18px 0", textAlign: "center" }}>
+                  <p style={{ fontSize: "11.5px", color: "#6366f1", margin: 0 }}>Evaluating checkpoint predictions...</p>
+                </div>
               ) : (
-                <div style={{ padding: "16px 0", textAlign: "center" }}>
-                  <div className="shap-stress-label" style={{ fontSize: "16px", color: "#64748b", marginBottom: "8px" }}>
-                    Pending C3 integration
+                <div style={{ padding: "18px 0", textAlign: "center" }}>
+                  <div className="shap-stress-label" style={{ fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>
+                    No Prediction Available
                   </div>
                   <p style={{ fontSize: "11px", color: "#94a3b8", margin: 0 }}>
-                    Model Prediction: Pending C3 integration
+                    Select a valid case to load model predictions.
                   </p>
-                  <p style={{ fontSize: "10.5px", color: "#94a3b8", marginTop: "4px" }}>
-                    Awaiting C3 classifier integration for live probability distribution.
-                  </p>
-                  <div className="shap-spectrum-slider-wrap" style={{ marginTop: "14px", opacity: 0.35 }}>
-                    <div className="shap-spectrum-bar-track">
-                      <div className="shap-spectrum-indicator-pin" style={{ left: "50%" }}></div>
-                    </div>
-                  </div>
                 </div>
               )}
+
+              {/* Sentiment Class Selector for LIME / SHAP Explanation */}
+              <div style={{ marginTop: "10px", borderTop: "1px solid #f1f5f9", paddingTop: "8px" }}>
+                <span style={{ fontSize: "10.5px", fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>
+                  Explained Sentiment Class (shared with LIME):
+                </span>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  {(["Negative", "Neutral", "Positive"] as const).map((cls) => (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => setSelectedSentimentClass(cls)}
+                      style={{
+                        flex: 1,
+                        padding: "4px 6px",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        borderRadius: "5px",
+                        border: targetClass === cls ? "1.5px solid #4f46e5" : "1px solid #cbd5e1",
+                        background: targetClass === cls ? "#eef2ff" : "#ffffff",
+                        color: targetClass === cls ? "#4338ca" : "#475569",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {cls}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Card 3: SHAP Summary */}
@@ -518,16 +588,16 @@ export default function ShapPage() {
               ) : (
                 <div style={{ textAlign: "center", padding: "26px 10px", color: "#94a3b8", fontSize: "11.5px" }}>
                   <p style={{ fontWeight: 600, color: "#64748b", margin: "0 0 4px" }}>No Summary Available</p>
-                  <p style={{ margin: 0 }}>Run SHAP attribution to compute token decomposition balance.</p>
+                  <p style={{ margin: 0 }}>Compute SHAP explanation to inspect attribution breakdown.</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ROW 2: Feature Importance (Left) & Force Plot / Beeswarm (Right) */}
-          <div className="shap-row shap-row-middle-split">
-            {/* Left Card: SHAP Feature Importance */}
-            <div className="shap-card shap-card-features">
+          {/* ROW 2: SHAP Feature Importance Table & Visual Plots */}
+          <div className="shap-row shap-row-2-cols-split">
+            {/* Card 4: SHAP Feature Importance Table */}
+            <div className="shap-card shap-card-features-table">
               <div className="shap-card-header">
                 <div className="shap-card-title-group">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -535,8 +605,8 @@ export default function ShapPage() {
                     <line x1="12" y1="20" x2="12" y2="4" />
                     <line x1="6" y1="20" x2="6" y2="14" />
                   </svg>
-                  <h3 className="shap-card-title">SHAP Feature Importance (mean |SHAP value|)</h3>
-                  <span className="shap-info-icon-small" title="Attribution calculated via Shapley values">
+                  <h3 className="shap-card-title">SHAP Feature Importance</h3>
+                  <span className="shap-info-icon-small" title={`Feature attribution for class: ${targetClass}`}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <line x1="12" y1="16" x2="12" y2="12" />
@@ -554,7 +624,7 @@ export default function ShapPage() {
                         <tr>
                           <th style={{ textAlign: "left", paddingLeft: 8 }}>Feature (Token)</th>
                           <th style={{ textAlign: "left" }}>SHAP Value</th>
-                          <th style={{ textAlign: "left" }}>Impact</th>
+                          <th style={{ textAlign: "left" }}>Impact ({targetClass})</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -624,7 +694,7 @@ export default function ShapPage() {
                     No Attribution Values Available
                   </p>
                   <p style={{ margin: 0, fontSize: "11px" }}>
-                    Compute SHAP additive values to inspect feature attributions.
+                    Compute SHAP additive values to inspect feature attributions for {targetClass}.
                   </p>
                 </div>
               )}
@@ -655,7 +725,7 @@ export default function ShapPage() {
                 <div className="shap-card shap-card-force-plot">
                   <div className="shap-card-header" style={{ marginBottom: 6 }}>
                     <div className="shap-card-title-group">
-                      <h3 className="shap-card-title">SHAP Force Plot (this prediction)</h3>
+                      <h3 className="shap-card-title">SHAP Force Plot ({targetClass})</h3>
                       <span className="shap-info-icon-small" title="Forces pushing output higher or lower">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10" />
@@ -698,13 +768,6 @@ export default function ShapPage() {
                   <div className="shap-card-header" style={{ marginBottom: 6 }}>
                     <div className="shap-card-title-group">
                       <h3 className="shap-card-title">Prediction Probabilities</h3>
-                      <span className="shap-info-icon-small" title="Overall prediction probabilities">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="12" y1="16" x2="12" y2="12" />
-                          <line x1="12" y1="8" x2="12.01" y2="8" />
-                        </svg>
-                      </span>
                     </div>
                   </div>
 
@@ -761,8 +824,10 @@ export default function ShapPage() {
                         <span className="shap-info-val">SHAP (Text Masker)</span>
                       </div>
                       <div className="shap-info-item">
-                        <span className="shap-info-lbl">Model Type</span>
-                        <span className="shap-info-val">Transformer (XLM-RoBERTa)</span>
+                        <span className="shap-info-lbl">Model</span>
+                        <span className="shap-info-val" style={{ fontSize: "9.5px" }}>
+                          twitter-xlm-roberta
+                        </span>
                       </div>
                       <div className="shap-info-item">
                         <span className="shap-info-lbl">Strategy</span>
@@ -775,11 +840,11 @@ export default function ShapPage() {
                         </span>
                       </div>
                       <div className="shap-info-item">
-                        <span className="shap-info-lbl">Output Class</span>
+                        <span className="shap-info-lbl">Target Class</span>
                         <span className="shap-info-val">{targetClass}</span>
                       </div>
                       <div className="shap-info-item">
-                        <span className="shap-info-lbl">Features</span>
+                        <span className="shap-info-lbl">Tokens</span>
                         <span className="shap-info-val">
                           {contributions.length > 0 ? contributions.length : "—"}
                         </span>
@@ -794,13 +859,6 @@ export default function ShapPage() {
                 <div className="shap-card-header" style={{ marginBottom: 4 }}>
                   <div className="shap-card-title-group">
                     <h3 className="shap-card-title">SHAP Beeswarm Plot (Global view for this instance)</h3>
-                    <span className="shap-info-icon-small" title="Distribution of SHAP values across samples">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="16" x2="12" y2="12" />
-                        <line x1="12" y1="8" x2="12.01" y2="8" />
-                      </svg>
-                    </span>
                   </div>
                 </div>
 
@@ -899,18 +957,12 @@ export default function ShapPage() {
             <div className="shap-card-key-takeaway">
               <span className="shap-takeaway-title">Key Takeaway</span>
               <p className="shap-takeaway-desc">
-                {hasResults && contributions.length > 0 ? (
-                  <>
-                    Tokens like{" "}
-                    <strong>
-                      "{contributions.filter((c) => c.weight > 0).slice(0, 3).map((c) => c.token).join('", "') || "none"}"
-                    </strong>{" "}
-                    strongly push the prediction towards {targetClass}.
-                  </>
-                ) : (
-                  "Awaiting C3 classifier integration to compute token attributions and summary."
-                )}
+                SHAP additive values satisfy local accuracy and consistency, providing exact game-theoretic attributions for <strong style={{ color: "#4f46e5" }}>{targetClass}</strong>.
               </p>
+              <div className="shap-takeaway-footer">
+                <span>Method: Tree-free Kernel / Partition</span>
+                <span>Unicode Words Aligned</span>
+              </div>
             </div>
           </div>
         </div>
@@ -925,86 +977,82 @@ function renderShapForceSvg(
   contributions: FeatureContribution[],
   targetClass: string
 ) {
-  const pos = contributions.filter((c) => c.weight > 0).sort((a, b) => b.weight - a.weight);
-  const neg = contributions.filter((c) => c.weight < 0).sort((a, b) => a.weight - b.weight);
+  const topPos = contributions.filter((c) => c.weight > 0).slice(0, 4);
+  const topNeg = contributions.filter((c) => c.weight < 0).slice(0, 4);
 
-  const toX = (val: number) => {
-    const clamped = Math.max(0, Math.min(1, val));
-    return 20 + clamped * 280;
-  };
+  const posSum = topPos.reduce((sum, c) => sum + c.weight, 0);
+  const negSum = topNeg.reduce((sum, c) => sum + Math.abs(c.weight), 0);
+  const total = posSum + negSum || 1;
 
-  const baseX = toX(baseValue);
-  const outX = toX(outputValue);
+  const width = 480;
+  const height = 80;
+  const center = Math.round(width * 0.48);
+
+  const posWidth = Math.min(200, Math.max(30, Math.round((posSum / total) * 180)));
+  const negWidth = Math.min(200, Math.max(30, Math.round((negSum / total) * 180)));
 
   return (
-    <svg className="shap-force-svg" viewBox="0 0 340 85" aria-label="SHAP Local Waterfall Plot">
-      {/* Top axis line */}
-      <line x1="20" y1="16" x2="300" y2="16" stroke="#cbd5e1" strokeWidth="1" />
-      <text x="20" y="11" fill="#64748b" fontSize="8" textAnchor="middle">
-        0.00
-      </text>
-      <text x="90" y="11" fill="#64748b" fontSize="8" textAnchor="middle">
-        0.25
-      </text>
-      <text x="160" y="11" fill="#64748b" fontSize="8" textAnchor="middle">
-        0.50
-      </text>
-      <text x="230" y="11" fill="#64748b" fontSize="8" textAnchor="middle">
-        0.75
-      </text>
-      <text x="300" y="11" fill="#64748b" fontSize="8" textAnchor="middle">
-        1.00
-      </text>
-      {/* Indicator ticks for base value and output value */}
-      <line x1={baseX} y1="13" x2={baseX} y2="19" stroke="#4338ca" strokeWidth="2" />
-      <line x1={outX} y1="13" x2={outX} y2="19" stroke="#ef4444" strokeWidth="2" />
-      <text x="320" y="27" fill="#0f172a" fontSize="8.5" fontWeight="700">
-        f(x)
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto" }}>
+      {/* Background track */}
+      <rect x="10" y="26" width={width - 20} height="28" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+
+      {/* Negative blocks (opposing target class) */}
+      <rect
+        x={center - negWidth}
+        y="28"
+        width={negWidth}
+        height="24"
+        fill="#16a34a"
+        rx="4"
+        opacity="0.85"
+      />
+      {topNeg.map((c, i) => (
+        <text
+          key={i}
+          x={center - negWidth + 8 + i * 40}
+          y="44"
+          fill="#ffffff"
+          fontSize="10"
+          fontWeight="600"
+        >
+          {c.token.length > 7 ? c.token.slice(0, 6) + "…" : c.token}
+        </text>
+      ))}
+
+      {/* Positive blocks (supporting target class) */}
+      <rect
+        x={center}
+        y="28"
+        width={posWidth}
+        height="24"
+        fill="#ef4444"
+        rx="4"
+        opacity="0.85"
+      />
+      {topPos.map((c, i) => (
+        <text
+          key={i}
+          x={center + 8 + i * 42}
+          y="44"
+          fill="#ffffff"
+          fontSize="10"
+          fontWeight="600"
+        >
+          {c.token.length > 7 ? c.token.slice(0, 6) + "…" : c.token}
+        </text>
+      ))}
+
+      {/* Center divider pin */}
+      <line x1={center} y1="20" x2={center} y2="60" stroke="#0f172a" strokeWidth="2.5" />
+      <circle cx={center} cy="20" r="4" fill="#0f172a" />
+      <text x={center - 32} y="15" fill="#475569" fontSize="10" fontWeight="700">
+        Base {baseValue.toFixed(2)}
       </text>
 
-      {/* Chevrons representing positive contributions pushing right */}
-      {pos.slice(0, 4).map((p, idx) => {
-        const xStart = 20 + idx * 46;
-        const xEnd = xStart + 40;
-        const colors = ["#ef4444", "#f87171", "#fca5a5", "#fecaca"];
-        const color = colors[idx % colors.length];
-        return (
-          <g key={`pos-${idx}`}>
-            <polygon
-              points={`${xStart},24 ${xEnd},24 ${xEnd + 8},32 ${xEnd},40 ${xStart},40 ${xStart + 8},32`}
-              fill={color}
-            />
-            <text x={xStart + 20} y="52" fill="#dc2626" fontSize="7.5" fontWeight="700" textAnchor="middle">
-              {p.token}
-            </text>
-            <text x={xStart + 20} y="60" fill="#dc2626" fontSize="7" textAnchor="middle">
-              +{p.weight.toFixed(3)}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Chevrons representing negative contributions pushing left */}
-      {neg.slice(0, 3).map((n, idx) => {
-        const xStart = 210 + idx * 30;
-        const xEnd = xStart + 28;
-        const colors = ["#86efac", "#4ade80", "#16a34a"];
-        const color = colors[idx % colors.length];
-        return (
-          <g key={`neg-${idx}`}>
-            <polygon
-              points={`${xStart},24 ${xEnd},24 ${xEnd + 8},32 ${xEnd},40 ${xStart},40 ${xStart + 8},32`}
-              fill={color}
-            />
-            <text x={xStart + 14} y="52" fill="#15803d" fontSize="7.5" fontWeight="700" textAnchor="middle">
-              {n.token}
-            </text>
-            <text x={xStart + 14} y="60" fill="#15803d" fontSize="7" textAnchor="middle">
-              {n.weight.toFixed(3)}
-            </text>
-          </g>
-        );
-      })}
+      {/* Output value arrow */}
+      <text x={center + posWidth + 8} y="44" fill="#ef4444" fontSize="11" fontWeight="700">
+        f(x)={outputValue.toFixed(2)}
+      </text>
     </svg>
   );
 }

@@ -8,6 +8,8 @@ export type Contracts =
   | C4EncoderCheckResponse
   | C4ExplanationRequest
   | C4ExplanationResponse
+  | C4PredictionRequest
+  | C4PredictionResponse
   | ConsentDecision
   | ConsentLifecycle
   | ConsentRecord
@@ -96,26 +98,49 @@ export type Weight = number;
 export type Contributions = FeatureContribution[];
 export type DevelopmentOnly7 = true;
 export type Method1 = "LIME" | "SHAP";
+export type ModelId1 = string | null;
+export type ModelRevision = string | null;
 export type ModelVersion = string | null;
 export type OutputValue = number | null;
+export type PredictedClass = string | null;
 export type SchemaVersion7 = "1.0.0";
 export type Status1 = "READY" | "AWAITING_CLASSIFIER_CONNECTION";
 export type StatusMessage1 = string;
 export type Synthetic7 = true;
 export type TargetClass1 = string | null;
 export type TargetClassProbability = number | null;
+export type TokenCount1 = number | null;
 export type Tokens = string[];
+export type Truncated1 = boolean | null;
 export type Weights = number[];
-export type ConsentStatus = "ACTIVE" | "REJECTED";
-export type ConsentVersion = "dev-notice-1";
 export type DevelopmentOnly8 = true;
-export type Purpose = "synthetic-wellbeing-screening";
+export type Language2 = ("English" | "Sinhala" | "Romanized Sinhala" | "Code-mixed") | null;
 export type SchemaVersion8 = "1.0.0";
 export type Synthetic8 = true;
+export type Text2 = string;
+export type Confidence = number;
+export type DevelopmentOnly9 = true;
+export type MaxSequenceLength = number;
+export type ModelId2 = string;
+export type ModelRevision1 = string | null;
+export type ModelVersion1 = string;
+export type PredictedSentiment = "Negative" | "Neutral" | "Positive";
+export type SchemaVersion9 = "1.0.0";
+export type Status2 = "READY" | "FAILED";
+export type StatusMessage2 = string;
+export type Synthetic9 = true;
+export type TokenCount2 = number;
+export type Truncated2 = boolean;
+export type ConsentStatus = "ACTIVE" | "REJECTED";
+export type ConsentVersion = "dev-notice-1";
+export type DevelopmentOnly10 = true;
+export type Purpose = "synthetic-wellbeing-screening";
+export type SchemaVersion10 = "1.0.0";
+export type Synthetic10 = true;
 export type CaseId1 = string;
 export type CorrelationId1 = string;
 export type CreatedAt1 = string;
-export type DevelopmentOnly9 = true;
+export type DevelopmentOnly11 = true;
 export type ErrorCode =
   | "AUTH_REQUIRED"
   | "AUTH_INVALID"
@@ -143,47 +168,47 @@ export type WorkflowState =
   | "FAILED"
   | "WITHDRAWAL_REQUESTED"
   | "WITHDRAWN";
-export type SchemaVersion9 = "1.0.0";
-export type Synthetic9 = true;
+export type SchemaVersion11 = "1.0.0";
+export type Synthetic11 = true;
 export type UpdatedAt = string;
 export type ConsentId = string;
 export type ConsentState = "PENDING" | "ACTIVE" | "EXPIRED" | "WITHDRAWN" | "REJECTED" | "INVALID";
 export type ConsentVersion1 = string;
 export type CreatedAt2 = string;
-export type DevelopmentOnly10 = true;
+export type DevelopmentOnly12 = true;
 export type ExpiresAt = string;
 export type Purpose1 = string;
-export type SchemaVersion10 = "1.0.0";
-export type Synthetic10 = true;
-export type DevelopmentOnly11 = true;
+export type SchemaVersion12 = "1.0.0";
+export type Synthetic12 = true;
+export type DevelopmentOnly13 = true;
 export type DisposalReason = ("RETENTION" | "OWNER_WITHDRAWAL" | "LEGACY_DISPOSAL") | null;
 export type ExplicitlyWithdrawnAt = string | null;
-export type SchemaVersion11 = "1.0.0";
-export type Synthetic11 = true;
+export type SchemaVersion13 = "1.0.0";
+export type Synthetic13 = true;
 export type CaseId2 = string;
 export type ConsentStatus1 = "ACTIVE";
 export type ConsentVersion2 = "dev-notice-1";
 export type CorrelationId2 = string;
-export type DevelopmentOnly12 = true;
+export type DevelopmentOnly14 = true;
 export type IdempotencyKey = string;
 export type Calibrated = false;
 export type CaseId3 = string;
-export type Confidence = number;
+export type Confidence1 = number;
 export type ConsentStatus2 = "ACTIVE";
 export type ConsentVersion3 = "dev-notice-1";
 export type CorrelationId3 = string;
 export type DatasetVersion = "synthetic-fixtures-1";
-export type DevelopmentOnly13 = true;
+export type DevelopmentOnly15 = true;
 export type EmotionalTone = "synthetic-neutral";
 export type IdempotencyKey1 = string;
-export type ModelVersion1 = "mock-1";
+export type ModelVersion2 = "mock-1";
 export type Purpose2 = "synthetic-wellbeing-screening";
 export type ReviewPriority = "HUMAN_REVIEW_REQUIRED";
-export type SchemaVersion12 = "1.0.0";
+export type SchemaVersion14 = "1.0.0";
 export type ServiceName1 = "nlp";
 export type ServiceVersion1 = "0.1.0";
 export type StressLanguageSignals = "synthetic-busy-timetable"[];
-export type Synthetic12 = true;
+export type Synthetic14 = true;
 export type WellbeingIndicator = "synthetic-academic-pressure";
 export type AnonymizedText = string;
 export type CaseId4 = string;
@@ -191,28 +216,28 @@ export type ConsentStatus3 = "ACTIVE";
 export type ConsentVersion4 = "dev-notice-1";
 export type CorrelationId4 = string;
 export type DatasetVersion1 = "synthetic-fixtures-1";
-export type DevelopmentOnly14 = true;
+export type DevelopmentOnly16 = true;
 export type IdempotencyKey2 = string;
-export type Language2 = "en" | "si" | "romanized-si" | "mixed" | "uncertain";
+export type Language3 = "en" | "si" | "romanized-si" | "mixed" | "uncertain";
 export type NormalizedText = string;
 export type PipelineVersion = "mock-1";
 export type Purpose3 = "synthetic-wellbeing-screening";
-export type SchemaVersion13 = "1.0.0";
+export type SchemaVersion15 = "1.0.0";
 export type ServiceName2 = "preprocessing";
 export type ServiceVersion2 = "0.1.0";
-export type Synthetic13 = true;
+export type Synthetic15 = true;
 export type TokenOffsets = [unknown, unknown][];
 export type Tokens1 = string[];
 export type Transformations = string[];
 export type Purpose4 = "synthetic-wellbeing-screening";
-export type SchemaVersion14 = "1.0.0";
-export type Synthetic14 = true;
+export type SchemaVersion16 = "1.0.0";
+export type Synthetic16 = true;
 export type CaseId5 = string;
 export type ConsentStatus4 = "ACTIVE";
 export type ConsentVersion5 = "dev-notice-1";
 export type CorrelationId5 = string;
 export type Counterfactual = null;
-export type DevelopmentOnly15 = true;
+export type DevelopmentOnly17 = true;
 export type Evidence = string[];
 export type ExplainerVersion = "mock-1";
 export type Faithfulness = null;
@@ -220,37 +245,37 @@ export type IdempotencyKey3 = string;
 export type Method2 = "MOCK_FIXED_FIXTURE";
 export type Purpose5 = "synthetic-wellbeing-screening";
 export type ReliabilityStatus = "NOT_EVALUATED";
-export type SchemaVersion15 = "1.0.0";
+export type SchemaVersion17 = "1.0.0";
 export type ServiceName3 = "xai";
 export type ServiceVersion3 = "0.1.0";
 export type Stability = null;
-export type Synthetic15 = true;
-export type DevelopmentOnly16 = true;
-export type SchemaVersion16 = "1.0.0";
-export type Synthetic16 = true;
-export type DevelopmentOnly17 = true;
-export type SchemaVersion17 = "1.0.0";
-export type ServiceName4 = string;
-export type Status2 = "ok" | "unavailable";
 export type Synthetic17 = true;
-export type Action = "START_REVIEW" | "COMPLETE_REVIEW";
 export type DevelopmentOnly18 = true;
-export type IdempotencyKey4 = string;
 export type SchemaVersion18 = "1.0.0";
 export type Synthetic18 = true;
+export type DevelopmentOnly19 = true;
+export type SchemaVersion19 = "1.0.0";
+export type ServiceName4 = string;
+export type Status3 = "ok" | "unavailable";
+export type Synthetic19 = true;
+export type Action = "START_REVIEW" | "COMPLETE_REVIEW";
+export type DevelopmentOnly20 = true;
+export type IdempotencyKey4 = string;
+export type SchemaVersion20 = "1.0.0";
+export type Synthetic20 = true;
 export type CaseId6 = string;
 export type ConsentStatus5 = "ACTIVE";
 export type ConsentVersion6 = "dev-notice-1";
 export type CorrelationId6 = string;
-export type DevelopmentOnly19 = true;
+export type DevelopmentOnly21 = true;
 export type IdempotencyKey5 = string;
 export type Purpose6 = "synthetic-wellbeing-screening";
-export type SchemaVersion19 = "1.0.0";
-export type Synthetic19 = true;
+export type SchemaVersion21 = "1.0.0";
+export type Synthetic21 = true;
 export type CaseId7 = string | null;
 export type CorrelationId7 = string;
 export type CreatedAt3 = string;
-export type DevelopmentOnly20 = true;
+export type DevelopmentOnly22 = true;
 export type EventId1 = string;
 export type EventType1 =
   | "AUTH_LOGIN"
@@ -272,97 +297,97 @@ export type EventType1 =
   | "RETENTION"
   | "ASSIGNMENT";
 export type PolicyExpiresAt = string | null;
-export type SchemaVersion20 = "1.0.0";
+export type SchemaVersion22 = "1.0.0";
 export type ServiceName5 = "orchestrator";
 export type ServiceVersion4 = "0.1.0";
-export type Status3 = string;
-export type Synthetic20 = true;
+export type Status4 = string;
+export type Synthetic22 = true;
 export type TraceId = string | null;
-export type DevelopmentOnly21 = true;
+export type DevelopmentOnly23 = true;
 export type Password = string;
-export type SchemaVersion21 = "1.0.0";
-export type Synthetic21 = true;
+export type SchemaVersion23 = "1.0.0";
+export type Synthetic23 = true;
 export type Username = string;
 export type CaseId8 = string;
 export type ConsentStatus6 = "ACTIVE";
 export type ConsentVersion7 = "dev-notice-1";
 export type CorrelationId8 = string;
-export type DevelopmentOnly22 = true;
+export type DevelopmentOnly24 = true;
 export type IdempotencyKey6 = string;
 export type Purpose7 = "synthetic-wellbeing-screening";
-export type SchemaVersion22 = "1.0.0";
-export type Synthetic22 = true;
-export type Text2 = string;
+export type SchemaVersion24 = "1.0.0";
+export type Synthetic24 = true;
+export type Text3 = string;
 export type Action1 = "DELETE_DERIVED_EVIDENCE" | "EXPIRE_ACCESS";
 export type ActionId = string;
 export type CaseId9 = string;
 export type CreatedAt4 = string;
-export type DevelopmentOnly23 = true;
-export type SchemaVersion23 = "1.0.0";
-export type Status4 = "PENDING" | "COMPLETED" | "FAILED";
-export type Synthetic23 = true;
-export type DevelopmentOnly24 = true;
+export type DevelopmentOnly25 = true;
+export type SchemaVersion25 = "1.0.0";
+export type Status5 = "PENDING" | "COMPLETED" | "FAILED";
+export type Synthetic25 = true;
+export type DevelopmentOnly26 = true;
 export type HumanReviewRequired = true;
-export type SchemaVersion24 = "1.0.0";
-export type Synthetic24 = true;
+export type SchemaVersion26 = "1.0.0";
+export type Synthetic26 = true;
 export type TaskId = string;
 export type CaseId10 = string;
 export type ConsentStatus7 = "ACTIVE";
 export type ConsentVersion8 = "dev-notice-1";
 export type CorrelationId9 = string;
-export type DevelopmentOnly25 = true;
+export type DevelopmentOnly27 = true;
 export type IdempotencyKey7 = string;
 export type Purpose8 = "synthetic-wellbeing-screening";
-export type SchemaVersion25 = "1.0.0";
-export type Synthetic25 = true;
+export type SchemaVersion27 = "1.0.0";
+export type Synthetic27 = true;
 export type CorrelationId10 = string;
-export type DevelopmentOnly26 = true;
+export type DevelopmentOnly28 = true;
 export type Message = "Request could not be completed safely.";
-export type SchemaVersion26 = "1.0.0";
-export type Synthetic26 = true;
+export type SchemaVersion28 = "1.0.0";
+export type Synthetic28 = true;
 export type CorrelationId11 = string;
-export type DevelopmentOnly27 = true;
+export type DevelopmentOnly29 = true;
 export type ExplainerVersion1 = "mock-1";
 export type ModelDatasetVersion = "synthetic-fixtures-1";
-export type ModelVersion2 = "mock-1";
+export type ModelVersion3 = "mock-1";
 export type NlpServiceVersion = "0.1.0";
 export type PipelineVersion1 = "mock-1";
 export type PreprocessingDatasetVersion = "synthetic-fixtures-1";
 export type PreprocessingServiceVersion = "0.1.0";
-export type SchemaVersion27 = "1.0.0";
-export type Synthetic27 = true;
-export type XaiServiceVersion = "0.1.0";
-export type DevelopmentOnly28 = true;
-export type ExpiresAt1 = string;
-export type SchemaVersion28 = "1.0.0";
-export type SessionId = string;
-export type Synthetic28 = true;
-export type DevelopmentOnly29 = true;
-export type Mode = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY" | "SYNTHETIC_DEVELOPMENT_ONLY";
 export type SchemaVersion29 = "1.0.0";
+export type Synthetic29 = true;
+export type XaiServiceVersion = "0.1.0";
+export type DevelopmentOnly30 = true;
+export type ExpiresAt1 = string;
+export type SchemaVersion30 = "1.0.0";
+export type SessionId = string;
+export type Synthetic30 = true;
+export type DevelopmentOnly31 = true;
+export type Mode = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY" | "SYNTHETIC_DEVELOPMENT_ONLY";
+export type SchemaVersion31 = "1.0.0";
 export type ServiceName6 = string;
 export type ServiceVersion5 = "0.1.0";
-export type Synthetic29 = true;
-export type DevelopmentOnly30 = true;
+export type Synthetic31 = true;
+export type DevelopmentOnly32 = true;
 export type IdempotencyKey8 = string;
-export type SchemaVersion30 = "1.0.0";
-export type Synthetic30 = true;
+export type SchemaVersion32 = "1.0.0";
+export type Synthetic32 = true;
 export type Attempts = number;
 export type CaseId11 = string;
 export type CorrelationId12 = string;
 export type CreatedAt5 = string;
-export type DevelopmentOnly31 = true;
+export type DevelopmentOnly33 = true;
 export type IdempotencyKey9 = string;
-export type SchemaVersion31 = "1.0.0";
-export type Synthetic31 = true;
+export type SchemaVersion33 = "1.0.0";
+export type Synthetic33 = true;
 export type UpdatedAt1 = string;
 export type ConsentId1 = string;
-export type DevelopmentOnly32 = true;
+export type DevelopmentOnly34 = true;
 export type FixtureId = "english" | "sinhala" | "romanized" | "mixed";
 export type IdempotencyKey10 = string;
-export type SchemaVersion32 = "1.0.0";
-export type Synthetic32 = true;
-export type Text3 = string;
+export type SchemaVersion34 = "1.0.0";
+export type Synthetic34 = true;
+export type Text4 = string;
 
 export interface AccountResponse {
   account_id: AccountId;
@@ -424,15 +449,21 @@ export interface C4ExplanationResponse {
   contributions?: Contributions;
   development_only?: DevelopmentOnly7;
   method: Method1;
+  model_id?: ModelId1;
+  model_revision?: ModelRevision;
   model_version?: ModelVersion;
   output_value?: OutputValue;
+  predicted_class?: PredictedClass;
+  probabilities?: Probabilities;
   schema_version?: SchemaVersion7;
   status: Status1;
   status_message: StatusMessage1;
   synthetic?: Synthetic7;
   target_class?: TargetClass1;
   target_class_probability?: TargetClassProbability;
+  token_count?: TokenCount1;
   tokens?: Tokens;
+  truncated?: Truncated1;
   weights?: Weights;
 }
 export interface ComputationBounds {
@@ -447,32 +478,61 @@ export interface FeatureContribution {
   token: Token;
   weight: Weight;
 }
+export interface Probabilities {
+  [k: string]: number;
+}
+export interface C4PredictionRequest {
+  development_only?: DevelopmentOnly8;
+  language?: Language2;
+  schema_version?: SchemaVersion8;
+  synthetic?: Synthetic8;
+  text: Text2;
+}
+export interface C4PredictionResponse {
+  confidence: Confidence;
+  development_only?: DevelopmentOnly9;
+  max_sequence_length?: MaxSequenceLength;
+  model_id?: ModelId2;
+  model_revision?: ModelRevision1;
+  model_version?: ModelVersion1;
+  predicted_sentiment: PredictedSentiment;
+  probabilities: Probabilities1;
+  schema_version?: SchemaVersion9;
+  status?: Status2;
+  status_message?: StatusMessage2;
+  synthetic?: Synthetic9;
+  token_count: TokenCount2;
+  truncated: Truncated2;
+}
+export interface Probabilities1 {
+  [k: string]: number;
+}
 export interface ConsentDecision {
   consent_status: ConsentStatus;
   consent_version?: ConsentVersion;
-  development_only?: DevelopmentOnly8;
+  development_only?: DevelopmentOnly10;
   purpose?: Purpose;
-  schema_version?: SchemaVersion8;
-  synthetic?: Synthetic8;
+  schema_version?: SchemaVersion10;
+  synthetic?: Synthetic10;
 }
 export interface ConsentLifecycle {
   case?: PseudonymousCase | null;
   consent: ConsentRecord;
-  development_only?: DevelopmentOnly11;
+  development_only?: DevelopmentOnly13;
   disposal_reason?: DisposalReason;
   explicitly_withdrawn_at?: ExplicitlyWithdrawnAt;
-  schema_version?: SchemaVersion11;
-  synthetic?: Synthetic11;
+  schema_version?: SchemaVersion13;
+  synthetic?: Synthetic13;
 }
 export interface PseudonymousCase {
   case_id: CaseId1;
   correlation_id: CorrelationId1;
   created_at: CreatedAt1;
-  development_only?: DevelopmentOnly9;
+  development_only?: DevelopmentOnly11;
   error_code?: ErrorCode | null;
   processing_status: WorkflowState;
-  schema_version?: SchemaVersion9;
-  synthetic?: Synthetic9;
+  schema_version?: SchemaVersion11;
+  synthetic?: Synthetic11;
   updated_at: UpdatedAt;
 }
 export interface ConsentRecord {
@@ -480,44 +540,44 @@ export interface ConsentRecord {
   consent_status: ConsentState;
   consent_version: ConsentVersion1;
   created_at: CreatedAt2;
-  development_only?: DevelopmentOnly10;
+  development_only?: DevelopmentOnly12;
   expires_at: ExpiresAt;
   purpose: Purpose1;
-  schema_version?: SchemaVersion10;
-  synthetic?: Synthetic10;
+  schema_version?: SchemaVersion12;
+  synthetic?: Synthetic12;
 }
 export interface ExplanationRequest {
   case_id: CaseId2;
   consent_status?: ConsentStatus1;
   consent_version?: ConsentVersion2;
   correlation_id: CorrelationId2;
-  development_only?: DevelopmentOnly12;
+  development_only?: DevelopmentOnly14;
   idempotency_key: IdempotencyKey;
   inference: InferenceResponse;
   preprocessing: PreprocessResponse;
   purpose?: Purpose4;
-  schema_version?: SchemaVersion14;
-  synthetic?: Synthetic14;
+  schema_version?: SchemaVersion16;
+  synthetic?: Synthetic16;
 }
 export interface InferenceResponse {
   calibrated?: Calibrated;
   case_id: CaseId3;
-  confidence: Confidence;
+  confidence: Confidence1;
   consent_status?: ConsentStatus2;
   consent_version?: ConsentVersion3;
   correlation_id: CorrelationId3;
   dataset_version?: DatasetVersion;
-  development_only?: DevelopmentOnly13;
+  development_only?: DevelopmentOnly15;
   emotional_tone?: EmotionalTone;
   idempotency_key: IdempotencyKey1;
-  model_version?: ModelVersion1;
+  model_version?: ModelVersion2;
   purpose?: Purpose2;
   review_priority?: ReviewPriority;
-  schema_version?: SchemaVersion12;
+  schema_version?: SchemaVersion14;
   service_name?: ServiceName1;
   service_version?: ServiceVersion1;
   stress_language_signals: StressLanguageSignals;
-  synthetic?: Synthetic12;
+  synthetic?: Synthetic14;
   wellbeing_indicator?: WellbeingIndicator;
 }
 export interface PreprocessResponse {
@@ -527,16 +587,16 @@ export interface PreprocessResponse {
   consent_version?: ConsentVersion4;
   correlation_id: CorrelationId4;
   dataset_version?: DatasetVersion1;
-  development_only?: DevelopmentOnly14;
+  development_only?: DevelopmentOnly16;
   idempotency_key: IdempotencyKey2;
-  language: Language2;
+  language: Language3;
   normalized_text: NormalizedText;
   pipeline_version?: PipelineVersion;
   purpose?: Purpose3;
-  schema_version?: SchemaVersion13;
+  schema_version?: SchemaVersion15;
   service_name?: ServiceName2;
   service_version?: ServiceVersion2;
-  synthetic?: Synthetic13;
+  synthetic?: Synthetic15;
   token_offsets: TokenOffsets;
   tokens: Tokens1;
   transformations: Transformations;
@@ -547,7 +607,7 @@ export interface ExplanationResponse {
   consent_version?: ConsentVersion5;
   correlation_id: CorrelationId5;
   counterfactual?: Counterfactual;
-  development_only?: DevelopmentOnly15;
+  development_only?: DevelopmentOnly17;
   evidence: Evidence;
   explainer_version?: ExplainerVersion;
   faithfulness?: Faithfulness;
@@ -555,67 +615,67 @@ export interface ExplanationResponse {
   method?: Method2;
   purpose?: Purpose5;
   reliability_status?: ReliabilityStatus;
-  schema_version?: SchemaVersion15;
+  schema_version?: SchemaVersion17;
   service_name?: ServiceName3;
   service_version?: ServiceVersion3;
   stability?: Stability;
-  synthetic?: Synthetic15;
+  synthetic?: Synthetic17;
 }
 export interface FixturesResponse {
-  development_only?: DevelopmentOnly16;
+  development_only?: DevelopmentOnly18;
   fixtures: Fixtures;
-  schema_version?: SchemaVersion16;
-  synthetic?: Synthetic16;
+  schema_version?: SchemaVersion18;
+  synthetic?: Synthetic18;
 }
 export interface Fixtures {
   [k: string]: string;
 }
 export interface HealthResponse {
-  development_only?: DevelopmentOnly17;
-  schema_version?: SchemaVersion17;
+  development_only?: DevelopmentOnly19;
+  schema_version?: SchemaVersion19;
   service_name: ServiceName4;
-  status: Status2;
-  synthetic?: Synthetic17;
+  status: Status3;
+  synthetic?: Synthetic19;
 }
 export interface HumanReviewAction {
   action: Action;
-  development_only?: DevelopmentOnly18;
+  development_only?: DevelopmentOnly20;
   idempotency_key: IdempotencyKey4;
-  schema_version?: SchemaVersion18;
-  synthetic?: Synthetic18;
+  schema_version?: SchemaVersion20;
+  synthetic?: Synthetic20;
 }
 export interface InferenceRequest {
   case_id: CaseId6;
   consent_status?: ConsentStatus5;
   consent_version?: ConsentVersion6;
   correlation_id: CorrelationId6;
-  development_only?: DevelopmentOnly19;
+  development_only?: DevelopmentOnly21;
   idempotency_key: IdempotencyKey5;
   preprocessing: PreprocessResponse;
   purpose?: Purpose6;
-  schema_version?: SchemaVersion19;
-  synthetic?: Synthetic19;
+  schema_version?: SchemaVersion21;
+  synthetic?: Synthetic21;
 }
 export interface LifecycleAuditEvent {
   case_id?: CaseId7;
   correlation_id: CorrelationId7;
   created_at?: CreatedAt3;
-  development_only?: DevelopmentOnly20;
+  development_only?: DevelopmentOnly22;
   event_id?: EventId1;
   event_type: EventType1;
   policy_expires_at?: PolicyExpiresAt;
-  schema_version?: SchemaVersion20;
+  schema_version?: SchemaVersion22;
   service_name?: ServiceName5;
   service_version?: ServiceVersion4;
-  status: Status3;
-  synthetic?: Synthetic20;
+  status: Status4;
+  synthetic?: Synthetic22;
   trace_id?: TraceId;
 }
 export interface LoginRequest {
-  development_only?: DevelopmentOnly21;
+  development_only?: DevelopmentOnly23;
   password: Password;
-  schema_version?: SchemaVersion21;
-  synthetic?: Synthetic21;
+  schema_version?: SchemaVersion23;
+  synthetic?: Synthetic23;
   username: Username;
 }
 export interface PreprocessRequest {
@@ -623,32 +683,32 @@ export interface PreprocessRequest {
   consent_status?: ConsentStatus6;
   consent_version?: ConsentVersion7;
   correlation_id: CorrelationId8;
-  development_only?: DevelopmentOnly22;
+  development_only?: DevelopmentOnly24;
   idempotency_key: IdempotencyKey6;
   purpose?: Purpose7;
-  schema_version?: SchemaVersion22;
-  synthetic?: Synthetic22;
-  text: Text2;
+  schema_version?: SchemaVersion24;
+  synthetic?: Synthetic24;
+  text: Text3;
 }
 export interface RetentionAction {
   action: Action1;
   action_id: ActionId;
   case_id: CaseId9;
   created_at: CreatedAt4;
-  development_only?: DevelopmentOnly23;
-  schema_version?: SchemaVersion23;
-  status: Status4;
-  synthetic?: Synthetic23;
+  development_only?: DevelopmentOnly25;
+  schema_version?: SchemaVersion25;
+  status: Status5;
+  synthetic?: Synthetic25;
 }
 export interface ReviewTask {
   case: PseudonymousCase;
-  development_only?: DevelopmentOnly24;
+  development_only?: DevelopmentOnly26;
   explanation: ExplanationResponse;
   human_review_required?: HumanReviewRequired;
   inference: InferenceResponse;
   preprocessing?: PreprocessResponse | null;
-  schema_version?: SchemaVersion24;
-  synthetic?: Synthetic24;
+  schema_version?: SchemaVersion26;
+  synthetic?: Synthetic26;
   task_id: TaskId;
 }
 export interface ServiceContext {
@@ -656,75 +716,75 @@ export interface ServiceContext {
   consent_status?: ConsentStatus7;
   consent_version?: ConsentVersion8;
   correlation_id: CorrelationId9;
-  development_only?: DevelopmentOnly25;
+  development_only?: DevelopmentOnly27;
   idempotency_key: IdempotencyKey7;
   purpose?: Purpose8;
-  schema_version?: SchemaVersion25;
-  synthetic?: Synthetic25;
+  schema_version?: SchemaVersion27;
+  synthetic?: Synthetic27;
 }
 export interface ServiceError {
   correlation_id: CorrelationId10;
-  development_only?: DevelopmentOnly26;
+  development_only?: DevelopmentOnly28;
   error_code: ErrorCode;
   message?: Message;
-  schema_version?: SchemaVersion26;
-  synthetic?: Synthetic26;
+  schema_version?: SchemaVersion28;
+  synthetic?: Synthetic28;
 }
 export interface ServiceProvenance {
   correlation_id: CorrelationId11;
-  development_only?: DevelopmentOnly27;
+  development_only?: DevelopmentOnly29;
   explainer_version: ExplainerVersion1;
   model_dataset_version: ModelDatasetVersion;
-  model_version: ModelVersion2;
+  model_version: ModelVersion3;
   nlp_service_version: NlpServiceVersion;
   pipeline_version: PipelineVersion1;
   preprocessing_dataset_version: PreprocessingDatasetVersion;
   preprocessing_service_version: PreprocessingServiceVersion;
-  schema_version?: SchemaVersion27;
-  synthetic?: Synthetic27;
+  schema_version?: SchemaVersion29;
+  synthetic?: Synthetic29;
   xai_service_version: XaiServiceVersion;
 }
 export interface SubmissionSession {
-  development_only?: DevelopmentOnly28;
+  development_only?: DevelopmentOnly30;
   expires_at: ExpiresAt1;
   role: Role;
-  schema_version?: SchemaVersion28;
+  schema_version?: SchemaVersion30;
   session_id: SessionId;
-  synthetic?: Synthetic28;
+  synthetic?: Synthetic30;
 }
 export interface VersionResponse {
-  development_only?: DevelopmentOnly29;
+  development_only?: DevelopmentOnly31;
   mode: Mode;
-  schema_version?: SchemaVersion29;
+  schema_version?: SchemaVersion31;
   service_name: ServiceName6;
   service_version?: ServiceVersion5;
-  synthetic?: Synthetic29;
+  synthetic?: Synthetic31;
 }
 export interface WithdrawalRequest {
-  development_only?: DevelopmentOnly30;
+  development_only?: DevelopmentOnly32;
   idempotency_key: IdempotencyKey8;
-  schema_version?: SchemaVersion30;
-  synthetic?: Synthetic30;
+  schema_version?: SchemaVersion32;
+  synthetic?: Synthetic32;
 }
 export interface WorkflowExecution {
   attempts?: Attempts;
   case_id: CaseId11;
   correlation_id: CorrelationId12;
   created_at: CreatedAt5;
-  development_only?: DevelopmentOnly31;
+  development_only?: DevelopmentOnly33;
   error_code?: ErrorCode | null;
   idempotency_key: IdempotencyKey9;
   processing_status: WorkflowState;
-  schema_version?: SchemaVersion31;
-  synthetic?: Synthetic31;
+  schema_version?: SchemaVersion33;
+  synthetic?: Synthetic33;
   updated_at: UpdatedAt1;
 }
 export interface WorkflowRequest {
   consent_id: ConsentId1;
-  development_only?: DevelopmentOnly32;
+  development_only?: DevelopmentOnly34;
   fixture_id: FixtureId;
   idempotency_key: IdempotencyKey10;
-  schema_version?: SchemaVersion32;
-  synthetic?: Synthetic32;
-  text: Text3;
+  schema_version?: SchemaVersion34;
+  synthetic?: Synthetic34;
+  text: Text4;
 }

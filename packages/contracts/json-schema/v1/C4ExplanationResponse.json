@@ -98,6 +98,30 @@
       "title": "Method",
       "type": "string"
     },
+    "model_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
     "model_version": {
       "anyOf": [
         {
@@ -121,6 +145,26 @@
       ],
       "default": null,
       "title": "Output Value"
+    },
+    "predicted_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Predicted Class"
+    },
+    "probabilities": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "default": {},
+      "title": "Probabilities",
+      "type": "object"
     },
     "schema_version": {
       "const": "1.0.0",
@@ -170,6 +214,18 @@
       "default": null,
       "title": "Target Class Probability"
     },
+    "token_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Token Count"
+    },
     "tokens": {
       "default": [],
       "items": {
@@ -177,6 +233,18 @@
       },
       "title": "Tokens",
       "type": "array"
+    },
+    "truncated": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Truncated"
     },
     "weights": {
       "default": [],

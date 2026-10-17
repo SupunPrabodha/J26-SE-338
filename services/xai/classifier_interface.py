@@ -26,6 +26,16 @@ class BatchPredictionClassifier(Protocol):
         """Version identifier of the classifier."""
         ...
 
+    @property
+    def model_id(self) -> str:
+        """Identifier of the model checkpoint."""
+        ...
+
+    @property
+    def model_revision(self) -> str | None:
+        """Revision or commit hash of the model checkpoint."""
+        ...
+
 
 _CURRENT_CLASSIFIER: BatchPredictionClassifier | None = None
 

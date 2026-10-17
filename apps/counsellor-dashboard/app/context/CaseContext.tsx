@@ -23,6 +23,8 @@ export interface CaseContextType {
   setError: (err: string) => void;
   inputText: string;
   setInputText: (text: string) => void;
+  selectedSentimentClass: "Negative" | "Neutral" | "Positive";
+  setSelectedSentimentClass: (cls: "Negative" | "Neutral" | "Positive") => void;
 }
 
 const CaseContext = createContext<CaseContextType>({
@@ -37,6 +39,8 @@ const CaseContext = createContext<CaseContextType>({
   setError: () => {},
   inputText: "",
   setInputText: () => {},
+  selectedSentimentClass: "Negative",
+  setSelectedSentimentClass: () => {},
 });
 
 export function CaseProvider({ children }: { children: ReactNode }) {
@@ -46,6 +50,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [inputText, setInputText] = useState("");
+  const [selectedSentimentClass, setSelectedSentimentClass] = useState<"Negative" | "Neutral" | "Positive">("Negative");
 
   const loadTasks = useCallback(async () => {
     try {
@@ -117,6 +122,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setError,
         inputText,
         setInputText,
+        selectedSentimentClass,
+        setSelectedSentimentClass,
       }}
     >
       {children}

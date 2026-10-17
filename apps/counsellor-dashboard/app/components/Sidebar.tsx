@@ -171,17 +171,21 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
 
       {/* Model Card */}
       <div className="lime-sidebar-model-card">
-        <div className="lime-model-label">Model</div>
-        <div className="lime-model-name" style={{ fontSize: "12px", fontWeight: 700, color: "#ffffff" }}>
-          XLM-RoBERTa
+        <div className="lime-model-label" style={{ fontSize: "10px", lineHeight: "1.25", marginBottom: "4px" }}>
+          Temporary sentiment model — C4 development
         </div>
-        <div className="lime-model-sub">(Member 3 Model)</div>
+        <div className="lime-model-name" style={{ fontSize: "11px", fontWeight: 700, color: "#ffffff", wordBreak: "break-all" }}>
+          twitter-xlm-roberta-base-sentiment
+        </div>
+        <div className="lime-model-sub" style={{ fontSize: "10px", color: "#94a3b8" }}>
+          (cardiffnlp checkpoint)
+        </div>
         <div className="lime-model-status-badge">
           <span
             className="lime-status-indicator"
             style={{ backgroundColor: isClassifierConnected ? "#10b981" : "#eab308" }}
           ></span>
-          <span>{isClassifierConnected ? "Connected" : "Awaiting C3 classifier"}</span>
+          <span>{isClassifierConnected ? "Connected" : "Loading / Disconnected"}</span>
         </div>
       </div>
     </aside>

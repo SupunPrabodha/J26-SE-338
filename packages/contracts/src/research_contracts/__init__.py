@@ -359,7 +359,13 @@ class C4ExplanationResponse(Contract):
     method: Literal["LIME", "SHAP"]
     status: Literal["READY", "AWAITING_CLASSIFIER_CONNECTION"]
     status_message: str
+    model_id: str | None = None
     model_version: str | None = None
+    model_revision: str | None = None
+    predicted_class: str | None = None
+    probabilities: dict[str, float] = {}
+    token_count: int | None = None
+    truncated: bool | None = None
     target_class: str | None = None
     target_class_probability: float | None = None
     base_value: float | None = None
@@ -368,4 +374,26 @@ class C4ExplanationResponse(Contract):
     tokens: list[str] = []
     weights: list[float] = []
     computation_bounds: dict[str, int] = {}
+
+
+class C4PredictionRequest(Contract):
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+
+
+class C4PredictionResponse(Contract):
+    model_id: str = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
+    model_version: str = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
+    model_revision: str | None = None
+    predicted_sentiment: Literal["Negative", "Neutral", "Positive"]
+    confidence: float
+    probabilities: dict[str, float]
+    token_count: int
+    truncated: bool
+    max_sequence_length: int = 512
+    status: Literal["READY", "FAILED"] = "READY"
+    status_message: str = "Prediction completed successfully."
+
 

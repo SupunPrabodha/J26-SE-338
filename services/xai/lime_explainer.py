@@ -35,15 +35,24 @@ def explain_with_lime(
     if not labels:
         raise ValueError("Classifier must define non-empty class labels.")
 
-    # Determine probabilities for target class selection
+    # Determine probabilities for all classes using the bounded batch classifier
     probs = classifier.predict_proba([text])[0]
+    prob_dict = {labels[i]: float(probs[i]) for i in range(len(labels))}
+    predicted_idx = int(probs.argmax())
+    predicted_class = labels[predicted_idx]
 
-    if target_class and target_class in labels:
-        target_idx = labels.index(target_class)
-    else:
-        # Explain top-predicted class
-        target_idx = int(probs.argmax())
-        target_class = labels[target_idx]
+    # Resolve target_class (case-insensitive lookup across checkpoint labels)
+    target_idx = None
+    if target_class:
+        for idx, lbl in enumerate(labels):
+            if lbl.lower() == target_class.lower():
+                target_idx = idx
+                target_class = lbl
+                break
+
+    if target_idx is None:
+        target_idx = predicted_idx
+        target_class = predicted_class
 
     target_prob = float(probs[target_idx])
 
@@ -81,11 +90,28 @@ def explain_with_lime(
             )
         )
 
+    # Compute token count and truncation metadata if tokenizer is available
+    token_count = len(text.split())
+    truncated = False
+    if hasattr(classifier, "tokenizer"):
+        token_ids = classifier.tokenizer.encode(text, add_special_tokens=True)
+        token_count = len(token_ids)
+        truncated = token_count > 512
+
+    model_id = getattr(classifier, "model_id", classifier.model_version)
+    model_rev = getattr(classifier, "model_revision", None)
+
     return C4ExplanationResponse(
         method="LIME",
         status="READY",
         status_message="LIME local explanation generated successfully.",
+        model_id=model_id,
         model_version=classifier.model_version,
+        model_revision=model_rev,
+        predicted_class=predicted_class,
+        probabilities=prob_dict,
+        token_count=token_count,
+        truncated=truncated,
         target_class=target_class,
         target_class_probability=target_prob,
         base_value=float(exp.intercept[target_idx]) if hasattr(exp, "intercept") and target_idx in exp.intercept else None,
