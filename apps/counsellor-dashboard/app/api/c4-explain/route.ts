@@ -25,6 +25,8 @@ export async function POST(request: Request) {
       process.env.XAI_URL,
       process.env.XAI_INTERNAL_URL,
       "http://xai:8000/internal/v1/dev/explain",
+      "http://host.docker.internal:8002/internal/v1/dev/explain",
+      "http://127.0.0.1:8002/internal/v1/dev/explain",
       "http://127.0.0.1:8000/internal/v1/dev/explain",
     ].filter(Boolean) as string[];
 

@@ -136,9 +136,10 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
         {/* Section: DATA & SETTINGS */}
         <div className="lime-nav-heading">DATA & SETTINGS</div>
         <Link
-          href="/input"
-          className={`lime-nav-btn ${pathname === "/input" ? "lime-nav-btn-active active" : ""}`}
-          aria-current={pathname === "/input" ? "page" : undefined}
+          href="/c4-dev-input"
+          className={`lime-nav-btn ${pathname === "/c4-dev-input" || pathname === "/input" ? "lime-nav-btn-active active" : ""}`}
+          aria-current={pathname === "/c4-dev-input" || pathname === "/input" ? "page" : undefined}
+          title="C4 development — fictional text only"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -147,7 +148,7 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
             <line x1="16" y1="17" x2="8" y2="17" />
             <polyline points="10 9 9 9 8 9" />
           </svg>
-          <span>Input</span>
+          <span>Development Input</span>
         </Link>
 
         <div

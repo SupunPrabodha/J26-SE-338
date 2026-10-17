@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/counsellor-dashboard/package.json apps/counsellor-dashboard/package.json
 COPY packages/typescript-common/package.json packages/typescript-common/package.json
-RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --fetch-timeout=60000
+RUN npm ci --no-audit --no-fund --fetch-timeout=60000
 COPY packages/typescript-common packages/typescript-common
 COPY apps apps
 ARG APP

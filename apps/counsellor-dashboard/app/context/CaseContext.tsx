@@ -9,7 +9,19 @@ import {
   type ReactNode,
 } from "react";
 import { api, ApiError } from "@j26/common/api";
-import type { AccountResponse, ReviewTask } from "@j26/common/contracts";
+import type { AccountResponse, ReviewTask, C4PredictionResponse } from "@j26/common/contracts";
+
+export interface DevelopmentInputSnapshot {
+  readonly id: string;
+  readonly text: string;
+  readonly language: string;
+  readonly prediction: C4PredictionResponse;
+  readonly targetClass: "Negative" | "Neutral" | "Positive";
+  readonly modelVersion?: string;
+  readonly submittedAt: number;
+}
+
+export type DevelopmentInputData = DevelopmentInputSnapshot;
 
 export interface CaseContextType {
   authorized: boolean;
@@ -25,6 +37,8 @@ export interface CaseContextType {
   setInputText: (text: string) => void;
   selectedSentimentClass: "Negative" | "Neutral" | "Positive";
   setSelectedSentimentClass: (cls: "Negative" | "Neutral" | "Positive") => void;
+  devInput: DevelopmentInputSnapshot | null;
+  setDevInput: (data: DevelopmentInputSnapshot | null) => void;
 }
 
 const CaseContext = createContext<CaseContextType>({
@@ -41,6 +55,8 @@ const CaseContext = createContext<CaseContextType>({
   setInputText: () => {},
   selectedSentimentClass: "Negative",
   setSelectedSentimentClass: () => {},
+  devInput: null,
+  setDevInput: () => {},
 });
 
 export function CaseProvider({ children }: { children: ReactNode }) {
@@ -51,6 +67,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
   const [inputText, setInputText] = useState("");
   const [selectedSentimentClass, setSelectedSentimentClass] = useState<"Negative" | "Neutral" | "Positive">("Negative");
+  const [devInput, setDevInput] = useState<DevelopmentInputSnapshot | null>(null);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -108,6 +125,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     tasks.find((t) => t.task_id === selectedTaskId) ||
     (tasks.length > 0 ? tasks[0] : null);
 
+  const updateSelectedSentimentClass = useCallback(
+    (cls: "Negative" | "Neutral" | "Positive") => {
+      setSelectedSentimentClass(cls);
+      setDevInput((prev) => (prev ? Object.freeze({ ...prev, targetClass: cls }) : null));
+    },
+    []
+  );
+
   return (
     <CaseContext.Provider
       value={{
@@ -123,7 +148,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         inputText,
         setInputText,
         selectedSentimentClass,
-        setSelectedSentimentClass,
+        setSelectedSentimentClass: updateSelectedSentimentClass,
+        devInput,
+        setDevInput,
       }}
     >
       {children}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
@@ -13,6 +14,7 @@ export default function ShapPage() {
     selectTask,
     selectedSentimentClass,
     setSelectedSentimentClass,
+    devInput,
   } = useReviewCase();
 
   const [isBusy, setIsBusy] = useState(false);
@@ -26,23 +28,31 @@ export default function ShapPage() {
   // Ignore late responses across case changes
   const activeRequestRef = useRef(0);
 
-  // Clear previous results whenever the selected case or target class changes
+  const snapshot = devInput && devInput.text ? devInput : null;
+  const submissionText = snapshot ? snapshot.text : null;
+  const caseLanguage = snapshot ? (snapshot.language || "English") : "English";
+  const targetClass = selectedSentimentClass || snapshot?.targetClass || "Negative";
+
+  // Clear previous results whenever the submitted text or target class changes
   useEffect(() => {
     activeRequestRef.current += 1;
     setExplanation(null);
     setError("");
     setStatusMessage("");
-  }, [selectedTaskId, selectedSentimentClass]);
+  }, [selectedTaskId, selectedSentimentClass, submissionText]);
 
-  const submissionText = selectedTask?.preprocessing?.anonymized_text ?? null;
-  const caseLanguage = selectedTask?.preprocessing?.language ?? "English (Code-mixed)";
-  const targetClass = selectedSentimentClass;
-
-  // Check classifier status and fetch predictions whenever case text changes
+  // Set prediction from snapshot or fetch if text is present
   useEffect(() => {
     let mounted = true;
     if (!submissionText) {
       setPrediction(null);
+      setIsClassifierConnected(false);
+      return;
+    }
+
+    if (snapshot && snapshot.prediction) {
+      setPrediction(snapshot.prediction);
+      setIsClassifierConnected(true);
       return;
     }
 
@@ -63,9 +73,6 @@ export default function ShapPage() {
           const data = (await res.json()) as C4PredictionResponse;
           setPrediction(data);
           setIsClassifierConnected(true);
-          if (data.predicted_sentiment) {
-            setSelectedSentimentClass(data.predicted_sentiment);
-          }
         } else {
           const errJson = await res.json().catch(() => ({}));
           setError(errJson.error || `Prediction check failed (${res.status})`);
@@ -86,11 +93,11 @@ export default function ShapPage() {
     return () => {
       mounted = false;
     };
-  }, [submissionText, caseLanguage, setSelectedSentimentClass]);
+  }, [submissionText, caseLanguage, snapshot]);
 
   async function handleRunShap() {
     if (!submissionText) {
-      setError("Cannot compute explanations: submission text is unavailable in the current ReviewTask contract.");
+      setError("Submit text first on the Development Input page before computing explanations.");
       return;
     }
 
@@ -217,8 +224,14 @@ export default function ShapPage() {
           </div>
 
           <div className="shap-header-actions">
-            {/* Case selector dropdown */}
-            {tasks.length > 1 ? (
+            {snapshot ? (
+              <div className="shap-header-pill" title="Active development submission">
+                <span style={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>Source:</span>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#4f46e5" }}>
+                  Development Input
+                </span>
+              </div>
+            ) : tasks.length > 1 ? (
               <div className="shap-header-pill" title="Assigned review cases">
                 <span style={{ fontSize: "11px", fontWeight: 600, color: "#64748b" }}>Case:</span>
                 <select
@@ -349,13 +362,30 @@ export default function ShapPage() {
                 {submissionText ? (
                   <p className="shap-input-line-1">{submissionText}</p>
                 ) : (
-                  <div>
-                    <p className="shap-input-line-1" style={{ color: "#64748b", fontStyle: "italic" }}>
-                      Submission text unavailable
+                  <div role="status" style={{ padding: "16px 8px", textAlign: "center" }}>
+                    <p style={{ fontSize: "14px", fontWeight: 700, color: "#1e293b", margin: "0 0 6px" }}>
+                      Submit text first
                     </p>
-                    <p className="shap-input-line-2" style={{ color: "#94a3b8", fontSize: "11px", marginTop: "4px" }}>
-                      Current C1 ReviewTask contract provides inference &amp; explanation receipts, but excludes raw/preprocessed submission text.
+                    <p className="shap-input-line-2" style={{ color: "#64748b", fontSize: "11.5px", margin: "0 0 12px", lineHeight: 1.5 }}>
+                      No reflection submission is active in shared context. Enter and analyse fictional reflection text on the Development Input page before generating explanations.
                     </p>
+                    <Link
+                      href="/c4-dev-input"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "8px 14px",
+                        borderRadius: "6px",
+                        background: "#6366f1",
+                        color: "#ffffff",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        textDecoration: "none",
+                      }}
+                    >
+                      ← Go to Development Input
+                    </Link>
                   </div>
                 )}
               </div>
@@ -374,6 +404,7 @@ export default function ShapPage() {
               <div style={{ marginTop: "12px", borderTop: "1px solid #f1f5f9", paddingTop: "10px" }}>
                 <button
                   type="button"
+                  aria-label="Compute SHAP Attributions"
                   onClick={handleRunShap}
                   disabled={!canCompute || isBusy}
                   style={{
@@ -393,11 +424,11 @@ export default function ShapPage() {
                     transition: "all 0.15s ease",
                   }}
                 >
-                  {isBusy ? "Computing SHAP..." : `Compute SHAP for "${targetClass}"`}
+                  {isBusy ? "Computing SHAP..." : !submissionText ? "Submit text first" : `Compute SHAP for "${targetClass}"`}
                 </button>
                 {!submissionText && (
                   <p style={{ fontSize: "10px", color: "#64748b", marginTop: "5px", textAlign: "center" }}>
-                    Explanation action disabled: submission text is unavailable in the current ReviewTask contract.
+                    Submit text on Development Input to enable SHAP explanations.
                   </p>
                 )}
               </div>
@@ -470,10 +501,10 @@ export default function ShapPage() {
               ) : (
                 <div style={{ padding: "18px 0", textAlign: "center" }}>
                   <div className="shap-stress-label" style={{ fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>
-                    No Prediction Available
+                    Submit text first
                   </div>
                   <p style={{ fontSize: "11px", color: "#94a3b8", margin: 0 }}>
-                    Select a valid case to load model predictions.
+                    Predictions appear after analysing text on Development Input.
                   </p>
                 </div>
               )}
@@ -587,8 +618,14 @@ export default function ShapPage() {
                 </>
               ) : (
                 <div style={{ textAlign: "center", padding: "26px 10px", color: "#94a3b8", fontSize: "11.5px" }}>
-                  <p style={{ fontWeight: 600, color: "#64748b", margin: "0 0 4px" }}>No Summary Available</p>
-                  <p style={{ margin: 0 }}>Compute SHAP explanation to inspect attribution breakdown.</p>
+                  <p style={{ fontWeight: 600, color: "#64748b", margin: "0 0 4px" }}>
+                    {!submissionText ? "Submit text first" : "No Summary Available"}
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    {!submissionText
+                      ? "Submit reflection text on Development Input to compute SHAP summary."
+                      : "Compute SHAP explanation to inspect attribution breakdown."}
+                  </p>
                 </div>
               )}
             </div>
@@ -691,10 +728,12 @@ export default function ShapPage() {
                   }}
                 >
                   <p style={{ fontWeight: 600, color: "#64748b", marginBottom: "4px" }}>
-                    No Attribution Values Available
+                    {!submissionText ? "Submit text first" : "No Attribution Values Available"}
                   </p>
                   <p style={{ margin: 0, fontSize: "11px" }}>
-                    Compute SHAP additive values to inspect feature attributions for {targetClass}.
+                    {!submissionText
+                      ? "Submit text first on Development Input before inspecting token attributions."
+                      : `Compute SHAP additive values to inspect feature attributions for ${targetClass}.`}
                   </p>
                 </div>
               )}
@@ -754,10 +793,12 @@ export default function ShapPage() {
                   ) : (
                     <div style={{ textAlign: "center", padding: "26px 12px", color: "#94a3b8", fontSize: "11px" }}>
                       <p style={{ fontWeight: 600, color: "#64748b", marginBottom: "4px" }}>
-                        No SHAP Waterfall / Force Plot Available
+                        {!submissionText ? "Submit text first" : "No SHAP Waterfall / Force Plot Available"}
                       </p>
                       <p style={{ margin: 0 }}>
-                        Local waterfall / force decomposition will render upon SHAP calculation.
+                        {!submissionText
+                          ? "Submit reflection text on Development Input to enable local force decomposition."
+                          : "Local waterfall / force decomposition will render upon SHAP calculation."}
                       </p>
                     </div>
                   )}
