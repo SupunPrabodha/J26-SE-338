@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
+import { SignedBarChart } from "../components/SignedBarChart";
+import { WaterfallChart } from "../components/WaterfallChart";
+import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
 
 export default function ShapPage() {
@@ -475,19 +478,8 @@ export default function ShapPage() {
                     </div>
                   </div>
 
-                  {/* Checkpoint Probabilities Distribution */}
-                  <div style={{ marginTop: "10px", marginBottom: "8px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10.5px", marginBottom: "4px", fontWeight: 600 }}>
-                      <span style={{ color: "#ef4444" }}>Negative: {Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%</span>
-                      <span style={{ color: "#3b82f6" }}>Neutral: {Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%</span>
-                      <span style={{ color: "#16a34a" }}>Positive: {Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%</span>
-                    </div>
-                    <div style={{ height: "8px", width: "100%", background: "#f1f5f9", borderRadius: "999px", overflow: "hidden", display: "flex" }}>
-                      <div style={{ width: `${Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%`, background: "#ef4444" }} title={`Negative: ${(prediction.probabilities["Negative"] ?? 0).toFixed(4)}`}></div>
-                      <div style={{ width: `${Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%`, background: "#93c5fd" }} title={`Neutral: ${(prediction.probabilities["Neutral"] ?? 0).toFixed(4)}`}></div>
-                      <div style={{ width: `${Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%`, background: "#16a34a" }} title={`Positive: ${(prediction.probabilities["Positive"] ?? 0).toFixed(4)}`}></div>
-                    </div>
-                  </div>
+                  {/* Checkpoint Probabilities Distribution (Recharts) */}
+                  <SentimentProbabilityChart probabilities={prediction.probabilities} />
 
                   <div style={{ fontSize: "10px", color: "#64748b", marginTop: "8px", borderTop: "1px solid #f1f5f9", paddingTop: "6px", display: "flex", justifyContent: "space-between" }}>
                     <span>Tokens: <strong>{prediction.token_count}</strong> {prediction.truncated ? "(Truncated)" : "(≤512)"}</span>
@@ -655,6 +647,10 @@ export default function ShapPage() {
 
               {hasResults ? (
                 <>
+                  <div style={{ marginBottom: "10px" }}>
+                    <SignedBarChart contributions={contributions} method="SHAP" targetClass={targetClass} />
+                  </div>
+
                   <div className="shap-features-table-wrap">
                     <table className="shap-features-table">
                       <thead>
@@ -667,10 +663,6 @@ export default function ShapPage() {
                       <tbody>
                         {contributions.map((item, i) => {
                           const isPositive = item.weight >= 0;
-                          const barPercent =
-                            maxAbsWeight > 0
-                              ? Math.round((Math.abs(item.weight) / maxAbsWeight) * 100)
-                              : 0;
                           const formattedWeight =
                             (item.weight >= 0 ? "+" : "") + item.weight.toFixed(4);
                           return (
@@ -683,19 +675,8 @@ export default function ShapPage() {
                               >
                                 {formattedWeight}
                               </td>
-                              <td className="shap-feat-bar-col">
-                                {barPercent > 0 && (
-                                  <div className="shap-feat-bar-track">
-                                    <div
-                                      className={
-                                        isPositive
-                                          ? "shap-feat-bar-fill-red"
-                                          : "shap-feat-bar-fill-green"
-                                      }
-                                      style={{ width: `${barPercent}%` }}
-                                    ></div>
-                                  </div>
-                                )}
+                              <td style={{ fontSize: "11px", fontWeight: 600, color: isPositive ? "#dc2626" : "#15803d" }}>
+                                {isPositive ? `Supports ${targetClass}` : `Opposes ${targetClass}`}
                               </td>
                             </tr>
                           );
@@ -760,48 +741,14 @@ export default function ShapPage() {
             <div className="shap-right-column-container">
               {/* Top Sub-row */}
               <div className="shap-top-sub-row">
-                {/* Card: SHAP Force Plot */}
+                {/* Card: SHAP Waterfall Plot (Plotly) */}
                 <div className="shap-card shap-card-force-plot">
-                  <div className="shap-card-header" style={{ marginBottom: 6 }}>
-                    <div className="shap-card-title-group">
-                      <h3 className="shap-card-title">SHAP Force Plot ({targetClass})</h3>
-                      <span className="shap-info-icon-small" title="Forces pushing output higher or lower">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="12" y1="16" x2="12" y2="12" />
-                          <line x1="12" y1="8" x2="12.01" y2="8" />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-
-                  {hasResults ? (
-                    <>
-                      <div className="shap-force-header-stats">
-                        <span>Base value (Expected): <strong>{baseValue.toFixed(4)}</strong></span>
-                        <span>Model output: <strong>{outputValue.toFixed(4)}</strong></span>
-                      </div>
-
-                      <div className="shap-force-svg-wrap">
-                        {renderShapForceSvg(baseValue, outputValue, contributions, targetClass)}
-                      </div>
-
-                      <div className="shap-force-footer-note">
-                        <span style={{ color: "#ef4444" }}>Red</span> pushes towards {targetClass}. <span style={{ color: "#15803d" }}>Green</span> opposes.
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{ textAlign: "center", padding: "26px 12px", color: "#94a3b8", fontSize: "11px" }}>
-                      <p style={{ fontWeight: 600, color: "#64748b", marginBottom: "4px" }}>
-                        {!submissionText ? "Submit text first" : "No SHAP Waterfall / Force Plot Available"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        {!submissionText
-                          ? "Submit reflection text on Development Input to enable local force decomposition."
-                          : "Local waterfall / force decomposition will render upon SHAP calculation."}
-                      </p>
-                    </div>
-                  )}
+                  <WaterfallChart
+                    baseValue={explanation?.base_value ?? (hasResults ? baseValue : null)}
+                    outputValue={explanation?.output_value ?? (hasResults ? outputValue : null)}
+                    contributions={contributions}
+                    targetClass={targetClass}
+                  />
                 </div>
 
                 {/* Card: Prediction Probabilities & SHAP Info */}
@@ -812,49 +759,11 @@ export default function ShapPage() {
                     </div>
                   </div>
 
-                  {/* Prob bars */}
-                  <div className="shap-prob-bars-wrap">
-                    <div className="shap-prob-row">
-                      <span className="shap-prob-lbl">{targetClass}</span>
-                      <div className="shap-prob-bar-track">
-                        <div
-                          className="shap-prob-fill-red"
-                          style={{
-                            width: `${
-                              explanation?.target_class_probability != null
-                                ? Math.round(explanation.target_class_probability * 100)
-                                : 0
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="shap-prob-val">
-                        {explanation?.target_class_probability != null
-                          ? explanation.target_class_probability.toFixed(2)
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="shap-prob-row">
-                      <span className="shap-prob-lbl">Opposing</span>
-                      <div className="shap-prob-bar-track">
-                        <div
-                          className="shap-prob-fill-green"
-                          style={{
-                            width: `${
-                              explanation?.target_class_probability != null
-                                ? Math.round((1 - explanation.target_class_probability) * 100)
-                                : 0
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="shap-prob-val">
-                        {explanation?.target_class_probability != null
-                          ? (1 - explanation.target_class_probability).toFixed(2)
-                          : "—"}
-                      </span>
-                    </div>
-                  </div>
+                  {/* Prob bars (Recharts) */}
+                  <LocalProbabilityChart
+                    targetClass={targetClass}
+                    targetProbability={explanation?.target_class_probability}
+                  />
 
                   {/* SHAP Explanation Info Box */}
                   <div className="shap-info-box-compact">
@@ -1009,91 +918,5 @@ export default function ShapPage() {
         </div>
       </main>
     </div>
-  );
-}
-
-function renderShapForceSvg(
-  baseValue: number,
-  outputValue: number,
-  contributions: FeatureContribution[],
-  targetClass: string
-) {
-  const topPos = contributions.filter((c) => c.weight > 0).slice(0, 4);
-  const topNeg = contributions.filter((c) => c.weight < 0).slice(0, 4);
-
-  const posSum = topPos.reduce((sum, c) => sum + c.weight, 0);
-  const negSum = topNeg.reduce((sum, c) => sum + Math.abs(c.weight), 0);
-  const total = posSum + negSum || 1;
-
-  const width = 480;
-  const height = 80;
-  const center = Math.round(width * 0.48);
-
-  const posWidth = Math.min(200, Math.max(30, Math.round((posSum / total) * 180)));
-  const negWidth = Math.min(200, Math.max(30, Math.round((negSum / total) * 180)));
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto" }}>
-      {/* Background track */}
-      <rect x="10" y="26" width={width - 20} height="28" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-
-      {/* Negative blocks (opposing target class) */}
-      <rect
-        x={center - negWidth}
-        y="28"
-        width={negWidth}
-        height="24"
-        fill="#16a34a"
-        rx="4"
-        opacity="0.85"
-      />
-      {topNeg.map((c, i) => (
-        <text
-          key={i}
-          x={center - negWidth + 8 + i * 40}
-          y="44"
-          fill="#ffffff"
-          fontSize="10"
-          fontWeight="600"
-        >
-          {c.token.length > 7 ? c.token.slice(0, 6) + "…" : c.token}
-        </text>
-      ))}
-
-      {/* Positive blocks (supporting target class) */}
-      <rect
-        x={center}
-        y="28"
-        width={posWidth}
-        height="24"
-        fill="#ef4444"
-        rx="4"
-        opacity="0.85"
-      />
-      {topPos.map((c, i) => (
-        <text
-          key={i}
-          x={center + 8 + i * 42}
-          y="44"
-          fill="#ffffff"
-          fontSize="10"
-          fontWeight="600"
-        >
-          {c.token.length > 7 ? c.token.slice(0, 6) + "…" : c.token}
-        </text>
-      ))}
-
-      {/* Center divider pin */}
-      <line x1={center} y1="20" x2={center} y2="60" stroke="#0f172a" strokeWidth="2.5" />
-      <circle cx={center} cy="20" r="4" fill="#0f172a" />
-      <text x={center - 32} y="15" fill="#475569" fontSize="10" fontWeight="700">
-        Base {baseValue.toFixed(2)}
-      </text>
-
-      {/* Output value arrow */}
-      <text x={center + posWidth + 8} y="44" fill="#ef4444" fontSize="11" fontWeight="700">
-        f(x)={outputValue.toFixed(2)}
-      </text>
-    </svg>
   );
 }

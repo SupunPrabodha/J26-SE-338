@@ -1,10 +1,36 @@
 "use client";
 
+import React from "react";
+import dynamic from "next/dynamic";
 import type { FeatureContribution } from "@j26/common/contracts";
 
+const DynamicPlotlyWaterfall = dynamic(() => import("./PlotlyWaterfall"), {
+  ssr: false,
+  loading: () => (
+    <div
+      style={{
+        height: "260px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#f8fafc",
+        borderRadius: "8px",
+        border: "1px dashed #e2e8f0",
+        color: "#64748b",
+        fontSize: "12px",
+        gap: "6px",
+      }}
+    >
+      <div style={{ fontWeight: 600 }}>Loading SHAP Waterfall Plot...</div>
+      <div style={{ fontSize: "11px", color: "#94a3b8" }}>Client-side rendering active</div>
+    </div>
+  ),
+});
+
 interface WaterfallChartProps {
-  baseValue: number | null;
-  outputValue: number | null;
+  baseValue: number | null | undefined;
+  outputValue: number | null | undefined;
   contributions: FeatureContribution[];
   targetClass: string | null;
 }
@@ -15,13 +41,19 @@ export function WaterfallChart({
   contributions,
   targetClass,
 }: WaterfallChartProps) {
-  if (baseValue === null || outputValue === null || !contributions || contributions.length === 0) {
+  const missingFields: string[] = [];
+  if (baseValue === null || baseValue === undefined) missingFields.push("base_value");
+  if (outputValue === null || outputValue === undefined) missingFields.push("output_value");
+  if (!contributions || contributions.length === 0) missingFields.push("contributions");
+
+  if (missingFields.length > 0) {
     return (
       <div className="empty-panel" role="status">
         <div className="empty-icon">🌊</div>
         <h3>No SHAP Waterfall / Force Plot Available</h3>
         <p>
-          Model Prediction is currently <strong>Pending C3 integration</strong>. Once the classifier is connected, SHAP will compute base expected value E[f(x)], additive token contributions, and final output f(x).
+          SHAP explanation data incomplete. Missing required backend field(s):{" "}
+          <strong>{missingFields.join(", ")}</strong>.
         </p>
         <p className="hint">
           Note: In accordance with research standards, single-example explanations utilize local waterfall/force views. Beeswarm plots are designed for dataset-level multi-example distributions and are not shown for individual predictions.
@@ -30,140 +62,71 @@ export function WaterfallChart({
     );
   }
 
-  // Calculate cumulative steps for the top 10 features functionally
-  const displayItems = contributions.slice(0, 10);
-  const steps = displayItems.reduce<
-    {
-      token: string;
-      weight: number;
-      startVal: number;
-      endVal: number;
-      isPositive: boolean;
-    }[]
-  >((acc, item) => {
-    const prevEnd = acc.length > 0 ? acc[acc.length - 1].endVal : baseValue;
-    const endVal = prevEnd + item.weight;
-    acc.push({
-      token: item.token,
-      weight: item.weight,
-      startVal: prevEnd,
-      endVal,
-      isPositive: item.weight >= 0,
-    });
-    return acc;
-  }, []);
-
-
   return (
     <div className="waterfall-container" aria-label="SHAP Local Waterfall Plot">
-      <div className="waterfall-header">
+      <div className="waterfall-header" style={{ marginBottom: "8px" }}>
         <div>
-          <h4>SHAP Additive Waterfall View</h4>
-          <p className="subtitle">
+          <h4 style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
+            SHAP Additive Waterfall View
+          </h4>
+          <p className="subtitle" style={{ margin: "2px 0 0", fontSize: "11px", color: "#64748b" }}>
             Local decomposition: Base expectation E[f(x)] → Feature contributions Σφ_i → Final f(x)
           </p>
         </div>
-        <div className="waterfall-summary-pill">
-          <span>Target: <strong>{targetClass || "Selected Class"}</strong></span>
+        <div className="waterfall-summary-pill" style={{ fontSize: "11px", color: "#475569" }}>
+          <span>
+            Target: <strong style={{ color: "#4f46e5" }}>{targetClass || "Selected Class"}</strong>
+          </span>
         </div>
       </div>
 
-      <div className="waterfall-scales">
-        <div className="scale-metric">
-          <span className="scale-label">Base Value E[f(x)]</span>
-          <span className="scale-val">{baseValue.toFixed(4)}</span>
+      <div className="waterfall-scales" style={{ display: "flex", alignItems: "center", gap: "10px", margin: "6px 0 10px" }}>
+        <div className="scale-metric" style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "6px", padding: "4px 8px" }}>
+          <span className="scale-label" style={{ fontSize: "10px", color: "#64748b", display: "block" }}>
+            Base Value E[f(x)]
+          </span>
+          <span className="scale-val" style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>
+            {baseValue.toFixed(4)}
+          </span>
         </div>
-        <div className="scale-arrow">→</div>
-        <div className="scale-metric output-metric">
-          <span className="scale-label">Output Score f(x)</span>
-          <span className="scale-val">{outputValue.toFixed(4)}</span>
-        </div>
-      </div>
-
-      {/* Axis Scale Bar [0.0 - 1.0] */}
-      <div className="output-scale-bar-wrapper">
-        <div className="scale-ticks">
-          <span>0.0</span>
-          <span>0.25</span>
-          <span>0.50</span>
-          <span>0.75</span>
-          <span>1.0</span>
-        </div>
-        <div className="scale-track">
-          {/* Base value marker */}
-          <div
-            className="scale-marker base-marker"
-            style={{ left: `${Math.max(0, Math.min(100, baseValue * 100))}%` }}
-            title={`Base value: ${baseValue.toFixed(3)}`}
-          />
-          {/* Output value marker */}
-          <div
-            className="scale-marker output-marker"
-            style={{ left: `${Math.max(0, Math.min(100, outputValue * 100))}%` }}
-            title={`Final output: ${outputValue.toFixed(3)}`}
-          />
+        <div className="scale-arrow" style={{ color: "#94a3b8", fontWeight: 700 }}>→</div>
+        <div className="scale-metric output-metric" style={{ background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: "6px", padding: "4px 8px" }}>
+          <span className="scale-label" style={{ fontSize: "10px", color: "#4338ca", display: "block" }}>
+            Output Score f(x)
+          </span>
+          <span className="scale-val" style={{ fontSize: "12px", fontWeight: 700, color: "#4f46e5" }}>
+            {outputValue.toFixed(4)}
+          </span>
         </div>
       </div>
 
-      <div className="waterfall-steps-list">
-        {/* Base value row */}
-        <div className="waterfall-row base-row">
-          <div className="step-label">Base expectation E[f(x)]</div>
-          <div className="step-bar-area">
-            <div
-              className="waterfall-step-bar base-block"
-              style={{
-                width: `${Math.max(4, Math.min(100, baseValue * 100))}%`,
-              }}
-            >
-              {baseValue.toFixed(3)}
-            </div>
-          </div>
-        </div>
+      <DynamicPlotlyWaterfall
+        baseValue={baseValue}
+        outputValue={outputValue}
+        contributions={contributions}
+        targetClass={targetClass}
+        maxTopFeatures={8}
+      />
 
-        {/* Individual feature steps */}
-        {steps.map((step, idx) => {
-          const minVal = Math.min(step.startVal, step.endVal);
-          const maxVal = Math.max(step.startVal, step.endVal);
-          const leftPercent = Math.max(0, Math.min(100, minVal * 100));
-          const widthPercent = Math.max(1.5, Math.min(100, (maxVal - minVal) * 100));
-
-          return (
-            <div key={`${step.token}-${idx}`} className="waterfall-row">
-              <div className="step-label" title={step.token}>
-                <code>{step.token}</code>
-              </div>
-              <div className="step-bar-area">
-                <div
-                  className={`waterfall-step-bar ${step.isPositive ? "positive" : "negative"}`}
-                  style={{
-                    left: `${leftPercent}%`,
-                    width: `${widthPercent}%`,
-                  }}
-                >
-                  <span className="step-val-text">
-                    {step.isPositive ? "+" : ""}{step.weight.toFixed(3)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Final output value row */}
-        <div className="waterfall-row final-row">
-          <div className="step-label">Final output score f(x)</div>
-          <div className="step-bar-area">
-            <div
-              className="waterfall-step-bar final-block"
-              style={{
-                width: `${Math.max(4, Math.min(100, outputValue * 100))}%`,
-              }}
-            >
-              {outputValue.toFixed(3)}
-            </div>
-          </div>
-        </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: "10px",
+          color: "#64748b",
+          marginTop: "6px",
+          borderTop: "1px solid #f1f5f9",
+          paddingTop: "6px",
+        }}
+      >
+        <span>
+          <span style={{ color: "#ef4444", fontWeight: 700 }}>Red</span> pushes towards {targetClass || "target"}.{" "}
+          <span style={{ color: "#16a34a", fontWeight: 700 }}>Green</span> opposes.
+        </span>
+        <span>
+          Scale: Unified continuous model output
+        </span>
       </div>
     </div>
   );

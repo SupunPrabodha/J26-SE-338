@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
+import { SignedBarChart } from "../components/SignedBarChart";
+import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
 
 export default function LimePage() {
@@ -466,19 +468,8 @@ export default function LimePage() {
                     </div>
                   </div>
 
-                  {/* Checkpoint Probabilities Distribution */}
-                  <div style={{ marginTop: "10px", marginBottom: "8px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10.5px", marginBottom: "4px", fontWeight: 600 }}>
-                      <span style={{ color: "#ef4444" }}>Negative: {Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%</span>
-                      <span style={{ color: "#3b82f6" }}>Neutral: {Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%</span>
-                      <span style={{ color: "#16a34a" }}>Positive: {Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%</span>
-                    </div>
-                    <div style={{ height: "8px", width: "100%", background: "#f1f5f9", borderRadius: "999px", overflow: "hidden", display: "flex" }}>
-                      <div style={{ width: `${Math.round((prediction.probabilities["Negative"] ?? 0) * 100)}%`, background: "#ef4444" }} title={`Negative: ${(prediction.probabilities["Negative"] ?? 0).toFixed(4)}`}></div>
-                      <div style={{ width: `${Math.round((prediction.probabilities["Neutral"] ?? 0) * 100)}%`, background: "#93c5fd" }} title={`Neutral: ${(prediction.probabilities["Neutral"] ?? 0).toFixed(4)}`}></div>
-                      <div style={{ width: `${Math.round((prediction.probabilities["Positive"] ?? 0) * 100)}%`, background: "#16a34a" }} title={`Positive: ${(prediction.probabilities["Positive"] ?? 0).toFixed(4)}`}></div>
-                    </div>
-                  </div>
+                  {/* Checkpoint Probabilities Distribution (Recharts) */}
+                  <SentimentProbabilityChart probabilities={prediction.probabilities} />
 
                   <div style={{ fontSize: "10px", color: "#64748b", marginTop: "8px", borderTop: "1px solid #f1f5f9", paddingTop: "6px", display: "flex", justifyContent: "space-between" }}>
                     <span>Tokens: <strong>{prediction.token_count}</strong> {prediction.truncated ? "(Truncated)" : "(≤512)"}</span>
@@ -642,22 +633,22 @@ export default function LimePage() {
 
               {hasResults ? (
                 <>
+                  <div style={{ marginBottom: "10px" }}>
+                    <SignedBarChart contributions={contributions} method="LIME" targetClass={targetClass} />
+                  </div>
+
                   <div className="lime-features-table-wrap" aria-label="LIME Diverging Signed Bar Chart">
                     <table className="lime-features-table">
                       <thead>
                         <tr>
                           <th style={{ textAlign: "left", paddingLeft: 8 }}>Feature (Word/Phrase)</th>
                           <th style={{ textAlign: "left" }}>Weight</th>
-                          <th style={{ textAlign: "left" }}>Contribution ({targetClass})</th>
+                          <th style={{ textAlign: "left" }}>Direction ({targetClass})</th>
                         </tr>
                       </thead>
                       <tbody>
                         {contributions.map((item, i) => {
                           const isPositive = item.weight >= 0;
-                          const barPercent =
-                            maxAbsWeight > 0
-                              ? Math.round((Math.abs(item.weight) / maxAbsWeight) * 100)
-                              : 0;
                           const formattedWeight =
                             (item.weight >= 0 ? "+" : "") + item.weight.toFixed(4);
                           return (
@@ -670,19 +661,8 @@ export default function LimePage() {
                               >
                                 {formattedWeight}
                               </td>
-                              <td className="lime-feat-bar-col">
-                                {barPercent > 0 && (
-                                  <div className="lime-feat-bar-track">
-                                    <div
-                                      className={
-                                        isPositive
-                                          ? "lime-feat-bar-fill-red"
-                                          : "lime-feat-bar-fill-green"
-                                      }
-                                      style={{ width: `${barPercent}%` }}
-                                    ></div>
-                                  </div>
-                                )}
+                              <td style={{ fontSize: "11px", fontWeight: 600, color: isPositive ? "#dc2626" : "#15803d" }}>
+                                {isPositive ? `Supports ${targetClass}` : `Opposes ${targetClass}`}
                               </td>
                             </tr>
                           );
@@ -834,49 +814,11 @@ export default function LimePage() {
                     </div>
                   </div>
 
-                  {/* Prob bars */}
-                  <div className="lime-local-prob-section">
-                    <div className="lime-prob-bar-row">
-                      <span className="lime-prob-label">{targetClass}</span>
-                      <div className="lime-prob-track">
-                        <div
-                          className="lime-prob-fill-red"
-                          style={{
-                            width: `${
-                              explanation?.target_class_probability != null
-                                ? Math.round(explanation.target_class_probability * 100)
-                                : 0
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="lime-prob-val">
-                        {explanation?.target_class_probability != null
-                          ? explanation.target_class_probability.toFixed(2)
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="lime-prob-bar-row">
-                      <span className="lime-prob-label">Opposing</span>
-                      <div className="lime-prob-track">
-                        <div
-                          className="lime-prob-fill-green"
-                          style={{
-                            width: `${
-                              explanation?.target_class_probability != null
-                                ? Math.round((1 - explanation.target_class_probability) * 100)
-                                : 0
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="lime-prob-val">
-                        {explanation?.target_class_probability != null
-                          ? (1 - explanation.target_class_probability).toFixed(2)
-                          : "—"}
-                      </span>
-                    </div>
-                  </div>
+                  {/* Prob bars (Recharts) */}
+                  <LocalProbabilityChart
+                    targetClass={targetClass}
+                    targetProbability={explanation?.target_class_probability}
+                  />
 
                   {/* 2-column local explanation info */}
                   <div className="lime-local-info-box">
