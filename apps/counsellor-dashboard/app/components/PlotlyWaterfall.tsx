@@ -28,8 +28,12 @@ export default function PlotlyWaterfall({
     const m: ("absolute" | "relative" | "total")[] = ["absolute"];
     const t: string[] = [baseValue.toFixed(4)];
 
-    const topFeatures = contributions.slice(0, maxTopFeatures);
-    const remainingFeatures = contributions.slice(maxTopFeatures);
+    // Sort a copy by descending absolute weight without mutating shared data
+    const sortedContributions = [...contributions].sort(
+      (a, b) => Math.abs(b.weight) - Math.abs(a.weight)
+    );
+    const topFeatures = sortedContributions.slice(0, maxTopFeatures);
+    const remainingFeatures = sortedContributions.slice(maxTopFeatures);
 
     for (const feat of topFeatures) {
       y.push(feat.token);
@@ -39,21 +43,25 @@ export default function PlotlyWaterfall({
     }
 
     if (remainingFeatures.length > 0) {
-      const topSum = topFeatures.reduce((acc, c) => acc + c.weight, 0);
-      const otherWeight = outputValue - (baseValue + topSum);
+      // Sum actual omitted contributions without forcing agreement with output
+      const otherWeight = remainingFeatures.reduce((acc, c) => acc + c.weight, 0);
       y.push(`+${remainingFeatures.length} other features`);
       x.push(otherWeight);
       m.push("relative");
       t.push((otherWeight >= 0 ? "+" : "") + otherWeight.toFixed(4));
     }
 
-    y.push("Model output f(x)");
-    x.push(0); // Plotly auto-computes total
+    // Plotted total matches actual accumulated values
+    const sumAllContributions = contributions.reduce((acc, c) => acc + c.weight, 0);
+    const accumulatedTotal = baseValue + sumAllContributions;
+
+    y.push("Reconstructed f(x)");
+    x.push(0); // Plotly auto-computes total from preceding values
     m.push("total");
-    t.push(outputValue.toFixed(4));
+    t.push(accumulatedTotal.toFixed(4));
 
     return { yLabels: y, xValues: x, measures: m, textLabels: t };
-  }, [baseValue, outputValue, contributions, maxTopFeatures]);
+  }, [baseValue, contributions, maxTopFeatures]);
 
   const height = Math.max(260, yLabels.length * 28 + 70);
 

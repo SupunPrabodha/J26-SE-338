@@ -748,6 +748,10 @@ export default function ShapPage() {
                     outputValue={explanation?.output_value ?? (hasResults ? outputValue : null)}
                     contributions={contributions}
                     targetClass={targetClass}
+                    reconstructedOutput={explanation?.reconstructed_output}
+                    additivityResidual={explanation?.additivity_residual}
+                    additivityWithinTolerance={explanation?.additivity_within_tolerance}
+                    discrepancyMessage={explanation?.additivity_discrepancy_message}
                   />
                 </div>
 

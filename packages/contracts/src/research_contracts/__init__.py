@@ -357,7 +357,7 @@ class C4ExplanationRequest(Contract):
 
 class C4ExplanationResponse(Contract):
     method: Literal["LIME", "SHAP"]
-    status: Literal["READY", "AWAITING_CLASSIFIER_CONNECTION"]
+    status: Literal["READY", "AWAITING_CLASSIFIER_CONNECTION", "UNAVAILABLE"] = "READY"
     status_message: str
     model_id: str | None = None
     model_version: str | None = None
@@ -374,6 +374,10 @@ class C4ExplanationResponse(Contract):
     tokens: list[str] = []
     weights: list[float] = []
     computation_bounds: dict[str, int] = {}
+    reconstructed_output: float | None = None
+    additivity_residual: float | None = None
+    additivity_within_tolerance: bool | None = None
+    additivity_discrepancy_message: str | None = None
 
 
 class C4PredictionRequest(Contract):

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -92,20 +92,20 @@ export function SignedBarChart({
     );
   }
 
-  const { chartData, maxAbsWeight } = useMemo(() => {
-    const items = contributions.slice(0, maxDisplay);
-    const maxVal = Math.max(...items.map((c) => Math.abs(c.weight)), 0.05);
+  // Sort a copy by descending absolute weight to preserve original token order for text highlighting
+  const sortedContributions = [...contributions].sort(
+    (a, b) => Math.abs(b.weight) - Math.abs(a.weight)
+  );
+  const items = sortedContributions.slice(0, maxDisplay);
+  const maxAbsWeight = Math.max(...items.map((c) => Math.abs(c.weight)), 0.05);
 
-    const formatted = items.map((c) => ({
-      token: c.token,
-      weight: c.weight,
-      absWeight: Math.abs(c.weight),
-      direction: c.direction,
-      formattedWeight: (c.weight >= 0 ? "+" : "") + c.weight.toFixed(4),
-    }));
-
-    return { chartData: formatted, maxAbsWeight: maxVal };
-  }, [contributions, maxDisplay]);
+  const chartData = items.map((c) => ({
+    token: c.token,
+    weight: c.weight,
+    absWeight: Math.abs(c.weight),
+    direction: c.direction,
+    formattedWeight: (c.weight >= 0 ? "+" : "") + c.weight.toFixed(4),
+  }));
 
   // Height dynamic to number of displayed items
   const chartHeight = Math.max(220, chartData.length * 24 + 50);

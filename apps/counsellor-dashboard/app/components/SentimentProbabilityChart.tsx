@@ -176,7 +176,7 @@ export function LocalProbabilityChart({
       fill: "#ef4444",
     },
     {
-      category: "Opposing",
+      category: "Other classes",
       probability: opposingProb,
       percentage: Math.round(opposingProb * 100),
       fill: "#16a34a",
@@ -195,7 +195,7 @@ export function LocalProbabilityChart({
           <YAxis
             type="category"
             dataKey="category"
-            width={65}
+            width={80}
             tick={{ fontSize: 10, fill: "#0f172a", fontWeight: 600 }}
             axisLine={false}
             tickLine={false}

@@ -33,6 +33,10 @@ interface WaterfallChartProps {
   outputValue: number | null | undefined;
   contributions: FeatureContribution[];
   targetClass: string | null;
+  reconstructedOutput?: number | null | undefined;
+  additivityResidual?: number | null | undefined;
+  additivityWithinTolerance?: boolean | null | undefined;
+  discrepancyMessage?: string | null | undefined;
 }
 
 export function WaterfallChart({
@@ -40,6 +44,10 @@ export function WaterfallChart({
   outputValue,
   contributions,
   targetClass,
+  reconstructedOutput,
+  additivityResidual,
+  additivityWithinTolerance,
+  discrepancyMessage,
 }: WaterfallChartProps) {
   if (
     baseValue === null ||
@@ -69,6 +77,11 @@ export function WaterfallChart({
     );
   }
 
+  const sumContributions = contributions.reduce((acc, c) => acc + c.weight, 0);
+  const actualReconstructed = reconstructedOutput ?? (baseValue + sumContributions);
+  const actualResidual = additivityResidual ?? (outputValue - actualReconstructed);
+  const hasDiscrepancy = additivityWithinTolerance === false || (additivityWithinTolerance === undefined && Math.abs(actualResidual) > 1e-4);
+
   return (
     <div className="waterfall-container" aria-label="SHAP Local Waterfall Plot">
       <div className="waterfall-header" style={{ marginBottom: "8px" }}>
@@ -77,7 +90,7 @@ export function WaterfallChart({
             SHAP Additive Waterfall View
           </h4>
           <p className="subtitle" style={{ margin: "2px 0 0", fontSize: "11px", color: "#64748b" }}>
-            Local decomposition: Base expectation E[f(x)] → Feature contributions Σφ_i → Final f(x)
+            Local decomposition: Base expectation E[f(x)] → Feature contributions Σφ_i → Reconstructed f(x)
           </p>
         </div>
         <div className="waterfall-summary-pill" style={{ fontSize: "11px", color: "#475569" }}>
@@ -87,25 +100,65 @@ export function WaterfallChart({
         </div>
       </div>
 
-      <div className="waterfall-scales" style={{ display: "flex", alignItems: "center", gap: "10px", margin: "6px 0 10px" }}>
+      <div className="waterfall-scales" style={{ display: "flex", alignItems: "center", gap: "8px", margin: "6px 0 10px", flexWrap: "wrap" }}>
         <div className="scale-metric" style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "6px", padding: "4px 8px" }}>
-          <span className="scale-label" style={{ fontSize: "10px", color: "#64748b", display: "block" }}>
+          <span className="scale-label" style={{ fontSize: "9.5px", color: "#64748b", display: "block" }}>
             Base Value E[f(x)]
           </span>
-          <span className="scale-val" style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>
+          <span className="scale-val" style={{ fontSize: "11.5px", fontWeight: 700, color: "#0f172a" }}>
             {baseValue.toFixed(4)}
           </span>
         </div>
-        <div className="scale-arrow" style={{ color: "#94a3b8", fontWeight: 700 }}>→</div>
-        <div className="scale-metric output-metric" style={{ background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: "6px", padding: "4px 8px" }}>
-          <span className="scale-label" style={{ fontSize: "10px", color: "#4338ca", display: "block" }}>
-            Output Score f(x)
+        <div className="scale-arrow" style={{ color: "#94a3b8", fontWeight: 700, fontSize: "11px" }}>+</div>
+        <div className="scale-metric" style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "6px", padding: "4px 8px" }}>
+          <span className="scale-label" style={{ fontSize: "9.5px", color: "#64748b", display: "block" }}>
+            Features Σφ_i
           </span>
-          <span className="scale-val" style={{ fontSize: "12px", fontWeight: 700, color: "#4f46e5" }}>
+          <span className="scale-val" style={{ fontSize: "11.5px", fontWeight: 700, color: "#0f172a" }}>
+            {(sumContributions >= 0 ? "+" : "") + sumContributions.toFixed(4)}
+          </span>
+        </div>
+        <div className="scale-arrow" style={{ color: "#94a3b8", fontWeight: 700, fontSize: "11px" }}>=</div>
+        <div className="scale-metric" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "6px", padding: "4px 8px" }}>
+          <span className="scale-label" style={{ fontSize: "9.5px", color: "#166534", display: "block" }}>
+            Reconstructed f(x)
+          </span>
+          <span className="scale-val" style={{ fontSize: "11.5px", fontWeight: 700, color: "#15803d" }}>
+            {actualReconstructed.toFixed(4)}
+          </span>
+        </div>
+        <div className="scale-arrow" style={{ color: "#94a3b8", fontWeight: 700, fontSize: "11px" }}>vs</div>
+        <div className="scale-metric output-metric" style={{ background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: "6px", padding: "4px 8px" }}>
+          <span className="scale-label" style={{ fontSize: "9.5px", color: "#4338ca", display: "block" }}>
+            Model Output f(x)
+          </span>
+          <span className="scale-val" style={{ fontSize: "11.5px", fontWeight: 700, color: "#4f46e5" }}>
             {outputValue.toFixed(4)}
           </span>
         </div>
       </div>
+
+      {hasDiscrepancy && (
+        <div
+          role="status"
+          style={{
+            background: "#fffbeb",
+            border: "1px solid #fef3c7",
+            borderRadius: "6px",
+            padding: "6px 10px",
+            fontSize: "11px",
+            color: "#92400e",
+            marginBottom: "8px",
+          }}
+        >
+          <strong>Output Discrepancy (Residual):</strong>{" "}
+          {discrepancyMessage ||
+            `Reconstructed sum (${actualReconstructed.toFixed(4)}) differs from model output (${outputValue.toFixed(4)}) by residual ${(actualResidual >= 0 ? "+" : "") + actualResidual.toFixed(4)} due to sampling evaluation bounds.`}
+          <div style={{ fontSize: "10px", color: "#b45309", marginTop: "2px" }}>
+            Note: This numerical check verifies mathematical efficiency ($E[f(x)] + \sum \phi_i \approx f(x)$) under finite sampling evaluations; it does not measure or prove explanation faithfulness.
+          </div>
+        </div>
+      )}
 
       <DynamicPlotlyWaterfall
         baseValue={baseValue}
@@ -132,7 +185,7 @@ export function WaterfallChart({
           <span style={{ color: "#16a34a", fontWeight: 700 }}>Green</span> opposes.
         </span>
         <span>
-          Scale: Unified continuous model output
+          Scale: Unified probability output scale
         </span>
       </div>
     </div>

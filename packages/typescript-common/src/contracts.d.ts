@@ -87,6 +87,9 @@ export type SchemaVersion5 = "1.0.0";
 export type Synthetic5 = true;
 export type TargetClass = string | null;
 export type Text1 = string;
+export type AdditivityDiscrepancyMessage = string | null;
+export type AdditivityResidual = number | null;
+export type AdditivityWithinTolerance = boolean | null;
 export type BaseValue = number | null;
 export type AbsWeight = number;
 export type DevelopmentOnly6 = true;
@@ -103,8 +106,9 @@ export type ModelRevision = string | null;
 export type ModelVersion = string | null;
 export type OutputValue = number | null;
 export type PredictedClass = string | null;
+export type ReconstructedOutput = number | null;
 export type SchemaVersion7 = "1.0.0";
-export type Status1 = "READY" | "AWAITING_CLASSIFIER_CONNECTION";
+export type Status1 = "READY" | "AWAITING_CLASSIFIER_CONNECTION" | "UNAVAILABLE";
 export type StatusMessage1 = string;
 export type Synthetic7 = true;
 export type TargetClass1 = string | null;
@@ -444,6 +448,9 @@ export interface C4ExplanationRequest {
   text: Text1;
 }
 export interface C4ExplanationResponse {
+  additivity_discrepancy_message?: AdditivityDiscrepancyMessage;
+  additivity_residual?: AdditivityResidual;
+  additivity_within_tolerance?: AdditivityWithinTolerance;
   base_value?: BaseValue;
   computation_bounds?: ComputationBounds;
   contributions?: Contributions;
@@ -455,8 +462,9 @@ export interface C4ExplanationResponse {
   output_value?: OutputValue;
   predicted_class?: PredictedClass;
   probabilities?: Probabilities;
+  reconstructed_output?: ReconstructedOutput;
   schema_version?: SchemaVersion7;
-  status: Status1;
+  status?: Status1;
   status_message: StatusMessage1;
   synthetic?: Synthetic7;
   target_class?: TargetClass1;

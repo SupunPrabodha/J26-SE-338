@@ -56,6 +56,42 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "additivity_discrepancy_message": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Additivity Discrepancy Message"
+    },
+    "additivity_residual": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Additivity Residual"
+    },
+    "additivity_within_tolerance": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Additivity Within Tolerance"
+    },
     "base_value": {
       "anyOf": [
         {
@@ -166,6 +202,18 @@
       "title": "Probabilities",
       "type": "object"
     },
+    "reconstructed_output": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reconstructed Output"
+    },
     "schema_version": {
       "const": "1.0.0",
       "default": "1.0.0",
@@ -173,9 +221,11 @@
       "type": "string"
     },
     "status": {
+      "default": "READY",
       "enum": [
         "READY",
-        "AWAITING_CLASSIFIER_CONNECTION"
+        "AWAITING_CLASSIFIER_CONNECTION",
+        "UNAVAILABLE"
       ],
       "title": "Status",
       "type": "string"
@@ -257,7 +307,6 @@
   },
   "required": [
     "method",
-    "status",
     "status_message"
   ],
   "title": "C4ExplanationResponse",

@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 DEFAULT_MAX_EVALS = 100
 
 
+# Documented numerical tolerance for SHAP efficiency (additivity) property under sampling
+ADDITIVITY_TOLERANCE = 1e-4
+
+
 def explain_with_shap(
     text: str,
     classifier: BatchPredictionClassifier,
@@ -66,19 +70,23 @@ def explain_with_shap(
 
     shap_values = explainer([text], max_evals=max_evals)
 
-    # Extract base value for target class
-    base_val = 0.0
-    if hasattr(shap_values, "base_values"):
+    # Extract base value for target class; do not default to zero if missing
+    base_val: float | None = None
+    if hasattr(shap_values, "base_values") and shap_values.base_values is not None:
         bv = shap_values.base_values
-        if isinstance(bv, np.ndarray):
-            if bv.ndim == 2:
-                base_val = float(bv[0, target_idx])
-            elif bv.ndim == 1:
-                base_val = float(bv[0])
-            else:
-                base_val = float(bv.item(0))
-        elif isinstance(bv, (int, float)):
-            base_val = float(bv)
+        try:
+            if isinstance(bv, np.ndarray):
+                if bv.ndim == 2:
+                    base_val = float(bv[0, target_idx])
+                elif bv.ndim == 1:
+                    base_val = float(bv[0])
+                else:
+                    base_val = float(bv.item(0))
+            elif isinstance(bv, (int, float)):
+                base_val = float(bv)
+        except Exception as exc:
+            logger.warning("Malformed SHAP base_values: %s", exc)
+            base_val = None
 
     # Extract tokens and values for target class
     raw_tokens: list[str] = []
@@ -87,33 +95,21 @@ def explain_with_shap(
 
     raw_values: list[float] = []
     if hasattr(shap_values, "values") and len(shap_values.values) > 0:
-        vals = shap_values.values[0]
-        if vals.ndim == 2:
-            raw_values = [float(v) for v in vals[:, target_idx]]
-        else:
-            raw_values = [float(v) for v in vals]
+        try:
+            vals = shap_values.values[0]
+            if isinstance(vals, np.ndarray):
+                if vals.ndim == 2:
+                    raw_values = [float(v) for v in vals[:, target_idx]]
+                else:
+                    raw_values = [float(v) for v in vals]
+            elif isinstance(vals, (list, tuple)):
+                raw_values = [float(v) for v in vals]
+        except Exception as exc:
+            logger.warning("Malformed SHAP values: %s", exc)
+            raw_values = []
 
-    contributions: list[FeatureContribution] = []
-    tokens: list[str] = []
-    weights: list[float] = []
-
-    for t, w in zip(raw_tokens, raw_values, strict=False):
-        t_clean = t.strip()
-        if not t_clean:
-            continue
-        tokens.append(t_clean)
-        weights.append(w)
-        contributions.append(
-            FeatureContribution(
-                token=t_clean,
-                weight=w,
-                direction="supports" if w >= 0 else "opposes",
-                abs_weight=abs(w),
-            )
-        )
-
-    # Calculated output value = base_value + sum(raw_values)
-    calculated_output = base_val + sum(raw_values)
+    model_id = getattr(classifier, "model_id", classifier.model_version)
+    model_rev = getattr(classifier, "model_revision", None)
 
     token_count = len(text.split())
     truncated = False
@@ -122,8 +118,65 @@ def explain_with_shap(
         token_count = len(token_ids)
         truncated = token_count > 512
 
-    model_id = getattr(classifier, "model_id", classifier.model_version)
-    model_rev = getattr(classifier, "model_revision", None)
+    # If required SHAP values are missing or malformed, report an unavailable result rather than defaulting to zero
+    if base_val is None or not raw_values:
+        return C4ExplanationResponse(
+            method="SHAP",
+            status="UNAVAILABLE",
+            status_message="SHAP explanation unavailable: required base_values or attribution values are missing or malformed.",
+            model_id=model_id,
+            model_version=classifier.model_version,
+            model_revision=model_rev,
+            predicted_class=predicted_class,
+            probabilities=prob_dict,
+            token_count=token_count,
+            truncated=truncated,
+            target_class=target_class,
+            target_class_probability=target_prob,
+            base_value=None,
+            output_value=target_prob,
+            contributions=[],
+            tokens=[],
+            weights=[],
+            computation_bounds={"max_evals": max_evals},
+        )
+
+    # Preserve all contributions, including whitespace or punctuation, for correct accounting
+    contributions: list[FeatureContribution] = []
+    tokens: list[str] = []
+    weights: list[float] = []
+
+    for t, w in zip(raw_tokens, raw_values, strict=False):
+        tok_str = str(t)
+        weight_val = float(w)
+        tokens.append(tok_str)
+        weights.append(weight_val)
+        contributions.append(
+            FeatureContribution(
+                token=tok_str,
+                weight=weight_val,
+                direction="supports" if weight_val >= 0 else "opposes",
+                abs_weight=abs(weight_val),
+            )
+        )
+
+    # Return actual selected-class probability on the probability scale as output_value
+    output_val = float(target_prob)
+
+    # Separately calculate reconstructed_output = base_value + sum(all SHAP contributions)
+    reconstructed_output = float(base_val + sum(c.weight for c in contributions))
+
+    # Calculate additivity residual on the probability scale
+    additivity_residual = float(output_val - reconstructed_output)
+
+    # Compare using documented numerical tolerance (absolute residual <= 1e-4)
+    additivity_within_tolerance = bool(abs(additivity_residual) <= ADDITIVITY_TOLERANCE)
+
+    discrepancy_msg = (
+        f"Additivity residual ({additivity_residual:+.4f}) exceeds numerical tolerance (±{ADDITIVITY_TOLERANCE:.0e}). Model output: {output_val:.4f}, Reconstructed: {reconstructed_output:.4f}."
+        if not additivity_within_tolerance
+        else None
+    )
 
     return C4ExplanationResponse(
         method="SHAP",
@@ -139,11 +192,15 @@ def explain_with_shap(
         target_class=target_class,
         target_class_probability=target_prob,
         base_value=base_val,
-        output_value=calculated_output,
+        output_value=output_val,
         contributions=contributions,
         tokens=tokens,
         weights=weights,
         computation_bounds={
             "max_evals": max_evals,
         },
+        reconstructed_output=reconstructed_output,
+        additivity_residual=additivity_residual,
+        additivity_within_tolerance=additivity_within_tolerance,
+        additivity_discrepancy_message=discrepancy_msg,
     )
