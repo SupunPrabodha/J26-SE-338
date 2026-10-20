@@ -85,6 +85,8 @@ services:
       redis: { condition: service_healthy }
   xai:
     <<: *python
+    networks: [ internal, edge ]
+    ports: [ 127.0.0.1:8002:8000 ]
     environment:
       SERVICE_NAME: xai
       XAI_SECRET: ${XAI_SECRET:?XAI_SECRET must be set}

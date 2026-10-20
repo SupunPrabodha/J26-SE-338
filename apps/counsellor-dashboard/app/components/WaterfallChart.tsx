@@ -41,12 +41,19 @@ export function WaterfallChart({
   contributions,
   targetClass,
 }: WaterfallChartProps) {
-  const missingFields: string[] = [];
-  if (baseValue === null || baseValue === undefined) missingFields.push("base_value");
-  if (outputValue === null || outputValue === undefined) missingFields.push("output_value");
-  if (!contributions || contributions.length === 0) missingFields.push("contributions");
+  if (
+    baseValue === null ||
+    baseValue === undefined ||
+    outputValue === null ||
+    outputValue === undefined ||
+    !contributions ||
+    contributions.length === 0
+  ) {
+    const missingFields: string[] = [];
+    if (baseValue === null || baseValue === undefined) missingFields.push("base_value");
+    if (outputValue === null || outputValue === undefined) missingFields.push("output_value");
+    if (!contributions || contributions.length === 0) missingFields.push("contributions");
 
-  if (missingFields.length > 0) {
     return (
       <div className="empty-panel" role="status">
         <div className="empty-icon">🌊</div>
