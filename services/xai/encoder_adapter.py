@@ -8,11 +8,12 @@ Provides bounded batch probability prediction conforming to BatchPredictionClass
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from research_contracts import C4EncoderCheckResponse
+from transformers import AutoModel, AutoModelForSequenceClassification, AutoTokenizer
 
 from xai.classifier_interface import BatchPredictionClassifier, set_classifier
 
@@ -144,21 +145,66 @@ class SentimentClassifierAdapter(BatchPredictionClassifier):
         }
 
 
-# Alias for backwards compatibility
-XaiEncoderAdapter = SentimentClassifierAdapter
+class XaiEncoderAdapter:
+    """Pretrained base encoder wrapper for development testing."""
 
-_ADAPTER_INSTANCE: SentimentClassifierAdapter | None = None
+    def __init__(self, model_id: str = "FacebookAI/xlm-roberta-base") -> None:
+        self.model_id = model_id
+        logger.info("Loading base encoder tokenizer and weights: %s", model_id)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.model = AutoModel.from_pretrained(model_id)
+        self.model.eval()
+        for param in self.model.parameters():
+            param.requires_grad = False
+
+    def run_check(self, text: str) -> C4EncoderCheckResponse:
+        """Run tokenizer and base encoder on input text and return diagnostic summary."""
+        if not text or not text.strip():
+            raise ValueError("Input text cannot be empty.")
+
+        unclipped_tokens = self.tokenizer.encode(text, add_special_tokens=True)
+        token_count = len(unclipped_tokens)
+        truncated = token_count > MAX_SEQUENCE_LENGTH
+
+        encoded = self.tokenizer(
+            text,
+            max_length=MAX_SEQUENCE_LENGTH,
+            truncation=True,
+            return_tensors="pt",
+        )
+
+        with torch.inference_mode():
+            outputs = self.model(**encoded)
+            last_hidden = outputs.last_hidden_state
+            embedding_shape = list(last_hidden.shape)
+
+        return C4EncoderCheckResponse(
+            model_id=cast(Any, self.model_id),
+            status_message="Base encoder connected — wellbeing classification unavailable.",
+            encoder_executed=True,
+            token_count=token_count,
+            truncated=truncated,
+            embedding_shape=embedding_shape,
+            hidden_dimension=embedding_shape[-1] if len(embedding_shape) >= 3 else 768,
+        )
+
+
+_CLASSIFIER_INSTANCE: SentimentClassifierAdapter | None = None
+_ENCODER_INSTANCE: XaiEncoderAdapter | None = None
 
 
 def get_classifier_adapter() -> SentimentClassifierAdapter:
     """Singleton getter for the sentiment classifier adapter."""
-    global _ADAPTER_INSTANCE
-    if _ADAPTER_INSTANCE is None:
-        _ADAPTER_INSTANCE = SentimentClassifierAdapter()
-        set_classifier(_ADAPTER_INSTANCE)
-    return _ADAPTER_INSTANCE
+    global _CLASSIFIER_INSTANCE
+    if _CLASSIFIER_INSTANCE is None:
+        _CLASSIFIER_INSTANCE = SentimentClassifierAdapter()
+        set_classifier(_CLASSIFIER_INSTANCE)
+    return _CLASSIFIER_INSTANCE
 
 
-def get_encoder_adapter() -> SentimentClassifierAdapter:
-    """Alias for backwards compatibility with existing caller imports."""
-    return get_classifier_adapter()
+def get_encoder_adapter() -> XaiEncoderAdapter:
+    """Singleton getter for the base encoder adapter."""
+    global _ENCODER_INSTANCE
+    if _ENCODER_INSTANCE is None:
+        _ENCODER_INSTANCE = XaiEncoderAdapter()
+    return _ENCODER_INSTANCE

@@ -186,6 +186,7 @@ class Explanation(Entity, Base):
     status_message: Mapped[str | None] = mapped_column(String(255))
     expires_at: Mapped[object | None] = mapped_column(UTCDateTime, index=True)
     __table_args__ = (
+        UniqueConstraint("account_id", "idempotency_key", name="uq_c4_explanations_account_idempotency"),
         CheckConstraint("method IN ('LIME','SHAP')"),
     )
 

@@ -54,6 +54,9 @@ def upgrade():
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        sa.UniqueConstraint(
+            "account_id", "idempotency_key", name="uq_c4_explanations_account_idempotency"
+        ),
         sa.CheckConstraint("method IN ('LIME','SHAP')"),
     )
     op.create_index(

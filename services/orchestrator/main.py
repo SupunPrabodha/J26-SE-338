@@ -474,29 +474,12 @@ def _call_xai_explain(body: C4ExplanationRequest) -> C4ExplanationResponse:
                 raise SafeError(ErrorCode.CONTRACT_INVALID, res.status_code)
             else:
                 raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502)
-    except (httpx.ConnectError, httpx.TimeoutException):
-        # Monolithic / direct execution fallback when XAI HTTP daemon is not separate
-        try:
-            from fastapi.testclient import TestClient
-            from xai.main import app as xai_app
-
-            client = TestClient(xai_app)
-            res = client.post(
-                "/internal/v1/dev/explain",
-                json=payload,
-                headers={"Authorization": "Bearer " + service_token("xai")},
-            )
-            if res.status_code == 200:
-                return C4ExplanationResponse.model_validate(res.json())
-            elif res.status_code in {403, 422}:
-                raise SafeError(ErrorCode.CONTRACT_INVALID, res.status_code)
-            else:
-                raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502)
-        except SafeError:
-            raise
-        except Exception as exc:
-            logger.exception("Inference execution failed: %s", exc)
-            raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503) from None
+    except httpx.TimeoutException:
+        logger.warning("XAI service call timed out")
+        raise SafeError(ErrorCode.DOWNSTREAM_TIMEOUT, 504) from None
+    except httpx.ConnectError:
+        logger.warning("XAI service connection failed")
+        raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503) from None
     except SafeError:
         raise
     except Exception as exc:
@@ -515,6 +498,11 @@ def explanation_record_to_response(record: Explanation) -> C4ExplanationResponse
         )
         for c in raw_contributions
     ]
+    diagnostics: dict[str, int | float | str | bool] = {}
+    if record.diagnostics and isinstance(record.diagnostics, dict):
+        for k, v in record.diagnostics.items():
+            if isinstance(v, (int, float, str, bool)):
+                diagnostics[k] = v
     return C4ExplanationResponse(
         method=record.method,  # type: ignore[arg-type]
         status=record.status,  # type: ignore[arg-type]
@@ -542,7 +530,7 @@ def explanation_record_to_response(record: Explanation) -> C4ExplanationResponse
         created_at=record.created_at,
         is_development=record.is_development,
         source_reference=record.source_reference,
-        diagnostics=record.diagnostics or {},
+        diagnostics=diagnostics,
     )
 
 
@@ -599,9 +587,20 @@ def create_c4_explanation(
     # Handle inference and database failures clearly. Never claim a result was saved if persistence failed.
     explanation_id = str(uuid4())
     is_temporary_model = True  # Mark temporary-model records as development explanations
+    created_time = now()
+
+    diagnostics_data: dict[str, int | float | str | bool] = {}
+    if explanation_res.token_count is not None:
+        diagnostics_data["token_count"] = explanation_res.token_count
+    if explanation_res.truncated is not None:
+        diagnostics_data["truncated"] = explanation_res.truncated
+    if isinstance(explanation_res.diagnostics, dict):
+        for k, v in explanation_res.diagnostics.items():
+            if isinstance(v, (int, float, str, bool)):
+                diagnostics_data[k] = v
 
     try:
-        with Session(engine()) as db, db.begin():
+        with Session(engine()) as db:
             record = Explanation(
                 id=explanation_id,
                 account_id=account.id,
@@ -625,11 +624,7 @@ def create_c4_explanation(
                 probabilities=explanation_res.probabilities,
                 token_count=explanation_res.token_count,
                 truncated=explanation_res.truncated,
-                diagnostics={
-                    "token_count": explanation_res.token_count,
-                    "truncated": explanation_res.truncated,
-                    "computation_bounds": explanation_res.computation_bounds,
-                },
+                diagnostics=diagnostics_data,
                 reconstructed_output=explanation_res.reconstructed_output,
                 additivity_residual=explanation_res.additivity_residual,
                 additivity_within_tolerance=explanation_res.additivity_within_tolerance,
@@ -638,9 +633,29 @@ def create_c4_explanation(
                 status="READY",
                 status_message=explanation_res.status_message,
                 expires_at=now() + timedelta(hours=settings().retention_hours),
+                created_at=created_time,
+                updated_at=created_time,
             )
             db.add(record)
-            saved_created_at = record.created_at
+            db.commit()
+            saved_created_at = record.created_at or created_time
+    except IntegrityError:
+        # Concurrent retry or race condition on idempotency key
+        if body.idempotency_key:
+            with Session(engine()) as db:
+                existing = db.scalar(
+                    select(Explanation).where(
+                        Explanation.account_id == account.id,
+                        Explanation.idempotency_key == str(body.idempotency_key),
+                    )
+                )
+                if existing:
+                    if existing.request_hash != fingerprint:
+                        raise SafeError(ErrorCode.CONFLICT, 409) from None
+                    if existing.expires_at and existing.expires_at <= now():
+                        raise SafeError(ErrorCode.NOT_FOUND, 404) from None
+                    return explanation_record_to_response(existing)
+        raise SafeError(ErrorCode.CONFLICT, 409) from None
     except Exception as exc:
         logger.exception("Failed to persist explanation: %s", exc)
         raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
@@ -649,6 +664,7 @@ def create_c4_explanation(
     explanation_res.created_at = saved_created_at
     explanation_res.is_development = is_temporary_model
     explanation_res.source_reference = body.source_reference
+    explanation_res.diagnostics = diagnostics_data
     return explanation_res
 
 

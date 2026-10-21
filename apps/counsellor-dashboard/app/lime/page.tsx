@@ -6,15 +6,15 @@ import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
 import { SignedBarChart } from "../components/SignedBarChart";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
-import { api, ApiError } from "@j26/common/api";
+import { api } from "@j26/common/api";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
 
 export default function LimePage() {
   const {
+    authorized,
+    checking,
     selectedTask,
     selectedTaskId,
-    tasks,
-    selectTask,
     selectedSentimentClass,
     setSelectedSentimentClass,
     devInput,
@@ -30,38 +30,67 @@ export default function LimePage() {
 
   // Ignore late responses across case/model changes
   const activeRequestRef = useRef(0);
+  const isRestoringRef = useRef(false);
+  const restoredIdRef = useRef<string | null>(null);
 
   const snapshot = devInput && devInput.text ? devInput : null;
-  const submissionText = snapshot ? snapshot.text : null;
-  const caseLanguage = snapshot ? (snapshot.language || "English") : "English";
+  const submissionText = snapshot ? snapshot.text : (selectedTask?.preprocessing?.anonymized_text || null);
+  const caseLanguage = snapshot ? (snapshot.language || "English") : (selectedTask?.preprocessing?.language || "English");
   const targetClass = selectedSentimentClass || snapshot?.targetClass || "Negative";
 
-  // Restore saved explanation from URL parameter (?id=...) on mount/refresh
+  const prevSubmissionTextRef = useRef<string | null>(submissionText);
+  const prevTaskIdRef = useRef<string | null>(selectedTaskId);
+  const prevTargetClassRef = useRef<string>(targetClass);
+
+  // Restore saved explanation from URL parameter (?id=...) once auth is ready
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (checking || !authorized) return;
+
     const urlParams = new URLSearchParams(window.location.search);
     const savedId = urlParams.get("id");
-    if (!savedId) return;
+    if (!savedId || savedId === restoredIdRef.current) return;
 
     let mounted = true;
+    isRestoringRef.current = true;
     const currentReqId = ++activeRequestRef.current;
     setIsBusy(true);
 
     api<C4ExplanationResponse>(`/c4/explanations/${savedId}`)
       .then((data) => {
         if (!mounted || currentReqId !== activeRequestRef.current) return;
+        if (data.method !== "LIME") {
+          setError(`Explanation method mismatch: this record is a ${data.method} explanation, not LIME.`);
+          setExplanation(null);
+          const url = new URL(window.location.href);
+          url.searchParams.delete("id");
+          window.history.replaceState(null, "", url.pathname);
+          return;
+        }
+        restoredIdRef.current = savedId;
         setExplanation(data);
-        setIsClassifierConnected(true);
-        setStatusMessage(`Restored saved LIME explanation (${data.target_class}).`);
+
+        if (data.status === "AWAITING_CLASSIFIER_CONNECTION") {
+          setIsClassifierConnected(false);
+          setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
+        } else if (data.status === "UNAVAILABLE") {
+          setIsClassifierConnected(true);
+          setStatusMessage(data.status_message || "Saved LIME explanation is unavailable.");
+        } else {
+          setIsClassifierConnected(true);
+          setStatusMessage(`Restored saved LIME explanation (${data.target_class}).`);
+        }
+
         if (data.target_class) {
-          setSelectedSentimentClass(data.target_class as any);
+          prevTargetClassRef.current = data.target_class;
+          setSelectedSentimentClass(data.target_class as "Negative" | "Neutral" | "Positive");
         }
         if (data.probabilities && data.predicted_class) {
           setPrediction({
             model_id: data.model_id || "cardiffnlp/twitter-xlm-roberta-base-sentiment",
             model_version: data.model_version || "",
             model_revision: data.model_revision || null,
-            predicted_sentiment: data.predicted_class as any,
+            predicted_sentiment: data.predicted_class as "Negative" | "Neutral" | "Positive",
             confidence:
               data.probabilities[data.predicted_class] ?? (data.target_class_probability ?? 0),
             probabilities: data.probabilities,
@@ -81,6 +110,7 @@ export default function LimePage() {
         window.history.replaceState(null, "", url.pathname);
       })
       .finally(() => {
+        isRestoringRef.current = false;
         if (mounted && currentReqId === activeRequestRef.current) {
           setIsBusy(false);
         }
@@ -88,48 +118,75 @@ export default function LimePage() {
 
     return () => {
       mounted = false;
+      isRestoringRef.current = false;
     };
-  }, [setSelectedSentimentClass]);
+  }, [checking, authorized, setSelectedSentimentClass]);
 
   // Clear previous results whenever new input is provided or target class changes
   useEffect(() => {
-    activeRequestRef.current += 1;
-    // If user changes task or provides new input, clear the previously selected explanation
-    setExplanation((prev) => {
-      if (prev && !submissionText && prev.explanation_id) {
-        // Keep restored explanation if we are viewing a restored record with no new input
-        return prev;
-      }
-      return null;
-    });
-    setError("");
-    setStatusMessage("");
-    if (submissionText && typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("id")) {
-        url.searchParams.delete("id");
-        window.history.replaceState(null, "", url.pathname);
+    if (!authorized) {
+      queueMicrotask(() => {
+        setExplanation(null);
+        setPrediction(null);
+        setError("");
+        setStatusMessage("");
+        restoredIdRef.current = null;
+      });
+      return;
+    }
+
+    if (isRestoringRef.current) return;
+
+    const textChanged = submissionText !== prevSubmissionTextRef.current;
+    const taskChanged = selectedTaskId !== prevTaskIdRef.current;
+    const classChanged = selectedSentimentClass !== prevTargetClassRef.current;
+
+    prevSubmissionTextRef.current = submissionText;
+    prevTaskIdRef.current = selectedTaskId;
+    prevTargetClassRef.current = selectedSentimentClass;
+
+    if (textChanged || taskChanged || classChanged) {
+      activeRequestRef.current += 1;
+      restoredIdRef.current = null;
+      queueMicrotask(() => {
+        setExplanation(null);
+        setError("");
+        setStatusMessage("");
+      });
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("id")) {
+          url.searchParams.delete("id");
+          window.history.replaceState(null, "", url.pathname);
+        }
       }
     }
-  }, [selectedTaskId, selectedSentimentClass, submissionText]);
+  }, [authorized, submissionText, selectedTaskId, selectedSentimentClass]);
 
   // Set prediction from snapshot or fetch if text is present
   useEffect(() => {
     let mounted = true;
     if (!submissionText) {
-      setPrediction(null);
-      setIsClassifierConnected(false);
+      queueMicrotask(() => {
+        setPrediction(null);
+        setIsClassifierConnected(false);
+      });
       return;
     }
 
     if (snapshot && snapshot.prediction) {
-      setPrediction(snapshot.prediction);
-      setIsClassifierConnected(true);
+      const snapPred = snapshot.prediction;
+      queueMicrotask(() => {
+        setPrediction(snapPred);
+        setIsClassifierConnected(true);
+      });
       return;
     }
 
     const currentReqId = ++activeRequestRef.current;
-    setIsPredicting(true);
+    queueMicrotask(() => {
+      setIsPredicting(true);
+    });
 
     fetch("/api/c4-predict", {
       method: "POST",
@@ -203,9 +260,16 @@ export default function LimePage() {
       if (data.status === "AWAITING_CLASSIFIER_CONNECTION") {
         setIsClassifierConnected(false);
         setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
-      } else {
+      } else if (data.status === "UNAVAILABLE") {
         setIsClassifierConnected(true);
-        setStatusMessage(`LIME explanation for "${targetClass}" computed and saved successfully.`);
+        setStatusMessage(data.status_message || "LIME explanation unavailable.");
+      } else if (data.status === "READY") {
+        setIsClassifierConnected(true);
+        if (data.explanation_id) {
+          setStatusMessage(`LIME explanation for "${targetClass}" computed and saved successfully.`);
+        } else {
+          setStatusMessage("LIME explanation computed successfully.");
+        }
       }
     } catch (err) {
       if (currentReqId === activeRequestRef.current) {
@@ -243,8 +307,6 @@ export default function LimePage() {
   const redDash = (posPct / 100) * circ;
   const greenDash = (negPct / 100) * circ;
 
-  const maxAbsWeight = contributions.reduce((max, c) => Math.max(max, c.abs_weight), 0);
-
   const handleDownloadCsv = () => {
     if (!hasResults || contributions.length === 0) return;
     const headers = "Feature (Word/Phrase),Weight,Direction\n";
@@ -266,7 +328,7 @@ export default function LimePage() {
     document.body.removeChild(link);
   };
 
-  const tokenCount = submissionText ? submissionText.trim().split(/\s+/).length : 0;
+  const tokenCount = submissionText ? submissionText.trim().split(/\s+/).length : (explanation?.token_count ?? 0);
   const canCompute = Boolean(submissionText);
 
   // Explanation steps (matching prototype LIME workflow)

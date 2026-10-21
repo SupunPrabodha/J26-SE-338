@@ -22,13 +22,24 @@ function cleanExpired() {
   }
 }
 
+const ALLOWED_ORIGIN_REGEX = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+function getCorsOrigin(request: Request): string {
+  const origin = request.headers.get("origin");
+  if (origin && ALLOWED_ORIGIN_REGEX.test(origin)) {
+    return origin;
+  }
+  return "http://localhost:3000";
+}
+
 export const dynamic = "force-dynamic";
 
-export async function OPTIONS() {
+export async function OPTIONS(request: Request) {
+  const origin = getCorsOrigin(request);
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
@@ -38,17 +49,24 @@ export async function OPTIONS() {
 export async function POST(request: Request) {
   cleanExpired();
   try {
+    const origin = getCorsOrigin(request);
     const body = await request.json();
     if (!body || !body.text || typeof body.text !== "string" || !body.text.trim()) {
       return NextResponse.json({ error: "Text is required for handoff." }, { status: 422 });
     }
+    if (body.text.length > 2000) {
+      return NextResponse.json({ error: "Text exceeds maximum allowed length of 2000 characters." }, { status: 422 });
+    }
+
+    const validClasses = ["Negative", "Neutral", "Positive"];
+    const targetClass = validClasses.includes(body.targetClass) ? body.targetClass : "Negative";
 
     const handoffId = `c4_${crypto.randomUUID().replace(/-/g, "")}`;
     handoffStore.set(handoffId, {
       text: body.text.trim().slice(0, 2000),
-      language: body.language || "English",
+      language: typeof body.language === "string" ? body.language.slice(0, 50) : "English",
       prediction: body.prediction || null,
-      targetClass: body.targetClass || "Negative",
+      targetClass,
       expiresAt: Date.now() + 120_000, // 2 minutes TTL
     });
 
@@ -56,7 +74,7 @@ export async function POST(request: Request) {
       { handoffId },
       {
         headers: {
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": origin,
         },
       }
     );
@@ -82,6 +100,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Handoff expired." }, { status: 410 });
   }
 
+  const origin = getCorsOrigin(request);
   return NextResponse.json(
     {
       text: item.text,
@@ -91,7 +110,7 @@ export async function GET(request: Request) {
     },
     {
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": origin,
       },
     }
   );

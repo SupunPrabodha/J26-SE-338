@@ -12,6 +12,7 @@ from research_common.database import (
     Case,
     CaseLink,
     Consent,
+    Explanation,
     Job,
     Retention,
     Review,
@@ -370,3 +371,10 @@ def enforce_retention():
                 state=SimpleNamespace(correlation_id=UUID(case.correlation_id))
             )
             dispose(db, case, request)
+        db.execute(
+            delete(Explanation).where(
+                Explanation.expires_at.is_not(None),
+                Explanation.expires_at <= now(),
+            )
+        )
+

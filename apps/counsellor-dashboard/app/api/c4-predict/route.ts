@@ -14,6 +14,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (body.text.length > 2000) {
+      return NextResponse.json(
+        { error: "Input text exceeds maximum allowed length of 2000 characters." },
+        { status: 422 }
+      );
+    }
+
     const candidateUrls = [
       process.env.XAI_URL,
       process.env.XAI_INTERNAL_URL,

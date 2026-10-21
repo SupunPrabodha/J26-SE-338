@@ -7,10 +7,13 @@ import { useReviewCase } from "../context/CaseContext";
 import { SignedBarChart } from "../components/SignedBarChart";
 import { WaterfallChart } from "../components/WaterfallChart";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
+import { api } from "@j26/common/api";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
 
 export default function ShapPage() {
   const {
+    authorized,
+    checking,
     selectedTask,
     selectedTaskId,
     tasks,
@@ -30,37 +33,163 @@ export default function ShapPage() {
 
   // Ignore late responses across case changes
   const activeRequestRef = useRef(0);
+  const isRestoringRef = useRef(false);
+  const restoredIdRef = useRef<string | null>(null);
 
   const snapshot = devInput && devInput.text ? devInput : null;
-  const submissionText = snapshot ? snapshot.text : null;
-  const caseLanguage = snapshot ? (snapshot.language || "English") : "English";
+  const submissionText = snapshot ? snapshot.text : (selectedTask?.preprocessing?.anonymized_text || null);
+  const caseLanguage = snapshot ? (snapshot.language || "English") : (selectedTask?.preprocessing?.language || "English");
   const targetClass = selectedSentimentClass || snapshot?.targetClass || "Negative";
+
+  const prevSubmissionTextRef = useRef<string | null>(submissionText);
+  const prevTaskIdRef = useRef<string | null>(selectedTaskId);
+  const prevTargetClassRef = useRef<string>(targetClass);
+
+  // Restore saved explanation from URL parameter (?id=...) once auth is ready
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (checking || !authorized) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const savedId = urlParams.get("id");
+    if (!savedId || savedId === restoredIdRef.current) return;
+
+    let mounted = true;
+    isRestoringRef.current = true;
+    const currentReqId = ++activeRequestRef.current;
+    setIsBusy(true);
+
+    api<C4ExplanationResponse>(`/c4/explanations/${savedId}`)
+      .then((data) => {
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
+        if (data.method !== "SHAP") {
+          setError(`Explanation method mismatch: this record is a ${data.method} explanation, not SHAP.`);
+          setExplanation(null);
+          const url = new URL(window.location.href);
+          url.searchParams.delete("id");
+          window.history.replaceState(null, "", url.pathname);
+          return;
+        }
+        restoredIdRef.current = savedId;
+        setExplanation(data);
+
+        if (data.status === "AWAITING_CLASSIFIER_CONNECTION") {
+          setIsClassifierConnected(false);
+          setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
+        } else if (data.status === "UNAVAILABLE") {
+          setIsClassifierConnected(true);
+          setStatusMessage(data.status_message || "Saved SHAP explanation is unavailable.");
+        } else {
+          setIsClassifierConnected(true);
+          setStatusMessage(`Restored saved SHAP explanation (${data.target_class}).`);
+        }
+
+        if (data.target_class) {
+          prevTargetClassRef.current = data.target_class;
+          setSelectedSentimentClass(data.target_class as "Negative" | "Neutral" | "Positive");
+        }
+        if (data.probabilities && data.predicted_class) {
+          setPrediction({
+            model_id: data.model_id || "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+            model_version: data.model_version || "",
+            model_revision: data.model_revision || null,
+            predicted_sentiment: data.predicted_class as "Negative" | "Neutral" | "Positive",
+            confidence:
+              data.probabilities[data.predicted_class] ?? (data.target_class_probability ?? 0),
+            probabilities: data.probabilities,
+            token_count: data.token_count ?? 0,
+            truncated: data.truncated ?? false,
+            max_sequence_length: 512,
+            status: "READY",
+            status_message: "Restored from saved explanation record.",
+          });
+        }
+      })
+      .catch((err) => {
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
+        setError(err.message || "Failed to retrieve saved explanation.");
+        const url = new URL(window.location.href);
+        url.searchParams.delete("id");
+        window.history.replaceState(null, "", url.pathname);
+      })
+      .finally(() => {
+        isRestoringRef.current = false;
+        if (mounted && currentReqId === activeRequestRef.current) {
+          setIsBusy(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+      isRestoringRef.current = false;
+    };
+  }, [checking, authorized, setSelectedSentimentClass]);
 
   // Clear previous results whenever the submitted text or target class changes
   useEffect(() => {
-    activeRequestRef.current += 1;
-    setExplanation(null);
-    setError("");
-    setStatusMessage("");
-  }, [selectedTaskId, selectedSentimentClass, submissionText]);
+    if (!authorized) {
+      queueMicrotask(() => {
+        setExplanation(null);
+        setPrediction(null);
+        setError("");
+        setStatusMessage("");
+        restoredIdRef.current = null;
+      });
+      return;
+    }
+
+    if (isRestoringRef.current) return;
+
+    const textChanged = submissionText !== prevSubmissionTextRef.current;
+    const taskChanged = selectedTaskId !== prevTaskIdRef.current;
+    const classChanged = selectedSentimentClass !== prevTargetClassRef.current;
+
+    prevSubmissionTextRef.current = submissionText;
+    prevTaskIdRef.current = selectedTaskId;
+    prevTargetClassRef.current = selectedSentimentClass;
+
+    if (textChanged || taskChanged || classChanged) {
+      activeRequestRef.current += 1;
+      restoredIdRef.current = null;
+      queueMicrotask(() => {
+        setExplanation(null);
+        setError("");
+        setStatusMessage("");
+      });
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("id")) {
+          url.searchParams.delete("id");
+          window.history.replaceState(null, "", url.pathname);
+        }
+      }
+    }
+  }, [authorized, submissionText, selectedTaskId, selectedSentimentClass]);
 
   // Set prediction from snapshot or fetch if text is present
   useEffect(() => {
     let mounted = true;
     if (!submissionText) {
-      setPrediction(null);
-      setIsClassifierConnected(false);
+      queueMicrotask(() => {
+        setPrediction(null);
+        setIsClassifierConnected(false);
+      });
       return;
     }
 
     if (snapshot && snapshot.prediction) {
-      setPrediction(snapshot.prediction);
-      setIsClassifierConnected(true);
+      const snapPred = snapshot.prediction;
+      queueMicrotask(() => {
+        setPrediction(snapPred);
+        setIsClassifierConnected(true);
+      });
       return;
     }
 
     const currentReqId = ++activeRequestRef.current;
-    setIsPredicting(true);
+    queueMicrotask(() => {
+      setIsPredicting(true);
+    });
 
     fetch("/api/c4-predict", {
       method: "POST",
@@ -110,15 +239,12 @@ export default function ShapPage() {
     setStatusMessage(`Running SHAP additive explanation for "${targetClass}" with text masker...`);
 
     try {
-      const res = await fetch("/api/c4-explain", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: submissionText,
-          method: "SHAP",
-          target_class: targetClass,
-          language: caseLanguage,
-        }),
+      const data = await api<C4ExplanationResponse>("/c4/explanations", {
+        text: submissionText,
+        method: "SHAP",
+        target_class: targetClass,
+        language: caseLanguage,
+        idempotency_key: crypto.randomUUID(),
       });
 
       if (currentReqId !== activeRequestRef.current) {
@@ -126,20 +252,27 @@ export default function ShapPage() {
         return;
       }
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || `Request failed with status ${res.status}`);
-      }
-
-      const data = (await res.json()) as C4ExplanationResponse;
       setExplanation(data);
+
+      if (data.explanation_id && typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("id", String(data.explanation_id));
+        window.history.replaceState(null, "", url.toString());
+      }
 
       if (data.status === "AWAITING_CLASSIFIER_CONNECTION") {
         setIsClassifierConnected(false);
         setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
-      } else {
+      } else if (data.status === "UNAVAILABLE") {
         setIsClassifierConnected(true);
-        setStatusMessage(`SHAP additive explanation for "${targetClass}" computed successfully.`);
+        setStatusMessage(data.status_message || "SHAP explanation unavailable.");
+      } else if (data.status === "READY") {
+        setIsClassifierConnected(true);
+        if (data.explanation_id) {
+          setStatusMessage(`SHAP additive explanation for "${targetClass}" computed and saved successfully.`);
+        } else {
+          setStatusMessage("SHAP additive explanation computed successfully.");
+        }
       }
     } catch (err) {
       if (currentReqId === activeRequestRef.current) {
@@ -177,7 +310,6 @@ export default function ShapPage() {
   const redDash = (posPct / 100) * circ;
   const greenDash = (negPct / 100) * circ;
 
-  const maxAbsWeight = contributions.reduce((max, c) => Math.max(max, c.abs_weight), 0);
   const meanAbsShap =
     contributions.length > 0
       ? (contributions.reduce((acc, c) => acc + c.abs_weight, 0) / contributions.length).toFixed(4)
@@ -205,7 +337,7 @@ export default function ShapPage() {
     document.body.removeChild(link);
   };
 
-  const tokenCount = submissionText ? submissionText.trim().split(/\s+/).length : 0;
+  const tokenCount = submissionText ? submissionText.trim().split(/\s+/).length : (explanation?.token_count ?? 0);
   const canCompute = Boolean(submissionText);
 
   // Base and Output values from explanation
@@ -220,7 +352,7 @@ export default function ShapPage() {
         {/* Top Header */}
         <header className="shap-header">
           <div className="shap-header-title-block">
-            <h1 className="shap-main-title">SHAP Explanation</h1>
+            <h1 className="shap-main-title" aria-label="SHAP Additive Explanations">SHAP Additive Explanations</h1>
             <p className="shap-main-subtitle">
               SHapley Additive exPlanations for individual sentiment screening predictions.
             </p>
@@ -364,6 +496,15 @@ export default function ShapPage() {
               <div className="shap-input-box">
                 {submissionText ? (
                   <p className="shap-input-line-1">{submissionText}</p>
+                ) : explanation ? (
+                  <div role="status" style={{ padding: "8px 4px" }}>
+                    <p style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b", margin: "0 0 4px" }}>
+                      Original text not retained in persistence
+                    </p>
+                    <p className="shap-input-line-2" style={{ color: "#64748b", fontSize: "11px", margin: 0, lineHeight: 1.45 }}>
+                      Per data minimization and retention controls, full input text is excluded from stored explanation records. Token attributions, probabilities, and diagnostics have been retrieved from saved explanation ID: <code style={{ fontSize: "10.5px", background: "#f1f5f9", padding: "1px 4px", borderRadius: "3px" }}>{String(explanation.explanation_id || "").slice(0, 8)}...</code>
+                    </p>
+                  </div>
                 ) : (
                   <div role="status" style={{ padding: "16px 8px", textAlign: "center" }}>
                     <p style={{ fontSize: "14px", fontWeight: 700, color: "#1e293b", margin: "0 0 6px" }}>
@@ -407,7 +548,7 @@ export default function ShapPage() {
               <div style={{ marginTop: "12px", borderTop: "1px solid #f1f5f9", paddingTop: "10px" }}>
                 <button
                   type="button"
-                  aria-label="Compute SHAP Attributions"
+                  aria-label="Compute SHAP Values"
                   onClick={handleRunShap}
                   disabled={!canCompute || isBusy}
                   style={{

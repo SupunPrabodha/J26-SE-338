@@ -8,11 +8,14 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import Request
+from fastapi import Depends, Request
 from research_common.config import settings
 from research_common.mocks import mock_app
+from research_common.service_auth import service_auth
 from research_common.web import SafeError
 from research_contracts import (
+    C4EncoderCheckRequest,
+    C4EncoderCheckResponse,
     C4ExplanationRequest,
     C4ExplanationResponse,
     C4PredictionRequest,
@@ -39,6 +42,30 @@ def _get_or_init_classifier():
             logger.warning("Could not auto-initialize classifier: %s", exc)
             return None
     return classifier
+
+
+@app.post("/internal/v1/dev/encoder-check", response_model=C4EncoderCheckResponse)
+def dev_encoder_check(
+    request: C4EncoderCheckRequest, http_request: Request
+) -> C4EncoderCheckResponse:
+    """Development-only check running input text through the pretrained base encoder."""
+    if settings().environment != "development":
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not request.text or not request.text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    try:
+        from xai.encoder_adapter import get_encoder_adapter
+
+        adapter = get_encoder_adapter()
+        return adapter.run_check(request.text)
+    except ModuleNotFoundError:
+        raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503) from None
+    except ValueError:
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422) from None
+    except Exception:
+        raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
 
 
 @app.post("/internal/v1/dev/predict", response_model=C4PredictionResponse)
@@ -81,7 +108,11 @@ def dev_predict(
         raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
 
 
-@app.post("/internal/v1/dev/explain", response_model=C4ExplanationResponse)
+@app.post(
+    "/internal/v1/dev/explain",
+    response_model=C4ExplanationResponse,
+    dependencies=[Depends(service_auth("xai"))],
+)
 def dev_explain(
     request: C4ExplanationRequest, http_request: Request
 ) -> C4ExplanationResponse:
@@ -92,12 +123,14 @@ def dev_explain(
     if not request.text or not request.text.strip():
         raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
 
-    classifier = _get_or_init_classifier()
+    from xai.classifier_interface import get_classifier
+
+    classifier = get_classifier()
     if classifier is None:
         return C4ExplanationResponse(
             method=request.method,
             status="AWAITING_CLASSIFIER_CONNECTION",
-            status_message="Awaiting classifier connection — C3 model integration pending.",
+            status_message="Awaiting classifier connection",
         )
 
     try:

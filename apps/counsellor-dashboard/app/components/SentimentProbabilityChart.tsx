@@ -201,7 +201,7 @@ export function LocalProbabilityChart({
             tickLine={false}
           />
           <Tooltip
-            formatter={(value: any) => [`${(Number(value) * 100).toFixed(1)}% (${Number(value).toFixed(4)})`, "Probability"]}
+            formatter={(value: unknown) => [`${(Number(value) * 100).toFixed(1)}% (${Number(value).toFixed(4)})`, "Probability"]}
             contentStyle={{
               background: "#ffffff",
               border: "1px solid #e2e8f0",

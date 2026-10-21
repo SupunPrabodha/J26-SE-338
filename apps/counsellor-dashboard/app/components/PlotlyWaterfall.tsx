@@ -17,7 +17,6 @@ interface PlotlyWaterfallProps {
 
 export default function PlotlyWaterfall({
   baseValue,
-  outputValue,
   contributions,
   targetClass,
   maxTopFeatures = 8,

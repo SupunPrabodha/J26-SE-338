@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
+from research_common.service_auth import service_token
 from research_contracts import C4ExplanationRequest
 from xai.classifier_interface import set_classifier
 from xai.lime_explainer import explain_with_lime
@@ -38,6 +39,36 @@ class FictionalInputDependentTestDouble:
 
 
 @pytest.fixture(autouse=True)
+def mock_service_redis(monkeypatch):
+    """Mock Redis and XAI service secret for unit test authentication."""
+    import secrets
+
+    from research_common import service_auth
+    from research_common.config import settings
+
+    class SimpleRedis:
+        def __init__(self):
+            self.data = {}
+
+        def get(self, k):
+            return self.data.get(k)
+
+        def set(self, k, v, **kw):
+            self.data[k] = v
+
+        def delete(self, k):
+            self.data.pop(k, None)
+
+    cache = SimpleRedis()
+    monkeypatch.setattr(service_auth, "redis_client", lambda: cache)
+    monkeypatch.setenv("SERVICE_NAME", "xai")
+    monkeypatch.setenv("XAI_SECRET", secrets.token_urlsafe(48))
+    settings.cache_clear()
+    yield cache
+    settings.cache_clear()
+
+
+@pytest.fixture(autouse=True)
 def clean_classifier_registry():
     """Ensure classifier registry is reset before and after each test."""
     set_classifier(None)
@@ -49,13 +80,14 @@ def test_awaiting_classifier_connection_without_classifier():
     """Verify that without a classifier, the explainer returns 'Awaiting classifier connection'."""
     client = TestClient(app)
 
+    headers = {"Authorization": f"Bearer {service_token('xai')}"}
     for method in ["LIME", "SHAP"]:
         payload = C4ExplanationRequest(
             text="I have two coursework deadlines and an upcoming exam.",
             method=method,  # type: ignore[arg-type]
         ).model_dump(mode="json")
 
-        resp = client.post("/internal/v1/dev/explain", json=payload)
+        resp = client.post("/internal/v1/dev/explain", json=payload, headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["method"] == method
@@ -132,7 +164,8 @@ def test_dev_explain_endpoint_with_classifier():
         method="LIME",
         target_class="Academic Pressure",
     ).model_dump(mode="json")
-    lime_resp = client.post("/internal/v1/dev/explain", json=lime_req)
+    headers = {"Authorization": f"Bearer {service_token('xai')}"}
+    lime_resp = client.post("/internal/v1/dev/explain", json=lime_req, headers=headers)
     assert lime_resp.status_code == 200
     lime_data = lime_resp.json()
     assert lime_data["method"] == "LIME"
@@ -145,7 +178,7 @@ def test_dev_explain_endpoint_with_classifier():
         method="SHAP",
         target_class="Academic Pressure",
     ).model_dump(mode="json")
-    shap_resp = client.post("/internal/v1/dev/explain", json=shap_req)
+    shap_resp = client.post("/internal/v1/dev/explain", json=shap_req, headers=headers)
     assert shap_resp.status_code == 200
     shap_data = shap_resp.json()
     assert shap_data["method"] == "SHAP"
