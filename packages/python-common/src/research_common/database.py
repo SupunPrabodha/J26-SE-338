@@ -8,6 +8,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -150,6 +151,43 @@ class ConsentWithdrawal(Entity, Base):
     __tablename__ = "linkage_consent_withdrawals"
     consent_id: Mapped[str] = mapped_column(ForeignKey("linkage_consents.id"), unique=True)
     idempotency_key: Mapped[str] = mapped_column(String(36))
+
+
+class Explanation(Entity, Base):
+    __tablename__ = "c4_explanations"
+    account_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"), index=True)
+    source_reference: Mapped[str | None] = mapped_column(String(100), index=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(64), index=True)
+    request_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    method: Mapped[str] = mapped_column(String(20))
+    target_class: Mapped[str] = mapped_column(String(50))
+    model_id: Mapped[str] = mapped_column(String(150))
+    model_version: Mapped[str | None] = mapped_column(String(150))
+    model_revision: Mapped[str | None] = mapped_column(String(100))
+    explainer_version: Mapped[str | None] = mapped_column(String(50))
+    explainer_config: Mapped[dict | None] = mapped_column(JSON)
+    contributions: Mapped[list | None] = mapped_column(JSON)
+    tokens: Mapped[list | None] = mapped_column(JSON)
+    weights: Mapped[list | None] = mapped_column(JSON)
+    base_value: Mapped[float | None] = mapped_column(Float)
+    output_value: Mapped[float | None] = mapped_column(Float)
+    target_class_probability: Mapped[float | None] = mapped_column(Float)
+    predicted_class: Mapped[str | None] = mapped_column(String(50))
+    probabilities: Mapped[dict | None] = mapped_column(JSON)
+    token_count: Mapped[int | None] = mapped_column(Integer)
+    truncated: Mapped[bool | None] = mapped_column(Boolean)
+    diagnostics: Mapped[dict | None] = mapped_column(JSON)
+    reconstructed_output: Mapped[float | None] = mapped_column(Float)
+    additivity_residual: Mapped[float | None] = mapped_column(Float)
+    additivity_within_tolerance: Mapped[bool | None] = mapped_column(Boolean)
+    additivity_discrepancy_message: Mapped[str | None] = mapped_column(String(500))
+    is_development: Mapped[bool] = mapped_column(Boolean, default=True)
+    status: Mapped[str] = mapped_column(String(40), default="READY")
+    status_message: Mapped[str | None] = mapped_column(String(255))
+    expires_at: Mapped[object | None] = mapped_column(UTCDateTime, index=True)
+    __table_args__ = (
+        CheckConstraint("method IN ('LIME','SHAP')"),
+    )
 
 
 class Audit(Base):

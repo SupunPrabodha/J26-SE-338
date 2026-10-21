@@ -64,7 +64,17 @@ export default function Dashboard() {
     </section> : <>
       <nav className="toolbar" aria-label="Review controls"><div><h2>Assigned tasks</h2><p className="hint">Refresh to recheck access and current consent.</p></div>
         <div className="actions"><button className="secondary" disabled={busy} onClick={() => act(load)}>Refresh assigned tasks</button>
-          <button className="quiet" disabled={busy} onClick={() => act(async () => { setAuthorized(false); setTasks([]); setSelected(null); await api("/auth/logout", {}); })}>Sign out</button></div></nav>
+          <button className="quiet" disabled={busy} onClick={() => act(async () => {
+            setAuthorized(false);
+            setTasks([]);
+            setSelected(null);
+            if (typeof window !== "undefined") {
+              const url = new URL(window.location.href);
+              url.search = "";
+              window.history.replaceState(null, "", url.pathname);
+            }
+            await api("/auth/logout", {});
+          })}>Sign out</button></div></nav>
       <p role="status" className="feedback">{busy ? "Checking authorized evidence…" : `${tasks.length} authorized synthetic task(s)`}</p>
       <div className="review-grid"><section className="card task-list" aria-label="Assigned synthetic cases">
         {tasks.length === 0 ? <div className="empty"><h3>No assigned cases available</h3><p>Cases appear after successful processing with active consent. Withdrawn or inaccessible evidence is excluded.</p></div> :

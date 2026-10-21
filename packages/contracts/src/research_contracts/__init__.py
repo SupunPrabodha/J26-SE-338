@@ -353,6 +353,8 @@ class C4ExplanationRequest(Contract):
     language: (
         Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
     ) = None
+    idempotency_key: UUID | None = None
+    source_reference: Annotated[str, Field(max_length=100)] | None = None
 
 
 class C4ExplanationResponse(Contract):
@@ -378,6 +380,29 @@ class C4ExplanationResponse(Contract):
     additivity_residual: float | None = None
     additivity_within_tolerance: bool | None = None
     additivity_discrepancy_message: str | None = None
+    explanation_id: UUID | None = None
+    created_at: AwareDatetime | None = None
+    is_development: bool = True
+    source_reference: str | None = None
+    diagnostics: dict[str, int | float | str | bool] = {}
+
+
+class C4ExplanationSummary(Contract):
+    explanation_id: UUID
+    created_at: AwareDatetime
+    method: Literal["LIME", "SHAP"]
+    target_class: str
+    predicted_class: str | None = None
+    target_class_probability: float | None = None
+    is_development: bool = True
+    source_reference: str | None = None
+
+
+class C4ExplanationListResponse(Contract):
+    items: list[C4ExplanationSummary]
+    total: int
+    limit: int
+    offset: int
 
 
 class C4PredictionRequest(Contract):

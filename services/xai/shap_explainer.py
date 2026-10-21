@@ -118,8 +118,10 @@ def explain_with_shap(
         token_count = len(token_ids)
         truncated = token_count > 512
 
+    import math
+
     # If required SHAP values are missing or malformed, report an unavailable result rather than defaulting to zero
-    if base_val is None or not raw_values:
+    if base_val is None or not raw_values or not math.isfinite(base_val):
         return C4ExplanationResponse(
             method="SHAP",
             status="UNAVAILABLE",
@@ -141,12 +143,64 @@ def explain_with_shap(
             computation_bounds={"max_evals": max_evals},
         )
 
+    # Validate that token and value counts match; never silently truncate mismatched arrays
+    if len(raw_tokens) != len(raw_values):
+        logger.warning(
+            "SHAP token count (%d) and value count (%d) mismatch",
+            len(raw_tokens),
+            len(raw_values),
+        )
+        return C4ExplanationResponse(
+            method="SHAP",
+            status="UNAVAILABLE",
+            status_message=f"SHAP explanation unavailable: token count ({len(raw_tokens)}) and attribution count ({len(raw_values)}) mismatch.",
+            model_id=model_id,
+            model_version=classifier.model_version,
+            model_revision=model_rev,
+            predicted_class=predicted_class,
+            probabilities=prob_dict,
+            token_count=token_count,
+            truncated=truncated,
+            target_class=target_class,
+            target_class_probability=target_prob,
+            base_value=base_val,
+            output_value=target_prob,
+            contributions=[],
+            tokens=[],
+            weights=[],
+            computation_bounds={"max_evals": max_evals},
+        )
+
+    # Validate all raw_values are finite numerical values
+    if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in raw_values):
+        logger.warning("Non-finite numerical values found in SHAP values")
+        return C4ExplanationResponse(
+            method="SHAP",
+            status="UNAVAILABLE",
+            status_message="SHAP explanation unavailable: non-finite numerical values in attributions.",
+            model_id=model_id,
+            model_version=classifier.model_version,
+            model_revision=model_rev,
+            predicted_class=predicted_class,
+            probabilities=prob_dict,
+            token_count=token_count,
+            truncated=truncated,
+            target_class=target_class,
+            target_class_probability=target_prob,
+            base_value=base_val,
+            output_value=target_prob,
+            contributions=[],
+            tokens=[],
+            weights=[],
+            computation_bounds={"max_evals": max_evals},
+        )
+
     # Preserve all contributions, including whitespace or punctuation, for correct accounting
     contributions: list[FeatureContribution] = []
     tokens: list[str] = []
     weights: list[float] = []
 
-    for t, w in zip(raw_tokens, raw_values, strict=False):
+    for t, w in zip(raw_tokens, raw_values, strict=True):
         tok_str = str(t)
         weight_val = float(w)
         tokens.append(tok_str)
@@ -168,6 +222,33 @@ def explain_with_shap(
 
     # Calculate additivity residual on the probability scale
     additivity_residual = float(output_val - reconstructed_output)
+
+    # Validate finite numerical values before returning READY
+    if (
+        not math.isfinite(output_val)
+        or not math.isfinite(reconstructed_output)
+        or not math.isfinite(additivity_residual)
+    ):
+        return C4ExplanationResponse(
+            method="SHAP",
+            status="UNAVAILABLE",
+            status_message="SHAP explanation unavailable: non-finite reconstruction or residual value.",
+            model_id=model_id,
+            model_version=classifier.model_version,
+            model_revision=model_rev,
+            predicted_class=predicted_class,
+            probabilities=prob_dict,
+            token_count=token_count,
+            truncated=truncated,
+            target_class=target_class,
+            target_class_probability=target_prob,
+            base_value=base_val,
+            output_value=target_prob,
+            contributions=[],
+            tokens=[],
+            weights=[],
+            computation_bounds={"max_evals": max_evals},
+        )
 
     # Compare using documented numerical tolerance (absolute residual <= 1e-4)
     additivity_within_tolerance = bool(abs(additivity_residual) <= ADDITIVITY_TOLERANCE)

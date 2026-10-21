@@ -39,6 +39,7 @@ export interface CaseContextType {
   setSelectedSentimentClass: (cls: "Negative" | "Neutral" | "Positive") => void;
   devInput: DevelopmentInputSnapshot | null;
   setDevInput: (data: DevelopmentInputSnapshot | null) => void;
+  logout: () => Promise<void>;
 }
 
 const CaseContext = createContext<CaseContextType>({
@@ -57,6 +58,7 @@ const CaseContext = createContext<CaseContextType>({
   setSelectedSentimentClass: () => {},
   devInput: null,
   setDevInput: () => {},
+  logout: async () => {},
 });
 
 export function CaseProvider({ children }: { children: ReactNode }) {
@@ -133,6 +135,26 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const logout = useCallback(async () => {
+    setAuthorized(false);
+    setTasks([]);
+    setSelectedTaskId(null);
+    setError("");
+    setInputText("");
+    setSelectedSentimentClass("Negative");
+    setDevInput(null);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.search = "";
+      window.history.replaceState(null, "", url.pathname);
+    }
+    try {
+      await api("/auth/logout", {});
+    } catch {
+      // Ignore network errors during logout
+    }
+  }, []);
+
   return (
     <CaseContext.Provider
       value={{
@@ -151,6 +173,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setSelectedSentimentClass: updateSelectedSentimentClass,
         devInput,
         setDevInput,
+        logout,
       }}
     >
       {children}

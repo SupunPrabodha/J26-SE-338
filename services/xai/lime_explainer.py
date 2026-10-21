@@ -101,6 +101,37 @@ def explain_with_lime(
     model_id = getattr(classifier, "model_id", classifier.model_version)
     model_rev = getattr(classifier, "model_revision", None)
 
+    import math
+    base_val = (
+        float(exp.intercept[target_idx])
+        if hasattr(exp, "intercept") and target_idx in exp.intercept
+        else None
+    )
+    if not math.isfinite(target_prob) or not all(math.isfinite(w) for w in weights) or (base_val is not None and not math.isfinite(base_val)):
+        return C4ExplanationResponse(
+            method="LIME",
+            status="UNAVAILABLE",
+            status_message="LIME explanation unavailable: non-finite numerical values in attributions.",
+            model_id=model_id,
+            model_version=classifier.model_version,
+            model_revision=model_rev,
+            predicted_class=predicted_class,
+            probabilities=prob_dict,
+            token_count=token_count,
+            truncated=truncated,
+            target_class=target_class,
+            target_class_probability=target_prob,
+            base_value=base_val,
+            output_value=target_prob,
+            contributions=[],
+            tokens=[],
+            weights=[],
+            computation_bounds={
+                "num_features": num_features,
+                "num_samples": num_samples,
+            },
+        )
+
     return C4ExplanationResponse(
         method="LIME",
         status="READY",
@@ -114,7 +145,7 @@ def explain_with_lime(
         truncated=truncated,
         target_class=target_class,
         target_class_probability=target_prob,
-        base_value=float(exp.intercept[target_idx]) if hasattr(exp, "intercept") and target_idx in exp.intercept else None,
+        base_value=base_val,
         output_value=target_prob,
         contributions=contributions,
         tokens=tokens,

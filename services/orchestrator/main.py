@@ -1,7 +1,10 @@
 import hashlib
+import json
+import logging
 from datetime import timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
+import httpx
 from fastapi import Depends, Request, Response
 from research_common.config import settings
 from research_common.database import (
@@ -11,22 +14,30 @@ from research_common.database import (
     CaseLink,
     Consent,
     ConsentWithdrawal,
+    Explanation,
     Job,
     Retention,
     Review,
     ReviewAction,
     Withdrawal,
+    engine,
     session,
 )
+from research_common.service_auth import service_token
 from research_common.web import SafeError, create_app
 from research_contracts import (
     FIXTURES,
     AccountResponse,
     AssignmentRequest,
+    C4ExplanationListResponse,
+    C4ExplanationRequest,
+    C4ExplanationResponse,
+    C4ExplanationSummary,
     ConsentDecision,
     ConsentLifecycle,
     ConsentRecord,
     ErrorCode,
+    FeatureContribution,
     FixturesResponse,
     HumanReviewAction,
     LoginRequest,
@@ -38,7 +49,7 @@ from research_contracts import (
     WorkflowRequest,
     now,
 )
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -442,3 +453,266 @@ def assign(
         db.add(Assignment(case_id=case.id, counsellor_id=reviewer.id))
         auth.audit(db, request, "ASSIGNMENT", "GRANTED", case.id)
         db.commit()
+
+
+logger = logging.getLogger(__name__)
+
+
+def _call_xai_explain(body: C4ExplanationRequest) -> C4ExplanationResponse:
+    payload = body.model_dump(mode="json")
+    # Avoid holding any database transaction open during model inference
+    try:
+        with httpx.Client(timeout=settings().service_timeout_seconds, trust_env=False) as client:
+            res = client.post(
+                settings().xai_url + "/internal/v1/dev/explain",
+                json=payload,
+                headers={"Authorization": "Bearer " + service_token("xai")},
+            )
+            if res.status_code == 200:
+                return C4ExplanationResponse.model_validate(res.json())
+            elif res.status_code in {403, 422}:
+                raise SafeError(ErrorCode.CONTRACT_INVALID, res.status_code)
+            else:
+                raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502)
+    except (httpx.ConnectError, httpx.TimeoutException):
+        # Monolithic / direct execution fallback when XAI HTTP daemon is not separate
+        try:
+            from fastapi.testclient import TestClient
+            from xai.main import app as xai_app
+
+            client = TestClient(xai_app)
+            res = client.post(
+                "/internal/v1/dev/explain",
+                json=payload,
+                headers={"Authorization": "Bearer " + service_token("xai")},
+            )
+            if res.status_code == 200:
+                return C4ExplanationResponse.model_validate(res.json())
+            elif res.status_code in {403, 422}:
+                raise SafeError(ErrorCode.CONTRACT_INVALID, res.status_code)
+            else:
+                raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502)
+        except SafeError:
+            raise
+        except Exception as exc:
+            logger.exception("Inference execution failed: %s", exc)
+            raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503) from None
+    except SafeError:
+        raise
+    except Exception as exc:
+        logger.exception("Inference call failed: %s", exc)
+        raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502) from None
+
+
+def explanation_record_to_response(record: Explanation) -> C4ExplanationResponse:
+    raw_contributions = record.contributions or []
+    contributions = [
+        FeatureContribution(
+            token=c["token"],
+            weight=float(c["weight"]),
+            direction=c["direction"],
+            abs_weight=float(c["abs_weight"]),
+        )
+        for c in raw_contributions
+    ]
+    return C4ExplanationResponse(
+        method=record.method,  # type: ignore[arg-type]
+        status=record.status,  # type: ignore[arg-type]
+        status_message=record.status_message or "Explanation retrieved successfully.",
+        model_id=record.model_id,
+        model_version=record.model_version,
+        model_revision=record.model_revision,
+        predicted_class=record.predicted_class,
+        probabilities=record.probabilities or {},
+        token_count=record.token_count,
+        truncated=record.truncated,
+        target_class=record.target_class,
+        target_class_probability=record.target_class_probability,
+        base_value=record.base_value,
+        output_value=record.output_value,
+        contributions=contributions,
+        tokens=record.tokens or [],
+        weights=record.weights or [],
+        computation_bounds=record.explainer_config or {},
+        reconstructed_output=record.reconstructed_output,
+        additivity_residual=record.additivity_residual,
+        additivity_within_tolerance=record.additivity_within_tolerance,
+        additivity_discrepancy_message=record.additivity_discrepancy_message,
+        explanation_id=UUID(record.id),
+        created_at=record.created_at,
+        is_development=record.is_development,
+        source_reference=record.source_reference,
+        diagnostics=record.diagnostics or {},
+    )
+
+
+@app.post("/api/v1/c4/explanations", response_model=C4ExplanationResponse, status_code=201)
+def create_c4_explanation(
+    body: C4ExplanationRequest,
+    request: Request,
+    account=Depends(auth.current_account),
+):
+    """Generate and persist an authenticated LIME or SHAP explanation."""
+    auth.csrf(request)
+    if account.role not in {Role.COUNSELLOR, Role.ADMIN, Role.RESEARCHER}:
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not body.text or not body.text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    # Compute request fingerprint
+    fingerprint = hashlib.sha256(
+        json.dumps(
+            {
+                "text": body.text,
+                "method": body.method,
+                "target_class": body.target_class,
+                "language": body.language,
+            },
+            sort_keys=True,
+        ).encode()
+    ).hexdigest()
+
+    # Prevent duplicate records when the same generation request is retried
+    if body.idempotency_key:
+        with Session(engine()) as db:
+            existing = db.scalar(
+                select(Explanation).where(
+                    Explanation.account_id == account.id,
+                    Explanation.idempotency_key == str(body.idempotency_key),
+                )
+            )
+            if existing:
+                if existing.request_hash != fingerprint:
+                    raise SafeError(ErrorCode.CONFLICT, 409)
+                if existing.expires_at and existing.expires_at <= now():
+                    raise SafeError(ErrorCode.NOT_FOUND, 404)
+                return explanation_record_to_response(existing)
+
+    # Avoid holding a database transaction open during model inference
+    explanation_res = _call_xai_explain(body)
+
+    if explanation_res.status != "READY":
+        # Do not persist incomplete or unavailable explanations
+        return explanation_res
+
+    # Handle inference and database failures clearly. Never claim a result was saved if persistence failed.
+    explanation_id = str(uuid4())
+    is_temporary_model = True  # Mark temporary-model records as development explanations
+
+    try:
+        with Session(engine()) as db, db.begin():
+            record = Explanation(
+                id=explanation_id,
+                account_id=account.id,
+                source_reference=body.source_reference,
+                idempotency_key=str(body.idempotency_key) if body.idempotency_key else None,
+                request_hash=fingerprint,
+                method=explanation_res.method,
+                target_class=explanation_res.target_class or body.target_class or "Negative",
+                model_id=explanation_res.model_id or "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+                model_version=explanation_res.model_version,
+                model_revision=explanation_res.model_revision,
+                explainer_version="0.1.0",
+                explainer_config=explanation_res.computation_bounds,
+                contributions=[c.model_dump(mode="json") for c in explanation_res.contributions],
+                tokens=explanation_res.tokens,
+                weights=explanation_res.weights,
+                base_value=explanation_res.base_value,
+                output_value=explanation_res.output_value,
+                target_class_probability=explanation_res.target_class_probability,
+                predicted_class=explanation_res.predicted_class,
+                probabilities=explanation_res.probabilities,
+                token_count=explanation_res.token_count,
+                truncated=explanation_res.truncated,
+                diagnostics={
+                    "token_count": explanation_res.token_count,
+                    "truncated": explanation_res.truncated,
+                    "computation_bounds": explanation_res.computation_bounds,
+                },
+                reconstructed_output=explanation_res.reconstructed_output,
+                additivity_residual=explanation_res.additivity_residual,
+                additivity_within_tolerance=explanation_res.additivity_within_tolerance,
+                additivity_discrepancy_message=explanation_res.additivity_discrepancy_message,
+                is_development=is_temporary_model,
+                status="READY",
+                status_message=explanation_res.status_message,
+                expires_at=now() + timedelta(hours=settings().retention_hours),
+            )
+            db.add(record)
+            saved_created_at = record.created_at
+    except Exception as exc:
+        logger.exception("Failed to persist explanation: %s", exc)
+        raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+
+    explanation_res.explanation_id = UUID(explanation_id)
+    explanation_res.created_at = saved_created_at
+    explanation_res.is_development = is_temporary_model
+    explanation_res.source_reference = body.source_reference
+    return explanation_res
+
+
+@app.get("/api/v1/c4/explanations/{explanation_id}", response_model=C4ExplanationResponse)
+def get_c4_explanation(
+    explanation_id: UUID,
+    account=Depends(auth.current_account),
+    db: Session = Depends(session),
+):
+    """Retrieve an authenticated user's saved explanation by ID."""
+    record = db.get(Explanation, str(explanation_id))
+    # Prevent access to another user's records; derive ownership from verified authentication
+    if not record or record.account_id != account.id:
+        raise SafeError(ErrorCode.NOT_FOUND, 404)
+    # Enforce retention policy
+    if record.expires_at and record.expires_at <= now():
+        raise SafeError(ErrorCode.NOT_FOUND, 404)
+    return explanation_record_to_response(record)
+
+
+@app.get("/api/v1/c4/explanations", response_model=C4ExplanationListResponse)
+def list_c4_explanations(
+    limit: int = 20,
+    offset: int = 0,
+    account=Depends(auth.current_account),
+    db: Session = Depends(session),
+):
+    """Return a bounded, paginated list of the current authenticated user's explanations."""
+    bounded_limit = max(1, min(limit, 100))
+    bounded_offset = max(0, offset)
+
+    query = (
+        select(Explanation)
+        .where(
+            Explanation.account_id == account.id,
+            (Explanation.expires_at.is_(None)) | (Explanation.expires_at > now()),
+        )
+        .order_by(Explanation.created_at.desc())
+    )
+    total = db.scalar(
+        select(func.count(Explanation.id)).where(
+            Explanation.account_id == account.id,
+            (Explanation.expires_at.is_(None)) | (Explanation.expires_at > now()),
+        )
+    ) or 0
+
+    records = db.scalars(query.offset(bounded_offset).limit(bounded_limit)).all()
+    items = [
+        C4ExplanationSummary(
+            explanation_id=UUID(r.id),
+            created_at=r.created_at,
+            method=r.method,  # type: ignore[arg-type]
+            target_class=r.target_class,
+            predicted_class=r.predicted_class,
+            target_class_probability=r.target_class_probability,
+            is_development=r.is_development,
+            source_reference=r.source_reference,
+        )
+        for r in records
+    ]
+    return C4ExplanationListResponse(
+        items=items,
+        total=total,
+        limit=bounded_limit,
+        offset=bounded_offset,
+    )
+

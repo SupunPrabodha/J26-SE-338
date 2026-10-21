@@ -120,10 +120,62 @@
       "title": "Contributions",
       "type": "array"
     },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    },
     "development_only": {
       "const": true,
       "default": true,
       "title": "Development Only",
+      "type": "boolean"
+    },
+    "diagnostics": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "default": {},
+      "title": "Diagnostics",
+      "type": "object"
+    },
+    "explanation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Explanation Id"
+    },
+    "is_development": {
+      "default": true,
+      "title": "Is Development",
       "type": "boolean"
     },
     "method": {
@@ -219,6 +271,18 @@
       "default": "1.0.0",
       "title": "Schema Version",
       "type": "string"
+    },
+    "source_reference": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Reference"
     },
     "status": {
       "default": "READY",

@@ -6,6 +6,7 @@ import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
 import { SignedBarChart } from "../components/SignedBarChart";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
+import { api, ApiError } from "@j26/common/api";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
 
 export default function LimePage() {
@@ -35,12 +36,81 @@ export default function LimePage() {
   const caseLanguage = snapshot ? (snapshot.language || "English") : "English";
   const targetClass = selectedSentimentClass || snapshot?.targetClass || "Negative";
 
-  // Clear previous results whenever the submitted text or target class changes
+  // Restore saved explanation from URL parameter (?id=...) on mount/refresh
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const savedId = urlParams.get("id");
+    if (!savedId) return;
+
+    let mounted = true;
+    const currentReqId = ++activeRequestRef.current;
+    setIsBusy(true);
+
+    api<C4ExplanationResponse>(`/c4/explanations/${savedId}`)
+      .then((data) => {
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
+        setExplanation(data);
+        setIsClassifierConnected(true);
+        setStatusMessage(`Restored saved LIME explanation (${data.target_class}).`);
+        if (data.target_class) {
+          setSelectedSentimentClass(data.target_class as any);
+        }
+        if (data.probabilities && data.predicted_class) {
+          setPrediction({
+            model_id: data.model_id || "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+            model_version: data.model_version || "",
+            model_revision: data.model_revision || null,
+            predicted_sentiment: data.predicted_class as any,
+            confidence:
+              data.probabilities[data.predicted_class] ?? (data.target_class_probability ?? 0),
+            probabilities: data.probabilities,
+            token_count: data.token_count ?? 0,
+            truncated: data.truncated ?? false,
+            max_sequence_length: 512,
+            status: "READY",
+            status_message: "Restored from saved explanation record.",
+          });
+        }
+      })
+      .catch((err) => {
+        if (!mounted || currentReqId !== activeRequestRef.current) return;
+        setError(err.message || "Failed to retrieve saved explanation.");
+        const url = new URL(window.location.href);
+        url.searchParams.delete("id");
+        window.history.replaceState(null, "", url.pathname);
+      })
+      .finally(() => {
+        if (mounted && currentReqId === activeRequestRef.current) {
+          setIsBusy(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [setSelectedSentimentClass]);
+
+  // Clear previous results whenever new input is provided or target class changes
   useEffect(() => {
     activeRequestRef.current += 1;
-    setExplanation(null);
+    // If user changes task or provides new input, clear the previously selected explanation
+    setExplanation((prev) => {
+      if (prev && !submissionText && prev.explanation_id) {
+        // Keep restored explanation if we are viewing a restored record with no new input
+        return prev;
+      }
+      return null;
+    });
     setError("");
     setStatusMessage("");
+    if (submissionText && typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("id")) {
+        url.searchParams.delete("id");
+        window.history.replaceState(null, "", url.pathname);
+      }
+    }
   }, [selectedTaskId, selectedSentimentClass, submissionText]);
 
   // Set prediction from snapshot or fetch if text is present
@@ -109,15 +179,12 @@ export default function LimePage() {
     setStatusMessage(`Running LIME explanation for "${targetClass}" with whitespace Unicode preservation...`);
 
     try {
-      const res = await fetch("/api/c4-explain", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: submissionText,
-          method: "LIME",
-          target_class: targetClass,
-          language: caseLanguage,
-        }),
+      const data = await api<C4ExplanationResponse>("/c4/explanations", {
+        text: submissionText,
+        method: "LIME",
+        target_class: targetClass,
+        language: caseLanguage,
+        idempotency_key: crypto.randomUUID(),
       });
 
       if (currentReqId !== activeRequestRef.current) {
@@ -125,20 +192,20 @@ export default function LimePage() {
         return;
       }
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || `Request failed with status ${res.status}`);
-      }
-
-      const data = (await res.json()) as C4ExplanationResponse;
       setExplanation(data);
+
+      if (data.explanation_id && typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("id", String(data.explanation_id));
+        window.history.replaceState(null, "", url.toString());
+      }
 
       if (data.status === "AWAITING_CLASSIFIER_CONNECTION") {
         setIsClassifierConnected(false);
         setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
       } else {
         setIsClassifierConnected(true);
-        setStatusMessage(`LIME explanation for "${targetClass}" computed successfully.`);
+        setStatusMessage(`LIME explanation for "${targetClass}" computed and saved successfully.`);
       }
     } catch (err) {
       if (currentReqId === activeRequestRef.current) {
@@ -354,6 +421,15 @@ export default function LimePage() {
               <div className="lime-input-box">
                 {submissionText ? (
                   <p className="lime-input-line-1">{submissionText}</p>
+                ) : explanation ? (
+                  <div role="status" style={{ padding: "8px 4px" }}>
+                    <p style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b", margin: "0 0 4px" }}>
+                      Original text not retained in persistence
+                    </p>
+                    <p className="lime-input-line-2" style={{ color: "#64748b", fontSize: "11px", margin: 0, lineHeight: 1.45 }}>
+                      Per data minimization and retention controls, full input text is excluded from stored explanation records. Token attributions, probabilities, and diagnostics have been retrieved from saved explanation ID: <code style={{ fontSize: "10.5px", background: "#f1f5f9", padding: "1px 4px", borderRadius: "3px" }}>{String(explanation.explanation_id || "").slice(0, 8)}...</code>
+                    </p>
+                  </div>
                 ) : (
                   <div role="status" style={{ padding: "16px 8px", textAlign: "center" }}>
                     <p style={{ fontSize: "14px", fontWeight: 700, color: "#1e293b", margin: "0 0 6px" }}>
@@ -748,6 +824,29 @@ export default function LimePage() {
                 <div className="lime-highlight-text-box" aria-label="Attribution highlighted text">
                   {hasResults && submissionText ? (
                     renderHighlightedTokens(submissionText, contributions, targetClass)
+                  ) : hasResults ? (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", padding: "4px 0" }}>
+                      <span style={{ fontSize: "10.5px", color: "#64748b", width: "100%", marginBottom: "4px" }}>
+                        Attributed tokens from restored explanation:
+                      </span>
+                      {contributions.map((c, i) => (
+                        <span
+                          key={i}
+                          className={`lime-chip-word ${
+                            c.weight >= 0.25
+                              ? "lime-chip-strong-red"
+                              : c.weight > 0
+                              ? "lime-chip-soft-pink"
+                              : c.weight <= -0.15
+                              ? "lime-chip-soft-green"
+                              : "lime-chip-soft-green"
+                          }`}
+                          title={`Token: "${c.token}" | Weight: ${c.weight >= 0 ? "+" : ""}${c.weight.toFixed(4)}`}
+                        >
+                          {c.token} <small style={{ opacity: 0.8 }}>({c.weight >= 0 ? "+" : ""}{c.weight.toFixed(3)})</small>
+                        </span>
+                      ))}
+                    </div>
                   ) : (
                     <span style={{ color: "#94a3b8", fontSize: "11px" }}>
                       {!submissionText
