@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     retention_hours: int = 24
     dev_counsellor_username: str = ""
     service_timeout_seconds: float = 5.0
+    xai_timeout_seconds: float = 60.0
 
     @field_validator("environment")
     @classmethod

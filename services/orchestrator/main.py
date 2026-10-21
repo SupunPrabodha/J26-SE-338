@@ -462,7 +462,7 @@ def _call_xai_explain(body: C4ExplanationRequest) -> C4ExplanationResponse:
     payload = body.model_dump(mode="json")
     # Avoid holding any database transaction open during model inference
     try:
-        with httpx.Client(timeout=settings().service_timeout_seconds, trust_env=False) as client:
+        with httpx.Client(timeout=settings().xai_timeout_seconds, trust_env=False) as client:
             res = client.post(
                 settings().xai_url + "/internal/v1/dev/explain",
                 json=payload,
