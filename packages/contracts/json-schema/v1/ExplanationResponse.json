@@ -1,0 +1,118 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/ExplanationResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "consent_status": {
+      "const": "ACTIVE",
+      "default": "ACTIVE",
+      "title": "Consent Status",
+      "type": "string"
+    },
+    "consent_version": {
+      "const": "dev-notice-1",
+      "default": "dev-notice-1",
+      "title": "Consent Version",
+      "type": "string"
+    },
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "counterfactual": {
+      "default": null,
+      "title": "Counterfactual",
+      "type": "null"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "evidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "explainer_version": {
+      "const": "mock-1",
+      "default": "mock-1",
+      "title": "Explainer Version",
+      "type": "string"
+    },
+    "faithfulness": {
+      "default": null,
+      "title": "Faithfulness",
+      "type": "null"
+    },
+    "idempotency_key": {
+      "format": "uuid",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "method": {
+      "const": "MOCK_FIXED_FIXTURE",
+      "default": "MOCK_FIXED_FIXTURE",
+      "title": "Method",
+      "type": "string"
+    },
+    "purpose": {
+      "const": "synthetic-wellbeing-screening",
+      "default": "synthetic-wellbeing-screening",
+      "title": "Purpose",
+      "type": "string"
+    },
+    "reliability_status": {
+      "const": "NOT_EVALUATED",
+      "default": "NOT_EVALUATED",
+      "title": "Reliability Status",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "service_name": {
+      "const": "xai",
+      "default": "xai",
+      "title": "Service Name",
+      "type": "string"
+    },
+    "service_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Service Version",
+      "type": "string"
+    },
+    "stability": {
+      "default": null,
+      "title": "Stability",
+      "type": "null"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "case_id",
+    "correlation_id",
+    "idempotency_key",
+    "evidence"
+  ],
+  "title": "ExplanationResponse",
+  "type": "object"
+}

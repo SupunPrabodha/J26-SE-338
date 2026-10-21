@@ -1,0 +1,67 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "AUTH_REQUIRED",
+        "AUTH_INVALID",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONSENT_REQUIRED",
+        "CONSENT_INVALID",
+        "CONTRACT_INVALID",
+        "CONFLICT",
+        "RATE_LIMITED",
+        "DEPENDENCY_UNAVAILABLE",
+        "DOWNSTREAM_FAILED",
+        "DOWNSTREAM_TIMEOUT",
+        "RETRY_EXHAUSTED",
+        "INTERNAL_ERROR"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/ServiceError.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "error_code": {
+      "$ref": "#/$defs/ErrorCode"
+    },
+    "message": {
+      "const": "Request could not be completed safely.",
+      "default": "Request could not be completed safely.",
+      "title": "Message",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "error_code",
+    "correlation_id"
+  ],
+  "title": "ServiceError",
+  "type": "object"
+}

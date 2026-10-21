@@ -1,0 +1,59 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/WorkflowRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "consent_id": {
+      "format": "uuid",
+      "title": "Consent Id",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "fixture_id": {
+      "enum": [
+        "english",
+        "sinhala",
+        "romanized",
+        "mixed"
+      ],
+      "title": "Fixture Id",
+      "type": "string"
+    },
+    "idempotency_key": {
+      "format": "uuid",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "text": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "consent_id",
+    "idempotency_key",
+    "fixture_id",
+    "text"
+  ],
+  "title": "WorkflowRequest",
+  "type": "object"
+}

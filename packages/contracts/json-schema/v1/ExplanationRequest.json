@@ -1,0 +1,345 @@
+{
+  "$defs": {
+    "InferenceResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "calibrated": {
+          "const": false,
+          "default": false,
+          "title": "Calibrated",
+          "type": "boolean"
+        },
+        "case_id": {
+          "format": "uuid",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "consent_status": {
+          "const": "ACTIVE",
+          "default": "ACTIVE",
+          "title": "Consent Status",
+          "type": "string"
+        },
+        "consent_version": {
+          "const": "dev-notice-1",
+          "default": "dev-notice-1",
+          "title": "Consent Version",
+          "type": "string"
+        },
+        "correlation_id": {
+          "format": "uuid",
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "dataset_version": {
+          "const": "synthetic-fixtures-1",
+          "default": "synthetic-fixtures-1",
+          "title": "Dataset Version",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "emotional_tone": {
+          "const": "synthetic-neutral",
+          "default": "synthetic-neutral",
+          "title": "Emotional Tone",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "model_version": {
+          "const": "mock-1",
+          "default": "mock-1",
+          "title": "Model Version",
+          "type": "string"
+        },
+        "purpose": {
+          "const": "synthetic-wellbeing-screening",
+          "default": "synthetic-wellbeing-screening",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "review_priority": {
+          "const": "HUMAN_REVIEW_REQUIRED",
+          "default": "HUMAN_REVIEW_REQUIRED",
+          "title": "Review Priority",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "service_name": {
+          "const": "nlp",
+          "default": "nlp",
+          "title": "Service Name",
+          "type": "string"
+        },
+        "service_version": {
+          "const": "0.1.0",
+          "default": "0.1.0",
+          "title": "Service Version",
+          "type": "string"
+        },
+        "stress_language_signals": {
+          "items": {
+            "const": "synthetic-busy-timetable",
+            "type": "string"
+          },
+          "title": "Stress Language Signals",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "wellbeing_indicator": {
+          "const": "synthetic-academic-pressure",
+          "default": "synthetic-academic-pressure",
+          "title": "Wellbeing Indicator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "correlation_id",
+        "idempotency_key",
+        "stress_language_signals",
+        "confidence"
+      ],
+      "title": "InferenceResponse",
+      "type": "object"
+    },
+    "PreprocessResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "anonymized_text": {
+          "title": "Anonymized Text",
+          "type": "string"
+        },
+        "case_id": {
+          "format": "uuid",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "consent_status": {
+          "const": "ACTIVE",
+          "default": "ACTIVE",
+          "title": "Consent Status",
+          "type": "string"
+        },
+        "consent_version": {
+          "const": "dev-notice-1",
+          "default": "dev-notice-1",
+          "title": "Consent Version",
+          "type": "string"
+        },
+        "correlation_id": {
+          "format": "uuid",
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "dataset_version": {
+          "const": "synthetic-fixtures-1",
+          "default": "synthetic-fixtures-1",
+          "title": "Dataset Version",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "language": {
+          "enum": [
+            "en",
+            "si",
+            "romanized-si",
+            "mixed",
+            "uncertain"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "normalized_text": {
+          "title": "Normalized Text",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "const": "mock-1",
+          "default": "mock-1",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "purpose": {
+          "const": "synthetic-wellbeing-screening",
+          "default": "synthetic-wellbeing-screening",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "service_name": {
+          "const": "preprocessing",
+          "default": "preprocessing",
+          "title": "Service Name",
+          "type": "string"
+        },
+        "service_version": {
+          "const": "0.1.0",
+          "default": "0.1.0",
+          "title": "Service Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "token_offsets": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Token Offsets",
+          "type": "array"
+        },
+        "tokens": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tokens",
+          "type": "array"
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "correlation_id",
+        "idempotency_key",
+        "anonymized_text",
+        "normalized_text",
+        "language",
+        "tokens",
+        "token_offsets",
+        "transformations"
+      ],
+      "title": "PreprocessResponse",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/ExplanationRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "consent_status": {
+      "const": "ACTIVE",
+      "default": "ACTIVE",
+      "title": "Consent Status",
+      "type": "string"
+    },
+    "consent_version": {
+      "const": "dev-notice-1",
+      "default": "dev-notice-1",
+      "title": "Consent Version",
+      "type": "string"
+    },
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "idempotency_key": {
+      "format": "uuid",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "inference": {
+      "$ref": "#/$defs/InferenceResponse"
+    },
+    "preprocessing": {
+      "$ref": "#/$defs/PreprocessResponse"
+    },
+    "purpose": {
+      "const": "synthetic-wellbeing-screening",
+      "default": "synthetic-wellbeing-screening",
+      "title": "Purpose",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "case_id",
+    "correlation_id",
+    "idempotency_key",
+    "preprocessing",
+    "inference"
+  ],
+  "title": "ExplanationRequest",
+  "type": "object"
+}

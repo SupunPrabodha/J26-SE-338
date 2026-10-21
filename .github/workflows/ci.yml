@@ -1,0 +1,60 @@
+name: Synthetic platform checks
+on:
+  pull_request:
+  push:
+    branches: ["feature/**", develop]
+permissions:
+  contents: read
+concurrency:
+  group: synthetic-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12.12"
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: "22.23.3"
+          cache: npm
+      - name: Install locked Python dependencies
+        run: |
+          python -m pip install uv==0.12.23
+          uv sync --frozen
+      - name: Generate ephemeral development environment
+        run: python scripts/bootstrap_dev.py
+      - name: Python lint, contracts, migrations, security and integration tests
+        run: |
+          .venv/bin/ruff check .
+          .venv/bin/ruff format --check .
+          .venv/bin/python scripts/run.py pytest
+          .venv/bin/python scripts/run.py scripts.generate_contracts --check
+          .venv/bin/python scripts/check_repository.py
+          .venv/bin/python scripts/check_ci.py
+      - name: Frontend checks
+        run: |
+          npm ci
+          npm run contracts:check
+          npm run lint
+          npm run typecheck
+          npm test
+          npm audit --audit-level=high
+      - name: Python dependency audit
+        run: .venv/bin/pip-audit --disable-pip --no-deps -r requirements.lock
+      - name: Compose validation and build
+        run: |
+          docker compose config --quiet
+          docker compose build
+          docker compose up -d --wait --wait-timeout 180
+      - name: Real-container synthetic integration
+        run: |
+          docker compose exec -T orchestrator alembic upgrade head
+          .venv/bin/python scripts/compose_smoke.py
+          git diff --check
+      - name: Stop containers; retain volumes
+        if: always()
+        run: docker compose down

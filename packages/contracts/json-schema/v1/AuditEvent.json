@@ -1,0 +1,91 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/AuditEvent.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case Id"
+    },
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "event_id": {
+      "format": "uuid",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "enum": [
+        "AUTH_LOGIN",
+        "AUTH_FAILURE",
+        "AUTH_LOGOUT",
+        "CONSENT_RECORDED",
+        "WORKFLOW_TRANSITION",
+        "HUMAN_REVIEW",
+        "WITHDRAWAL",
+        "RETENTION",
+        "ASSIGNMENT"
+      ],
+      "title": "Event Type",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "service_name": {
+      "const": "orchestrator",
+      "default": "orchestrator",
+      "title": "Service Name",
+      "type": "string"
+    },
+    "service_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Service Version",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "correlation_id",
+    "event_type",
+    "status"
+  ],
+  "title": "AuditEvent",
+  "type": "object"
+}

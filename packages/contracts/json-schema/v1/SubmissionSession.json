@@ -1,0 +1,58 @@
+{
+  "$defs": {
+    "Role": {
+      "enum": [
+        "STUDENT",
+        "COUNSELLOR",
+        "ADMIN",
+        "RESEARCHER",
+        "SERVICE"
+      ],
+      "title": "Role",
+      "type": "string"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/SubmissionSession.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/$defs/Role"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "session_id",
+    "role",
+    "expires_at"
+  ],
+  "title": "SubmissionSession",
+  "type": "object"
+}
