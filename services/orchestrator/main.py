@@ -14,6 +14,7 @@ from research_common.database import (
     CaseLink,
     Consent,
     ConsentWithdrawal,
+    CounterfactualRecord,
     Explanation,
     Job,
     Retention,
@@ -29,13 +30,21 @@ from research_contracts import (
     FIXTURES,
     AccountResponse,
     AssignmentRequest,
+    C4CounterfactualListResponse,
+    C4CounterfactualRequest,
+    C4CounterfactualResponse,
+    C4CounterfactualSummary,
     C4ExplanationListResponse,
     C4ExplanationRequest,
     C4ExplanationResponse,
     C4ExplanationSummary,
+    C4PredictionRequest,
+    C4PredictionResponse,
     ConsentDecision,
     ConsentLifecycle,
     ConsentRecord,
+    CounterfactualCandidate,
+    EditOperation,
     ErrorCode,
     FeatureContribution,
     FixturesResponse,
@@ -731,4 +740,376 @@ def list_c4_explanations(
         limit=bounded_limit,
         offset=bounded_offset,
     )
+
+
+def _call_xai_predict(body: C4PredictionRequest) -> C4PredictionResponse:
+    payload = body.model_dump(mode="json")
+    try:
+        with httpx.Client(timeout=settings().xai_timeout_seconds, trust_env=False) as client:
+            res = client.post(
+                settings().xai_url + "/internal/v1/dev/predict",
+                json=payload,
+                headers={"Authorization": "Bearer " + service_token("xai")},
+            )
+            if res.status_code == 200:
+                return C4PredictionResponse.model_validate(res.json())
+            elif res.status_code in {403, 422}:
+                raise SafeError(ErrorCode.CONTRACT_INVALID, res.status_code)
+            else:
+                raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502)
+    except httpx.TimeoutException:
+        logger.warning("XAI prediction service call timed out")
+        raise SafeError(ErrorCode.DOWNSTREAM_TIMEOUT, 504) from None
+    except httpx.ConnectError:
+        logger.warning("XAI prediction service connection failed")
+        raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503) from None
+    except SafeError:
+        raise
+    except Exception as exc:
+        logger.exception("Prediction call failed: %s", exc)
+        raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502) from None
+
+
+def _call_xai_counterfactual(body: C4CounterfactualRequest) -> C4CounterfactualResponse:
+    payload = body.model_dump(mode="json")
+    try:
+        with httpx.Client(timeout=settings().xai_timeout_seconds, trust_env=False) as client:
+            res = client.post(
+                settings().xai_url + "/internal/v1/dev/counterfactuals",
+                json=payload,
+                headers={"Authorization": "Bearer " + service_token("xai")},
+            )
+            if res.status_code == 200:
+                return C4CounterfactualResponse.model_validate(res.json())
+            elif res.status_code in {403, 422}:
+                raise SafeError(ErrorCode.CONTRACT_INVALID, res.status_code)
+            else:
+                raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502)
+    except httpx.TimeoutException:
+        logger.warning("XAI counterfactual service call timed out")
+        raise SafeError(ErrorCode.DOWNSTREAM_TIMEOUT, 504) from None
+    except httpx.ConnectError:
+        logger.warning("XAI counterfactual service connection failed")
+        raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503) from None
+    except SafeError:
+        raise
+    except Exception as exc:
+        logger.exception("Counterfactual call failed: %s", exc)
+        raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502) from None
+
+
+def counterfactual_record_to_response(
+    record: CounterfactualRecord,
+) -> C4CounterfactualResponse:
+    raw_candidates = record.candidates or []
+    candidates: list[CounterfactualCandidate] = []
+    for c in raw_candidates:
+        edits = [
+            EditOperation(
+                op=e["op"],
+                index=e["index"],
+                original=e.get("original"),
+                replacement=e.get("replacement"),
+            )
+            for e in c.get("edits", [])
+        ]
+        candidates.append(
+            CounterfactualCandidate(
+                candidate_text=c.get("candidate_text"),
+                edits=edits,
+                edit_count=c.get("edit_count", len(edits)),
+                predicted_class=c.get("predicted_class", record.target_class),
+                probabilities=c.get("probabilities", {}),
+                target_probability=c.get("target_probability", 0.0),
+                target_probability_delta=c.get("target_probability_delta", 0.0),
+                diff_spans=[],
+                minimality_rank=c.get("minimality_rank", 1),
+                minimality_description=c.get(
+                    "minimality_description",
+                    "Smallest edit distance found within this bounded search; not a global guarantee.",
+                ),
+                verified=c.get("verified", True),
+            )
+        )
+
+    best_candidate: CounterfactualCandidate | None = None
+    if record.best_candidate:
+        b = record.best_candidate
+        b_edits = [
+            EditOperation(
+                op=e["op"],
+                index=e["index"],
+                original=e.get("original"),
+                replacement=e.get("replacement"),
+            )
+            for e in b.get("edits", [])
+        ]
+        best_candidate = CounterfactualCandidate(
+            candidate_text=b.get("candidate_text"),
+            edits=b_edits,
+            edit_count=b.get("edit_count", len(b_edits)),
+            predicted_class=b.get("predicted_class", record.target_class),
+            probabilities=b.get("probabilities", {}),
+            target_probability=b.get("target_probability", 0.0),
+            target_probability_delta=b.get("target_probability_delta", 0.0),
+            diff_spans=[],
+            minimality_rank=b.get("minimality_rank", 1),
+            minimality_description=b.get(
+                "minimality_description",
+                "Smallest edit distance found within this bounded search; not a global guarantee.",
+            ),
+            verified=b.get("verified", True),
+        )
+
+    outcome_val = record.outcome
+    if outcome_val not in {
+        "SUCCESS",
+        "NO_COUNTERFACTUAL_FOUND",
+        "ALREADY_TARGET_CLASS",
+        "SEARCH_LIMIT_EXCEEDED",
+        "TIMEOUT",
+        "UNAVAILABLE_MODEL",
+    }:
+        outcome_val = "SUCCESS"
+
+    return C4CounterfactualResponse(
+        counterfactual_id=UUID(record.id),
+        created_at=record.created_at,
+        target_class=record.target_class,
+        original_predicted_class=record.original_predicted_class,
+        original_probabilities=record.original_probabilities or {},
+        outcome=outcome_val,  # type: ignore[arg-type]
+        outcome_message=record.outcome_message or "Counterfactual retrieved successfully.",
+        candidates=candidates,
+        best_candidate=best_candidate,
+        search_limits=record.search_limits or {},
+        model_id=record.model_id,
+        model_version=record.model_version,
+        model_revision=record.model_revision,
+        is_development=record.is_development,
+        source_reference=record.source_reference,
+        execution_time_ms=record.execution_time_ms,
+    )
+
+
+@app.post("/api/v1/c4/predict", response_model=C4PredictionResponse)
+def create_c4_predict(
+    body: C4PredictionRequest,
+    request: Request,
+    account=Depends(auth.optional_account),
+):
+    """Sentiment prediction route proxying to XAI service with CSRF & origin protection."""
+    auth.csrf(request)
+    if account and account.role not in {Role.COUNSELLOR, Role.ADMIN, Role.RESEARCHER, Role.STUDENT}:
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not account and settings().environment != "development":
+        raise SafeError(ErrorCode.AUTH_REQUIRED, 401)
+
+    if not body.text or not body.text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    return _call_xai_predict(body)
+
+
+@app.post("/api/v1/c4/counterfactuals", response_model=C4CounterfactualResponse, status_code=201)
+def create_c4_counterfactual(
+    body: C4CounterfactualRequest,
+    request: Request,
+    account=Depends(auth.current_account),
+):
+    """Generate and persist an authenticated model-backed counterfactual explanation."""
+    auth.csrf(request)
+    if account.role not in {Role.COUNSELLOR, Role.ADMIN, Role.RESEARCHER}:
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not body.text or not body.text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    fingerprint = hashlib.sha256(
+        json.dumps(
+            {
+                "text": body.text,
+                "target_class": body.target_class,
+                "language": body.language,
+                "max_edits": body.max_edits,
+                "max_candidates": body.max_candidates,
+            },
+            sort_keys=True,
+        ).encode()
+    ).hexdigest()
+
+    # Idempotency check before inference
+    if body.idempotency_key:
+        with Session(engine()) as db:
+            existing = db.scalar(
+                select(CounterfactualRecord).where(
+                    CounterfactualRecord.account_id == account.id,
+                    CounterfactualRecord.idempotency_key == str(body.idempotency_key),
+                )
+            )
+            if existing:
+                if existing.request_hash != fingerprint:
+                    raise SafeError(ErrorCode.CONFLICT, 409)
+                if existing.expires_at and existing.expires_at <= now():
+                    raise SafeError(ErrorCode.NOT_FOUND, 404)
+                return counterfactual_record_to_response(existing)
+
+    # Run inference outside database transaction
+    cf_res = _call_xai_counterfactual(body)
+
+    if cf_res.outcome == "UNAVAILABLE_MODEL":
+        return cf_res
+
+    cf_id = str(uuid4())
+    created_time = now()
+
+    # Sanitize candidates for storage: keep complete raw candidate text transient!
+    # Stored fragments only retain sensitive edit operations and verified metrics.
+    stored_candidates = [
+        {
+            "edits": [e.model_dump(mode="json") for e in c.edits],
+            "edit_count": c.edit_count,
+            "predicted_class": c.predicted_class,
+            "probabilities": c.probabilities,
+            "target_probability": c.target_probability,
+            "target_probability_delta": c.target_probability_delta,
+            "minimality_rank": c.minimality_rank,
+            "minimality_description": c.minimality_description,
+            "verified": c.verified,
+        }
+        for c in cf_res.candidates
+    ]
+
+    stored_best = None
+    if cf_res.best_candidate:
+        stored_best = {
+            "edits": [e.model_dump(mode="json") for e in cf_res.best_candidate.edits],
+            "edit_count": cf_res.best_candidate.edit_count,
+            "predicted_class": cf_res.best_candidate.predicted_class,
+            "probabilities": cf_res.best_candidate.probabilities,
+            "target_probability": cf_res.best_candidate.target_probability,
+            "target_probability_delta": cf_res.best_candidate.target_probability_delta,
+            "minimality_rank": cf_res.best_candidate.minimality_rank,
+            "minimality_description": cf_res.best_candidate.minimality_description,
+            "verified": cf_res.best_candidate.verified,
+        }
+
+    try:
+        with Session(engine()) as db:
+            record = CounterfactualRecord(
+                id=cf_id,
+                account_id=account.id,
+                source_reference=body.source_reference,
+                idempotency_key=str(body.idempotency_key) if body.idempotency_key else None,
+                request_hash=fingerprint,
+                target_class=cf_res.target_class,
+                original_predicted_class=cf_res.original_predicted_class,
+                original_probabilities=cf_res.original_probabilities,
+                model_id=cf_res.model_id or "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+                model_version=cf_res.model_version,
+                model_revision=cf_res.model_revision,
+                outcome=cf_res.outcome,
+                outcome_message=cf_res.outcome_message,
+                search_limits=cf_res.search_limits,
+                candidates=stored_candidates,
+                best_candidate=stored_best,
+                is_development=True,
+                execution_time_ms=cf_res.execution_time_ms,
+                expires_at=now() + timedelta(hours=settings().retention_hours),
+                created_at=created_time,
+                updated_at=created_time,
+            )
+            db.add(record)
+            db.commit()
+            saved_created_at = record.created_at or created_time
+    except IntegrityError:
+        if body.idempotency_key:
+            with Session(engine()) as db:
+                existing = db.scalar(
+                    select(CounterfactualRecord).where(
+                        CounterfactualRecord.account_id == account.id,
+                        CounterfactualRecord.idempotency_key == str(body.idempotency_key),
+                    )
+                )
+                if existing:
+                    if existing.request_hash != fingerprint:
+                        raise SafeError(ErrorCode.CONFLICT, 409) from None
+                    if existing.expires_at and existing.expires_at <= now():
+                        raise SafeError(ErrorCode.NOT_FOUND, 404) from None
+                    return counterfactual_record_to_response(existing)
+        raise SafeError(ErrorCode.CONFLICT, 409) from None
+    except Exception as exc:
+        logger.exception("Failed to persist counterfactual: %s", exc)
+        raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+
+    cf_res.counterfactual_id = UUID(cf_id)
+    cf_res.created_at = saved_created_at
+    cf_res.source_reference = body.source_reference
+    return cf_res
+
+
+@app.get("/api/v1/c4/counterfactuals/{counterfactual_id}", response_model=C4CounterfactualResponse)
+def get_c4_counterfactual(
+    counterfactual_id: UUID,
+    account=Depends(auth.current_account),
+    db: Session = Depends(session),
+):
+    """Retrieve an authenticated user's saved counterfactual by ID."""
+    record = db.get(CounterfactualRecord, str(counterfactual_id))
+    if not record or record.account_id != account.id:
+        raise SafeError(ErrorCode.NOT_FOUND, 404)
+    if record.expires_at and record.expires_at <= now():
+        raise SafeError(ErrorCode.NOT_FOUND, 404)
+    return counterfactual_record_to_response(record)
+
+
+@app.get("/api/v1/c4/counterfactuals", response_model=C4CounterfactualListResponse)
+def list_c4_counterfactuals(
+    limit: int = 20,
+    offset: int = 0,
+    account=Depends(auth.current_account),
+    db: Session = Depends(session),
+):
+    """Return a bounded, paginated list of the current authenticated user's counterfactuals."""
+    bounded_limit = max(1, min(limit, 100))
+    bounded_offset = max(0, offset)
+
+    query = (
+        select(CounterfactualRecord)
+        .where(
+            CounterfactualRecord.account_id == account.id,
+            (CounterfactualRecord.expires_at.is_(None)) | (CounterfactualRecord.expires_at > now()),
+        )
+        .order_by(CounterfactualRecord.created_at.desc())
+    )
+    total = db.scalar(
+        select(func.count(CounterfactualRecord.id)).where(
+            CounterfactualRecord.account_id == account.id,
+            (CounterfactualRecord.expires_at.is_(None)) | (CounterfactualRecord.expires_at > now()),
+        )
+    ) or 0
+
+    records = db.scalars(query.offset(bounded_offset).limit(bounded_limit)).all()
+    items = [
+        C4CounterfactualSummary(
+            counterfactual_id=UUID(r.id),
+            created_at=r.created_at,
+            target_class=r.target_class,
+            original_predicted_class=r.original_predicted_class,
+            outcome=r.outcome,
+            candidate_count=len(r.candidates or []),
+            best_edit_count=r.best_candidate.get("edit_count") if r.best_candidate else None,
+            is_development=r.is_development,
+            source_reference=r.source_reference,
+        )
+        for r in records
+    ]
+    return C4CounterfactualListResponse(
+        items=items,
+        total=total,
+        limit=bounded_limit,
+        offset=bounded_offset,
+    )
+
 

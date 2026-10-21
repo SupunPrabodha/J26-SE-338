@@ -38,7 +38,8 @@ export interface CaseContextType {
   selectedSentimentClass: "Negative" | "Neutral" | "Positive";
   setSelectedSentimentClass: (cls: "Negative" | "Neutral" | "Positive") => void;
   devInput: DevelopmentInputSnapshot | null;
-  setDevInput: (data: DevelopmentInputSnapshot | null) => void;
+  setDevInput: (data: React.SetStateAction<DevelopmentInputSnapshot | null>) => void;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -58,6 +59,7 @@ const CaseContext = createContext<CaseContextType>({
   setSelectedSentimentClass: () => {},
   devInput: null,
   setDevInput: () => {},
+  login: async () => {},
   logout: async () => {},
 });
 
@@ -69,7 +71,46 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
   const [inputText, setInputText] = useState("");
   const [selectedSentimentClass, setSelectedSentimentClass] = useState<"Negative" | "Neutral" | "Positive">("Negative");
-  const [devInput, setDevInput] = useState<DevelopmentInputSnapshot | null>(null);
+  const [devInput, setDevInputState] = useState<DevelopmentInputSnapshot | null>(null);
+
+  // Restore devInput from sessionStorage on client-side mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = sessionStorage.getItem("j26_dev_input");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.text) {
+          setTimeout(() => {
+            setDevInputState(parsed);
+            if (parsed.targetClass) {
+              setSelectedSentimentClass(parsed.targetClass);
+            }
+          }, 0);
+        }
+      }
+    } catch {
+      // Ignore storage read errors
+    }
+  }, []);
+
+  const setDevInput = useCallback((action: React.SetStateAction<DevelopmentInputSnapshot | null>) => {
+    setDevInputState((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      if (typeof window !== "undefined") {
+        try {
+          if (next) {
+            sessionStorage.setItem("j26_dev_input", JSON.stringify(next));
+          } else {
+            sessionStorage.removeItem("j26_dev_input");
+          }
+        } catch {
+          // Ignore storage write errors
+        }
+      }
+      return next;
+    });
+  }, []);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -132,7 +173,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setSelectedSentimentClass(cls);
       setDevInput((prev) => (prev ? Object.freeze({ ...prev, targetClass: cls }) : null));
     },
-    []
+    [setDevInput]
   );
 
   const logout = useCallback(async () => {
@@ -153,7 +194,20 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore network errors during logout
     }
-  }, []);
+  }, [setDevInput]);
+
+  const login = useCallback(
+    async (username: string, password: string) => {
+      const account = await api<AccountResponse>("/auth/login", { username, password });
+      if (account.role !== "COUNSELLOR") {
+        await api("/auth/logout", {});
+        throw new Error("This development shell requires an authorized counsellor account.");
+      }
+      setAuthorized(true);
+      await loadTasks();
+    },
+    [loadTasks]
+  );
 
   return (
     <CaseContext.Provider
@@ -173,6 +227,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setSelectedSentimentClass: updateSelectedSentimentClass,
         devInput,
         setDevInput,
+        login,
         logout,
       }}
     >

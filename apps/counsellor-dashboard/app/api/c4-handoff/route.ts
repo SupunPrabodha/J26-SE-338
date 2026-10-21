@@ -22,26 +22,26 @@ function cleanExpired() {
   }
 }
 
-const ALLOWED_ORIGIN_REGEX = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const ALLOWED_ORIGIN_REGEX = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
-function getCorsOrigin(request: Request): string {
-  const origin = request.headers.get("origin");
-  if (origin && ALLOWED_ORIGIN_REGEX.test(origin)) {
-    return origin;
-  }
-  return "http://localhost:3000";
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return true;
+  return ALLOWED_ORIGIN_REGEX.test(origin);
 }
 
 export const dynamic = "force-dynamic";
 
 export async function OPTIONS(request: Request) {
-  const origin = getCorsOrigin(request);
+  const origin = request.headers.get("origin");
+  if (!isAllowedOrigin(origin)) {
+    return new NextResponse(null, { status: 403 });
+  }
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": origin,
+      ...(origin ? { "Access-Control-Allow-Origin": origin } : {}),
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, X-Requested-With",
     },
   });
 }
@@ -49,7 +49,11 @@ export async function OPTIONS(request: Request) {
 export async function POST(request: Request) {
   cleanExpired();
   try {
-    const origin = getCorsOrigin(request);
+    const origin = request.headers.get("origin");
+    if (!isAllowedOrigin(origin)) {
+      return NextResponse.json({ error: "Disallowed origin" }, { status: 403 });
+    }
+
     const body = await request.json();
     if (!body || !body.text || typeof body.text !== "string" || !body.text.trim()) {
       return NextResponse.json({ error: "Text is required for handoff." }, { status: 422 });
@@ -73,9 +77,11 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { handoffId },
       {
-        headers: {
-          "Access-Control-Allow-Origin": origin,
-        },
+        headers: origin
+          ? {
+              "Access-Control-Allow-Origin": origin,
+            }
+          : {},
       }
     );
   } catch {
@@ -85,6 +91,11 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   cleanExpired();
+  const origin = request.headers.get("origin");
+  if (!isAllowedOrigin(origin)) {
+    return NextResponse.json({ error: "Disallowed origin" }, { status: 403 });
+  }
+
   const url = new URL(request.url);
   const handoffId = url.searchParams.get("handoffId");
 
@@ -100,7 +111,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Handoff expired." }, { status: 410 });
   }
 
-  const origin = getCorsOrigin(request);
   return NextResponse.json(
     {
       text: item.text,
@@ -109,9 +119,12 @@ export async function GET(request: Request) {
       targetClass: item.targetClass,
     },
     {
-      headers: {
-        "Access-Control-Allow-Origin": origin,
-      },
+      headers: origin
+        ? {
+            "Access-Control-Allow-Origin": origin,
+          }
+        : {},
     }
   );
 }
+

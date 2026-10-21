@@ -71,6 +71,450 @@
         "title": "AssignmentRequest",
         "type": "object"
       },
+      "C4CounterfactualListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/C4CounterfactualSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "C4CounterfactualListResponse",
+        "type": "object"
+      },
+      "C4CounterfactualRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "enum": [
+                  "English",
+                  "Sinhala",
+                  "Romanized Sinhala",
+                  "Code-mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "max_candidates": {
+            "default": 50,
+            "title": "Max Candidates",
+            "type": "integer"
+          },
+          "max_edits": {
+            "default": 2,
+            "title": "Max Edits",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_class": {
+            "enum": [
+              "Negative",
+              "Neutral",
+              "Positive"
+            ],
+            "title": "Target Class",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "target_class"
+        ],
+        "title": "C4CounterfactualRequest",
+        "type": "object"
+      },
+      "C4CounterfactualResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "best_candidate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CounterfactualCandidate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidates": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CounterfactualCandidate"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "counterfactual_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counterfactual Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms"
+          },
+          "is_development": {
+            "default": true,
+            "title": "Is Development",
+            "type": "boolean"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "model_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Revision"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "non_diagnostic_notice": {
+            "default": "Model-behaviour exploration only. Non-diagnostic output for screening support; requires authorized human interpretation and does not constitute wellbeing or treatment advice.",
+            "title": "Non Diagnostic Notice",
+            "type": "string"
+          },
+          "original_predicted_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Predicted Class"
+          },
+          "original_probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": {},
+            "title": "Original Probabilities",
+            "type": "object"
+          },
+          "outcome": {
+            "default": "SUCCESS",
+            "enum": [
+              "SUCCESS",
+              "NO_COUNTERFACTUAL_FOUND",
+              "ALREADY_TARGET_CLASS",
+              "SEARCH_LIMIT_EXCEEDED",
+              "TIMEOUT",
+              "UNAVAILABLE_MODEL"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "outcome_message": {
+            "title": "Outcome Message",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "search_limits": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "default": {},
+            "title": "Search Limits",
+            "type": "object"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "supported_languages": {
+            "default": [
+              "English",
+              "Sinhala",
+              "Romanized Sinhala",
+              "Code-mixed"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Languages",
+            "type": "array"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_class": {
+            "title": "Target Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_class",
+          "outcome_message"
+        ],
+        "title": "C4CounterfactualResponse",
+        "type": "object"
+      },
+      "C4CounterfactualSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "best_edit_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Edit Count"
+          },
+          "candidate_count": {
+            "title": "Candidate Count",
+            "type": "integer"
+          },
+          "counterfactual_id": {
+            "format": "uuid",
+            "title": "Counterfactual Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "is_development": {
+            "default": true,
+            "title": "Is Development",
+            "type": "boolean"
+          },
+          "original_predicted_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Predicted Class"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_class": {
+            "title": "Target Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterfactual_id",
+          "created_at",
+          "target_class",
+          "outcome",
+          "candidate_count"
+        ],
+        "title": "C4CounterfactualSummary",
+        "type": "object"
+      },
       "C4ExplanationListResponse": {
         "additionalProperties": false,
         "properties": {
@@ -613,6 +1057,157 @@
         "title": "C4ExplanationSummary",
         "type": "object"
       },
+      "C4PredictionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "enum": [
+                  "English",
+                  "Sinhala",
+                  "Romanized Sinhala",
+                  "Code-mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "C4PredictionRequest",
+        "type": "object"
+      },
+      "C4PredictionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "max_sequence_length": {
+            "default": 512,
+            "title": "Max Sequence Length",
+            "type": "integer"
+          },
+          "model_id": {
+            "default": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Revision"
+          },
+          "model_version": {
+            "default": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "predicted_sentiment": {
+            "enum": [
+              "Negative",
+              "Neutral",
+              "Positive"
+            ],
+            "title": "Predicted Sentiment",
+            "type": "string"
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Probabilities",
+            "type": "object"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "status": {
+            "default": "READY",
+            "enum": [
+              "READY",
+              "FAILED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "status_message": {
+            "default": "Prediction completed successfully.",
+            "title": "Status Message",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "token_count": {
+            "title": "Token Count",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "predicted_sentiment",
+          "confidence",
+          "probabilities",
+          "token_count",
+          "truncated"
+        ],
+        "title": "C4PredictionResponse",
+        "type": "object"
+      },
       "ConsentDecision": {
         "additionalProperties": false,
         "properties": {
@@ -800,6 +1395,167 @@
         ],
         "title": "ConsentState",
         "type": "string"
+      },
+      "CounterfactualCandidate": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Text"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "diff_spans": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TextSpanDiff"
+            },
+            "title": "Diff Spans",
+            "type": "array"
+          },
+          "edit_count": {
+            "title": "Edit Count",
+            "type": "integer"
+          },
+          "edits": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/EditOperation"
+            },
+            "title": "Edits",
+            "type": "array"
+          },
+          "minimality_description": {
+            "default": "Smallest edit distance found within this bounded search; not a global guarantee.",
+            "title": "Minimality Description",
+            "type": "string"
+          },
+          "minimality_rank": {
+            "default": 1,
+            "title": "Minimality Rank",
+            "type": "integer"
+          },
+          "predicted_class": {
+            "title": "Predicted Class",
+            "type": "string"
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Probabilities",
+            "type": "object"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_probability": {
+            "title": "Target Probability",
+            "type": "number"
+          },
+          "target_probability_delta": {
+            "title": "Target Probability Delta",
+            "type": "number"
+          },
+          "verified": {
+            "default": true,
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "edit_count",
+          "predicted_class",
+          "probabilities",
+          "target_probability",
+          "target_probability_delta"
+        ],
+        "title": "CounterfactualCandidate",
+        "type": "object"
+      },
+      "EditOperation": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "op": {
+            "enum": [
+              "delete",
+              "replace",
+              "insert"
+            ],
+            "title": "Op",
+            "type": "string"
+          },
+          "original": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original"
+          },
+          "replacement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacement"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "op",
+          "index"
+        ],
+        "title": "EditOperation",
+        "type": "object"
       },
       "ErrorCode": {
         "enum": [
@@ -1637,6 +2393,60 @@
         "title": "SubmissionSession",
         "type": "object"
       },
+      "TextSpanDiff": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "original_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Text"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "unchanged",
+              "deleted",
+              "inserted",
+              "replaced"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ],
+        "title": "TextSpanDiff",
+        "type": "object"
+      },
       "VersionResponse": {
         "additionalProperties": false,
         "properties": {
@@ -2404,6 +3214,420 @@
         "summary": "Open Session"
       }
     },
+    "/api/v1/c4/counterfactuals": {
+      "get": {
+        "description": "Return a bounded, paginated list of the current authenticated user's counterfactuals.",
+        "operationId": "list_c4_counterfactuals_api_v1_c4_counterfactuals_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4CounterfactualListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "List C4 Counterfactuals"
+      },
+      "post": {
+        "description": "Generate and persist an authenticated model-backed counterfactual explanation.",
+        "operationId": "create_c4_counterfactual_api_v1_c4_counterfactuals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/C4CounterfactualRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4CounterfactualResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Create C4 Counterfactual"
+      }
+    },
+    "/api/v1/c4/counterfactuals/{counterfactual_id}": {
+      "get": {
+        "description": "Retrieve an authenticated user's saved counterfactual by ID.",
+        "operationId": "get_c4_counterfactual_api_v1_c4_counterfactuals__counterfactual_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "counterfactual_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Counterfactual Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4CounterfactualResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Get C4 Counterfactual"
+      }
+    },
     "/api/v1/c4/explanations": {
       "get": {
         "description": "Return a bounded, paginated list of the current authenticated user's explanations.",
@@ -2816,6 +4040,140 @@
           }
         ],
         "summary": "Get C4 Explanation"
+      }
+    },
+    "/api/v1/c4/predict": {
+      "post": {
+        "description": "Authenticated sentiment prediction route proxying to XAI service.",
+        "operationId": "create_c4_predict_api_v1_c4_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/C4PredictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4PredictionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Create C4 Predict"
       }
     },
     "/api/v1/cases/{case_id}/assign": {

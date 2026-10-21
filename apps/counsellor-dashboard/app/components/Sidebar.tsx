@@ -75,11 +75,10 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
           <span>SHAP Explanation</span>
         </Link>
 
-        <div
-          className="lime-nav-btn"
-          style={{ opacity: 0.6, cursor: "not-allowed" }}
-          title="Awaiting C4 Counterfactual module"
-          aria-disabled="true"
+        <Link
+          href="/counterfactuals"
+          className={`lime-nav-btn ${pathname === "/counterfactuals" ? "lime-nav-btn-active active" : ""}`}
+          aria-current={pathname === "/counterfactuals" ? "page" : undefined}
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m16 3 4 4-4 4" />
@@ -88,7 +87,7 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
             <path d="M4 17h16" />
           </svg>
           <span>Counterfactuals</span>
-        </div>
+        </Link>
 
         {/* Section: EVALUATION */}
         <div className="lime-nav-heading">EVALUATION</div>

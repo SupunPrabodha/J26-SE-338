@@ -1,0 +1,149 @@
+{
+  "$defs": {
+    "C4CounterfactualSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "best_edit_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Best Edit Count"
+        },
+        "candidate_count": {
+          "title": "Candidate Count",
+          "type": "integer"
+        },
+        "counterfactual_id": {
+          "format": "uuid",
+          "title": "Counterfactual Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "is_development": {
+          "default": true,
+          "title": "Is Development",
+          "type": "boolean"
+        },
+        "original_predicted_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Predicted Class"
+        },
+        "outcome": {
+          "title": "Outcome",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Reference"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_class": {
+          "title": "Target Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "counterfactual_id",
+        "created_at",
+        "target_class",
+        "outcome",
+        "candidate_count"
+      ],
+      "title": "C4CounterfactualSummary",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C4CounterfactualListResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/C4CounterfactualSummary"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "limit": {
+      "title": "Limit",
+      "type": "integer"
+    },
+    "offset": {
+      "title": "Offset",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "total": {
+      "title": "Total",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "items",
+    "total",
+    "limit",
+    "offset"
+  ],
+  "title": "C4CounterfactualListResponse",
+  "type": "object"
+}

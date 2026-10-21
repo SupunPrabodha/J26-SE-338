@@ -191,6 +191,33 @@ class Explanation(Entity, Base):
     )
 
 
+class CounterfactualRecord(Entity, Base):
+    __tablename__ = "c4_counterfactuals"
+    account_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"), index=True)
+    source_reference: Mapped[str | None] = mapped_column(String(100), index=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(64), index=True)
+    request_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    target_class: Mapped[str] = mapped_column(String(50))
+    original_predicted_class: Mapped[str | None] = mapped_column(String(50))
+    original_probabilities: Mapped[dict | None] = mapped_column(JSON)
+    model_id: Mapped[str] = mapped_column(String(150))
+    model_version: Mapped[str | None] = mapped_column(String(150))
+    model_revision: Mapped[str | None] = mapped_column(String(100))
+    outcome: Mapped[str] = mapped_column(String(50))
+    outcome_message: Mapped[str | None] = mapped_column(String(255))
+    search_limits: Mapped[dict | None] = mapped_column(JSON)
+    candidates: Mapped[list | None] = mapped_column(JSON)
+    best_candidate: Mapped[dict | None] = mapped_column(JSON)
+    is_development: Mapped[bool] = mapped_column(Boolean, default=True)
+    execution_time_ms: Mapped[float | None] = mapped_column(Float)
+    expires_at: Mapped[object | None] = mapped_column(UTCDateTime, index=True)
+    __table_args__ = (
+        UniqueConstraint(
+            "account_id", "idempotency_key", name="uq_c4_counterfactuals_account_idempotency"
+        ),
+    )
+
+
 class Audit(Base):
     __tablename__ = "audit_events"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)

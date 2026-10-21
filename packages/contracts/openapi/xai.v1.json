@@ -1,6 +1,308 @@
 {
   "components": {
     "schemas": {
+      "C4CounterfactualRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "enum": [
+                  "English",
+                  "Sinhala",
+                  "Romanized Sinhala",
+                  "Code-mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "max_candidates": {
+            "default": 50,
+            "title": "Max Candidates",
+            "type": "integer"
+          },
+          "max_edits": {
+            "default": 2,
+            "title": "Max Edits",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_class": {
+            "enum": [
+              "Negative",
+              "Neutral",
+              "Positive"
+            ],
+            "title": "Target Class",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "target_class"
+        ],
+        "title": "C4CounterfactualRequest",
+        "type": "object"
+      },
+      "C4CounterfactualResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "best_candidate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CounterfactualCandidate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidates": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CounterfactualCandidate"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "counterfactual_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counterfactual Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms"
+          },
+          "is_development": {
+            "default": true,
+            "title": "Is Development",
+            "type": "boolean"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "model_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Revision"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "non_diagnostic_notice": {
+            "default": "Model-behaviour exploration only. Non-diagnostic output for screening support; requires authorized human interpretation and does not constitute wellbeing or treatment advice.",
+            "title": "Non Diagnostic Notice",
+            "type": "string"
+          },
+          "original_predicted_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Predicted Class"
+          },
+          "original_probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": {},
+            "title": "Original Probabilities",
+            "type": "object"
+          },
+          "outcome": {
+            "default": "SUCCESS",
+            "enum": [
+              "SUCCESS",
+              "NO_COUNTERFACTUAL_FOUND",
+              "ALREADY_TARGET_CLASS",
+              "SEARCH_LIMIT_EXCEEDED",
+              "TIMEOUT",
+              "UNAVAILABLE_MODEL"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "outcome_message": {
+            "title": "Outcome Message",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "search_limits": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "default": {},
+            "title": "Search Limits",
+            "type": "object"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "supported_languages": {
+            "default": [
+              "English",
+              "Sinhala",
+              "Romanized Sinhala",
+              "Code-mixed"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Languages",
+            "type": "array"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_class": {
+            "title": "Target Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_class",
+          "outcome_message"
+        ],
+        "title": "C4CounterfactualResponse",
+        "type": "object"
+      },
       "C4EncoderCheckRequest": {
         "additionalProperties": false,
         "properties": {
@@ -672,6 +974,167 @@
         "title": "C4PredictionResponse",
         "type": "object"
       },
+      "CounterfactualCandidate": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Text"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "diff_spans": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TextSpanDiff"
+            },
+            "title": "Diff Spans",
+            "type": "array"
+          },
+          "edit_count": {
+            "title": "Edit Count",
+            "type": "integer"
+          },
+          "edits": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/EditOperation"
+            },
+            "title": "Edits",
+            "type": "array"
+          },
+          "minimality_description": {
+            "default": "Smallest edit distance found within this bounded search; not a global guarantee.",
+            "title": "Minimality Description",
+            "type": "string"
+          },
+          "minimality_rank": {
+            "default": 1,
+            "title": "Minimality Rank",
+            "type": "integer"
+          },
+          "predicted_class": {
+            "title": "Predicted Class",
+            "type": "string"
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Probabilities",
+            "type": "object"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_probability": {
+            "title": "Target Probability",
+            "type": "number"
+          },
+          "target_probability_delta": {
+            "title": "Target Probability Delta",
+            "type": "number"
+          },
+          "verified": {
+            "default": true,
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "edit_count",
+          "predicted_class",
+          "probabilities",
+          "target_probability",
+          "target_probability_delta"
+        ],
+        "title": "CounterfactualCandidate",
+        "type": "object"
+      },
+      "EditOperation": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "op": {
+            "enum": [
+              "delete",
+              "replace",
+              "insert"
+            ],
+            "title": "Op",
+            "type": "string"
+          },
+          "original": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original"
+          },
+          "replacement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacement"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "op",
+          "index"
+        ],
+        "title": "EditOperation",
+        "type": "object"
+      },
       "ErrorCode": {
         "enum": [
           "AUTH_REQUIRED",
@@ -1281,6 +1744,60 @@
         "title": "ServiceError",
         "type": "object"
       },
+      "TextSpanDiff": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "original_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Text"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "unchanged",
+              "deleted",
+              "inserted",
+              "replaced"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ],
+        "title": "TextSpanDiff",
+        "type": "object"
+      },
       "VersionResponse": {
         "additionalProperties": false,
         "properties": {
@@ -1460,6 +1977,140 @@
         "summary": "Health"
       }
     },
+    "/internal/v1/dev/counterfactuals": {
+      "post": {
+        "description": "Generate model-backed counterfactuals using bounded candidate search.",
+        "operationId": "dev_counterfactuals_internal_v1_dev_counterfactuals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/C4CounterfactualRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4CounterfactualResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dev Counterfactuals"
+      }
+    },
     "/internal/v1/dev/encoder-check": {
       "post": {
         "description": "Development-only check running input text through the pretrained base encoder.",
@@ -1586,6 +2237,11 @@
             "description": "Service Unavailable"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Dev Encoder Check"
       }
     },
@@ -1849,6 +2505,11 @@
             "description": "Service Unavailable"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Dev Predict"
       }
     },

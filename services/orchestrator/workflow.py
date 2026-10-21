@@ -12,6 +12,7 @@ from research_common.database import (
     Case,
     CaseLink,
     Consent,
+    CounterfactualRecord,
     Explanation,
     Job,
     Retention,
@@ -375,6 +376,12 @@ def enforce_retention():
             delete(Explanation).where(
                 Explanation.expires_at.is_not(None),
                 Explanation.expires_at <= now(),
+            )
+        )
+        db.execute(
+            delete(CounterfactualRecord).where(
+                CounterfactualRecord.expires_at.is_not(None),
+                CounterfactualRecord.expires_at <= now(),
             )
         )
 

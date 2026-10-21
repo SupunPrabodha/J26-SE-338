@@ -426,3 +426,100 @@ class C4PredictionResponse(Contract):
     status_message: str = "Prediction completed successfully."
 
 
+class EditOperation(Contract):
+    op: Literal["delete", "replace", "insert"]
+    index: int
+    original: str | None = None
+    replacement: str | None = None
+
+
+class TextSpanDiff(Contract):
+    text: str
+    type: Literal["unchanged", "deleted", "inserted", "replaced"]
+    original_text: str | None = None
+
+
+class CounterfactualCandidate(Contract):
+    candidate_text: str | None = None
+    edits: list[EditOperation] = []
+    edit_count: int
+    predicted_class: str
+    probabilities: dict[str, float]
+    target_probability: float
+    target_probability_delta: float
+    diff_spans: list[TextSpanDiff] = []
+    minimality_rank: int = 1
+    minimality_description: str = (
+        "Smallest edit distance found within this bounded search; not a global guarantee."
+    )
+    verified: bool = True
+
+
+class C4CounterfactualRequest(Contract):
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    target_class: Literal["Negative", "Neutral", "Positive"]
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+    idempotency_key: UUID | None = None
+    source_reference: Annotated[str, Field(max_length=100)] | None = None
+    max_edits: int = 2
+    max_candidates: int = 50
+
+
+class C4CounterfactualResponse(Contract):
+    counterfactual_id: UUID | None = None
+    created_at: AwareDatetime | None = None
+    target_class: str
+    original_predicted_class: str | None = None
+    original_probabilities: dict[str, float] = {}
+    outcome: Literal[
+        "SUCCESS",
+        "NO_COUNTERFACTUAL_FOUND",
+        "ALREADY_TARGET_CLASS",
+        "SEARCH_LIMIT_EXCEEDED",
+        "TIMEOUT",
+        "UNAVAILABLE_MODEL",
+    ] = "SUCCESS"
+    outcome_message: str
+    candidates: list[CounterfactualCandidate] = []
+    best_candidate: CounterfactualCandidate | None = None
+    search_limits: dict[str, int | float | str] = {}
+    model_id: str | None = None
+    model_version: str | None = None
+    model_revision: str | None = None
+    is_development: bool = True
+    source_reference: str | None = None
+    execution_time_ms: float | None = None
+    supported_languages: list[str] = [
+        "English",
+        "Sinhala",
+        "Romanized Sinhala",
+        "Code-mixed",
+    ]
+    non_diagnostic_notice: str = (
+        "Model-behaviour exploration only. Non-diagnostic output for screening support; "
+        "requires authorized human interpretation and does not constitute wellbeing or treatment advice."
+    )
+
+
+class C4CounterfactualSummary(Contract):
+    counterfactual_id: UUID
+    created_at: AwareDatetime
+    target_class: str
+    original_predicted_class: str | None = None
+    outcome: str
+    candidate_count: int
+    best_edit_count: int | None = None
+    is_development: bool = True
+    source_reference: str | None = None
+
+
+class C4CounterfactualListResponse(Contract):
+    items: list[C4CounterfactualSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+

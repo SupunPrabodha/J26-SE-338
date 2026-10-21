@@ -14,6 +14,8 @@ from research_common.mocks import mock_app
 from research_common.service_auth import service_auth
 from research_common.web import SafeError
 from research_contracts import (
+    C4CounterfactualRequest,
+    C4CounterfactualResponse,
     C4EncoderCheckRequest,
     C4EncoderCheckResponse,
     C4ExplanationRequest,
@@ -44,7 +46,11 @@ def _get_or_init_classifier():
     return classifier
 
 
-@app.post("/internal/v1/dev/encoder-check", response_model=C4EncoderCheckResponse)
+@app.post(
+    "/internal/v1/dev/encoder-check",
+    response_model=C4EncoderCheckResponse,
+    dependencies=[Depends(service_auth("xai"))],
+)
 def dev_encoder_check(
     request: C4EncoderCheckRequest, http_request: Request
 ) -> C4EncoderCheckResponse:
@@ -68,7 +74,11 @@ def dev_encoder_check(
         raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
 
 
-@app.post("/internal/v1/dev/predict", response_model=C4PredictionResponse)
+@app.post(
+    "/internal/v1/dev/predict",
+    response_model=C4PredictionResponse,
+    dependencies=[Depends(service_auth("xai"))],
+)
 def dev_predict(
     request: C4PredictionRequest, http_request: Request
 ) -> C4PredictionResponse:
@@ -123,9 +133,7 @@ def dev_explain(
     if not request.text or not request.text.strip():
         raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
 
-    from xai.classifier_interface import get_classifier
-
-    classifier = get_classifier()
+    classifier = _get_or_init_classifier()
     if classifier is None:
         return C4ExplanationResponse(
             method=request.method,
@@ -157,3 +165,38 @@ def dev_explain(
     except Exception as exc:
         logger.exception("Explanation generation failed: %s", exc)
         raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+
+
+@app.post(
+    "/internal/v1/dev/counterfactuals",
+    response_model=C4CounterfactualResponse,
+    dependencies=[Depends(service_auth("xai"))],
+)
+def dev_counterfactuals(
+    request: C4CounterfactualRequest, http_request: Request
+) -> C4CounterfactualResponse:
+    """Generate model-backed counterfactuals using bounded candidate search."""
+    if settings().environment != "development":
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not request.text or not request.text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    classifier = _get_or_init_classifier()
+    if classifier is None:
+        return C4CounterfactualResponse(
+            target_class=request.target_class,
+            outcome="UNAVAILABLE_MODEL",
+            outcome_message="Sentiment classifier model is unavailable.",
+        )
+
+    try:
+        from xai.counterfactual_generator import generate_counterfactuals
+
+        return generate_counterfactuals(request, classifier)
+    except ValueError:
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422) from None
+    except Exception as exc:
+        logger.exception("Counterfactual generation failed: %s", exc)
+        raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+

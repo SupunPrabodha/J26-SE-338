@@ -120,6 +120,38 @@ def current_account(request: Request, db: Session = Depends(session), token=Depe
     return account
 
 
+def optional_account(
+    request: Request, db: Session = Depends(session), token=Depends(access_cookie)
+):
+    if not token:
+        return None
+    try:
+        data = jwt.decode(
+            token,
+            settings().jwt_secret.get_secret_value(),
+            algorithms=["HS256"],
+            audience=AUDIENCE,
+            issuer=ISSUER,
+            options={"require": ["sub", "role", "iss", "aud", "iat", "exp", "jti"]},
+        )
+        UUID(data["sub"])
+        UUID(data["jti"])
+        record = db.scalar(select(AuthSession).where(AuthSession.access_jti == data["jti"]))
+        account = db.get(Account, data["sub"])
+        if (
+            not record
+            or record.revoked
+            or record.expires_at <= now()
+            or record.account_id != data["sub"]
+            or not account_valid(account)
+            or account.role != data["role"]
+        ):
+            return None
+        return account
+    except (jwt.PyJWTError, ValueError, TypeError):
+        return None
+
+
 def require_role(*roles):
     def check(account=Depends(current_account)):
         if account.role not in roles:

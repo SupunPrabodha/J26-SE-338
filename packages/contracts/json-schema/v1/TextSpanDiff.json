@@ -1,0 +1,57 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/TextSpanDiff.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "original_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Original Text"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "unchanged",
+        "deleted",
+        "inserted",
+        "replaced"
+      ],
+      "title": "Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "type"
+  ],
+  "title": "TextSpanDiff",
+  "type": "object"
+}
