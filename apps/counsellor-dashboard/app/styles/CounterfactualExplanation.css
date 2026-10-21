@@ -11,68 +11,28 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* ==========================================================================
+   MAIN CONTENT AREA
+   ========================================================================== */
+
 .cf-main {
   flex: 1;
-  padding: 24px 32px 48px;
-  overflow-y: auto;
-  max-width: 1400px;
-}
-
-.cf-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.cf-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.cf-header-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 9999px;
-  padding: 5px 12px;
-  font-size: 12px;
-  color: #334155;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.cf-user-avatar-circle {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #e0e7ff;
-  color: #4338ca;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cf-user-text-info {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  min-width: 0;
+  padding: 20px 28px 32px 28px;
+  overflow-y: auto;
+  max-width: 1540px;
 }
 
-.cf-user-name {
-  font-size: 11px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.cf-user-role {
-  font-size: 10px;
-  color: #64748b;
+/* Top Header */
+.cf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .cf-header-title-block {
@@ -81,91 +41,492 @@
 }
 
 .cf-main-title {
-  font-size: 22px;
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
+.cf-main-subtitle {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+.cf-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cf-header-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.cf-header-pill:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.cf-user-avatar-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #3b82f6;
+  border: 1px solid #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cf-user-text-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.cf-user-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cf-user-role {
+  font-size: 10.5px;
+  color: #64748b;
+}
+
+/* Screening Support Banner & Non-Diagnostic Notice */
+.cf-notice {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+  font-size: 11px;
+  color: #1e40af;
+  line-height: 1.4;
+}
+
+/* Alerts */
+.cf-alert {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cf-alert-error {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #991b1b;
+}
+
+.cf-alert-success {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  color: #166534;
+}
+
+.cf-alert-close {
+  background: none;
+  border: none;
+  color: currentColor;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 0 4px;
+  opacity: 0.8;
+}
+
+.cf-alert-close:hover {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   GRID LAYOUT & CARDS
+   ========================================================================== */
+
+.cf-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cf-row {
+  display: grid;
+  gap: 16px;
+}
+
+.cf-row-3-cols {
+  grid-template-columns: 1fr 1.08fr 1.02fr;
+}
+
+.cf-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 15px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.cf-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cf-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-card-icon {
+  color: #1e293b;
+  flex-shrink: 0;
+}
+
+.cf-card-title {
+  font-size: 13px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
   letter-spacing: -0.01em;
 }
 
-.cf-main-subtitle {
-  font-size: 13px;
-  color: #64748b;
-  margin-top: 4px;
-  margin-bottom: 0;
+/* ==========================================================================
+   ROW 1: INPUT TEXT | MODEL PREDICTION | OBJECTIVE SUMMARY
+   ========================================================================== */
+
+/* Card 1: Input Text */
+.cf-card-input-text .cf-input-box {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  max-height: 140px;
+  overflow-y: auto;
 }
 
-/* Top 3-Card Grid */
-.cf-top-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+.cf-input-line-1 {
+  font-size: 12.5px;
+  color: #1e293b;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+  white-space: pre-wrap;
 }
 
-@media (max-width: 1080px) {
-  .cf-top-grid {
-    grid-template-columns: 1fr;
-  }
+.cf-input-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11.5px;
+  margin-bottom: 10px;
 }
 
-.cf-top-card {
+.cf-meta-label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.cf-meta-pill-sinhala {
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #ffedd5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.cf-meta-pill-english {
+  background: #f5f3ff;
+  color: #6366f1;
+  border: 1px solid #ede9fe;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.cf-input-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #0f172a;
+  font-weight: 600;
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cf-target-class-val {
+  font-weight: 700;
+}
+
+.cf-btn-primary-sm {
+  padding: 6px 12px;
+  background: #4f46e5;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s ease;
+}
+
+.cf-btn-primary-sm:hover {
+  background: #4338ca;
+}
+
+.cf-btn-secondary-sm {
+  padding: 6px 12px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 16px 18px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  color: #4338ca;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.cf-btn-secondary-sm:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Card 2: Model Prediction */
+.cf-card-orig-prediction .cf-prediction-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.cf-stress-label {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ef4444;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.cf-confidence-badge {
   display: flex;
   flex-direction: column;
-}
-
-.cf-top-card-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f1f5f9;
+  justify-content: center;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  padding: 6px 14px;
+  min-width: 70px;
 }
 
-.cf-top-card-title {
-  font-size: 13px;
-  font-weight: 700;
+.cf-score-percent {
+  font-size: 19px;
+  font-weight: 800;
+  color: #dc2626;
+  line-height: 1;
+}
+
+.cf-score-sublabel {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Horizontal Probabilities Distribution */
+.cf-prob-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.cf-prob-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
   color: #0f172a;
-  margin: 0;
+  font-weight: 600;
+}
+
+.cf-prob-label {
+  width: 60px;
+  font-size: 10.5px;
+  color: #475569;
+}
+
+.cf-prob-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #f1f5f9;
+  overflow: hidden;
+}
+
+.cf-prob-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.cf-prob-val {
+  width: 34px;
+  text-align: right;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+  font-family: monospace;
+}
+
+/* Card 3: Counterfactual Objective & Bounds */
+.cf-summary-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  margin-bottom: 12px;
+}
+
+.cf-legend-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.cf-legend-left {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-/* Control Toolbar */
-.cf-toolbar {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 16px 20px;
+.cf-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cf-dot-red {
+  background-color: #ef4444;
+}
+
+.cf-dot-green {
+  background-color: #16a34a;
+}
+
+.cf-dot-blue {
+  background-color: #3b82f6;
+}
+
+.cf-dot-gray {
+  background-color: #94a3b8;
+}
+
+.cf-legend-item-val {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 11px;
+}
+
+.cf-strength-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cf-strength-label {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.cf-strength-badge {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   ROW 2: CONTROL TOOLBAR
+   ========================================================================== */
+
+.cf-toolbar-card {
+  padding: 12px 18px;
+}
+
+.cf-toolbar-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 14px;
 }
 
 .cf-toolbar-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .cf-toolbar-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   color: #475569;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .cf-target-button-group {
@@ -174,7 +535,7 @@
 }
 
 .cf-target-btn {
-  padding: 6px 14px;
+  padding: 5px 14px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -208,23 +569,23 @@
 }
 
 .cf-generate-btn {
-  background: #6366f1;
+  background: #4f46e5;
   color: #ffffff;
   border: none;
   border-radius: 7px;
-  padding: 9px 20px;
-  font-size: 13px;
+  padding: 8px 18px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   transition: background 0.15s ease;
-  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
 }
 
 .cf-generate-btn:hover:not(:disabled) {
-  background: #4f46e5;
+  background: #4338ca;
 }
 
 .cf-generate-btn:disabled {
@@ -233,52 +594,50 @@
   box-shadow: none;
 }
 
-/* Persistent Non-Diagnostic Notice */
-.cf-notice-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-left: 4px solid #6366f1;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  font-size: 12px;
-  color: #475569;
-  line-height: 1.45;
+.cf-spinner-sm {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.cf-notice-title {
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Feedback States */
+/* ==========================================================================
+   FEEDBACK & OUTCOME STATES
+   ========================================================================== */
+
 .cf-state-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 32px 24px;
   text-align: center;
-  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .cf-state-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: #1e293b;
   margin: 0 0 6px 0;
 }
 
 .cf-state-desc {
-  font-size: 13px;
+  font-size: 12.5px;
   color: #64748b;
   margin: 0;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  line-height: 1.5;
 }
 
 .cf-state-no-result {
@@ -286,53 +645,69 @@
   border-color: #fef3c7;
 }
 
-.cf-state-error {
-  background: #fff1f2;
-  border-color: #fecdd3;
+.cf-outcome-card {
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-/* Candidate Cards Grid */
+.cf-outcome-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.cf-outcome-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.cf-outcome-warning {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+}
+
+/* ==========================================================================
+   CANDIDATE CARDS & TOKEN HIGHLIGHTS (MATCHING LIME HIGHLIGHTS)
+   ========================================================================== */
+
 .cf-candidate-grid {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-top: 20px;
+  gap: 16px;
 }
 
-.cf-card {
-  background: #ffffff;
+.cf-candidate-card {
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: #ffffff;
 }
 
-.cf-card:hover {
+.cf-candidate-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .cf-card-best {
-  border-color: #6366f1;
+  border-color: #818cf8;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
 }
 
-.cf-card-header {
-  padding: 12px 18px;
+.cf-candidate-header {
+  padding: 10px 16px;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-}
-
-.cf-card-title-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .cf-rank-badge {
@@ -341,17 +716,17 @@
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 .cf-rank-badge-best {
-  background: #6366f1;
+  background: #4f46e5;
 }
 
 .cf-minimality-tag {
   font-size: 11.5px;
   color: #475569;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cf-edit-count-badge {
@@ -361,7 +736,7 @@
   font-size: 11px;
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 .cf-verified-badge {
@@ -370,101 +745,143 @@
   font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 5px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.cf-card-body {
-  padding: 18px 20px;
+.cf-candidate-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* Diff Spans */
-.cf-text-box {
-  background: #fafaf9;
-  border: 1px solid #e7e5e4;
+/* Perturbed Text Box - Matching LIME Highlight Box */
+.cf-highlight-text-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
   border-radius: 8px;
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.7;
-  margin-bottom: 16px;
-  word-break: break-word;
+  font-size: 12.5px;
+  line-height: 1.6;
 }
 
 .cf-span-unchanged {
-  color: #1c1917;
-}
-
-.cf-span-deleted {
-  background-color: #fee2e2;
-  color: #991b1b;
-  text-decoration: line-through;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-weight: 500;
-  margin: 0 2px;
+  color: #1e293b;
+  font-weight: 400;
 }
 
 .cf-span-inserted {
   background-color: #dcfce7;
-  color: #166534;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-weight: 600;
-  margin: 0 2px;
+  color: #15803d;
+  border: 1px solid #86efac;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-weight: 700;
+}
+
+.cf-span-deleted {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  padding: 2px 6px;
+  border-radius: 5px;
+  text-decoration: line-through;
+  font-weight: 500;
 }
 
 .cf-span-replaced {
-  background-color: #e0e7ff;
-  color: #3730a3;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-weight: 600;
-  margin: 0 2px;
-  border-bottom: 2px solid #6366f1;
+  background-color: #ede9fe;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-weight: 700;
 }
 
-/* Edit operations list */
-.cf-operations-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
+/* Sub-split: Probability Chart & Operations Table */
+.cf-sub-cards-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
-.cf-op-badge {
-  font-size: 11.5px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+/* Table - Matching LIME Features Table */
+.cf-features-table-wrap {
+  width: 100%;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cf-features-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.cf-features-table th {
+  padding: 7px 10px;
+  color: #0f172a;
+  font-weight: 700;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 10.5px;
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  text-align: left;
 }
 
-.cf-op-delete {
-  border-color: #fecdd3;
-  background: #fff1f2;
-  color: #9f1239;
+.cf-features-table td {
+  padding: 6px 10px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.cf-op-replace {
-  border-color: #c7d2fe;
-  background: #eef2ff;
-  color: #3730a3;
+.cf-features-table tr:last-child td {
+  border-bottom: none;
 }
 
-/* Metrics row */
+.cf-row-delete {
+  background-color: #fff5f5;
+}
+
+.cf-row-replace {
+  background-color: #f5f3ff;
+}
+
+.cf-table-op-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.cf-table-op-delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.cf-table-op-replace {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+/* Metrics Grid */
 .cf-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   background: #f8fafc;
-  padding: 14px;
+  padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid #edf2f7;
 }
 
 .cf-metric-col {
@@ -473,15 +890,16 @@
 }
 
 .cf-metric-title {
-  font-size: 11px;
+  font-size: 10px;
   color: #64748b;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
 }
 
 .cf-metric-val {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #0f172a;
 }
@@ -496,14 +914,91 @@
 
 /* Probability Comparison */
 .cf-prob-comparison {
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid #e2e8f0;
+  margin-top: 10px;
 }
 
 .cf-prob-header {
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0f172a;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   ROW 4: HOW TO READ COUNTERFACTUAL EXPLANATIONS (MATCHING LIME / SHAP)
+   ========================================================================== */
+
+.cf-card-how-to {
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+
+.cf-how-to-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.cf-how-to-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cf-how-to-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cf-icon-red {
+  color: #ef4444;
+}
+
+.cf-icon-green {
+  color: #10b981;
+}
+
+.cf-icon-blue {
+  color: #6366f1;
+}
+
+.cf-how-to-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.cf-how-to-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+  margin-bottom: 2px;
+}
+
+.cf-how-to-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.cf-how-to-desc strong {
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   RESPONSIVENESS
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+
+  .cf-row-3-cols,
+  .cf-sub-cards-split,
+  .cf-how-to-columns,
+  .cf-metrics-grid {
+    grid-template-columns: 1fr;
+  }
 }

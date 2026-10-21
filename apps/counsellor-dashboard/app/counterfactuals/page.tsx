@@ -251,7 +251,7 @@ export default function CounterfactualsPage() {
 
     if (candidate.diff_spans && candidate.diff_spans.length > 0) {
       return (
-        <div className="cf-text-box">
+        <div className="cf-highlight-text-box">
           {candidate.diff_spans.map((span, idx) => {
             if (span.type === "deleted") {
               return (
@@ -289,7 +289,7 @@ export default function CounterfactualsPage() {
     }
 
     return (
-      <div className="cf-text-box">
+      <div className="cf-highlight-text-box">
         <span className="cf-span-unchanged">{candidate.candidate_text}</span>
       </div>
     );
@@ -309,7 +309,12 @@ export default function CounterfactualsPage() {
     return (
       <div className="cf-prob-comparison">
         <div className="cf-prob-header">
-          Probability Shift Comparison (Before vs. After Perturbation)
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          <span>Probability Shift (Before vs. After Perturbation)</span>
         </div>
         <div style={{ width: "100%", height: "130px" }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -340,22 +345,18 @@ export default function CounterfactualsPage() {
       <Sidebar isClassifierConnected={isClassifierConnected} />
 
       <main className="cf-main" id="content">
-        {/* Header Block */}
+        {/* Top Header */}
         <header className="cf-header">
           <div className="cf-header-title-block">
-            <p
-              style={{
-                margin: "0 0 4px",
-                fontSize: "11px",
-                fontWeight: 600,
-                color: "#6366f1",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-              }}
-            >
-              Component 4 · Explainable AI
-            </p>
-            <h1 className="cf-main-title">Counterfactual Explanations</h1>
+            <h1 className="cf-main-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="m16 3 4 4-4 4" />
+                <path d="M20 7H4" />
+                <path d="m8 21-4-4 4-4" />
+                <path d="M4 17h16" />
+              </svg>
+              <span>Counterfactual Explanations</span>
+            </h1>
             <p className="cf-main-subtitle">
               Model-behaviour exploration identifying minimal token edits required to perturb the classifier&apos;s verified prediction.
             </p>
@@ -380,10 +381,10 @@ export default function CounterfactualsPage() {
 
             {/* Language Pill */}
             <div className="cf-header-pill" title="Language detected in submission">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10z" />
               </svg>
               <span>{caseLanguage}</span>
             </div>
@@ -391,7 +392,7 @@ export default function CounterfactualsPage() {
             {/* Counsellor Profile Pill */}
             <div className="cf-header-pill">
               <div className="cf-user-avatar-circle">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
@@ -404,313 +405,23 @@ export default function CounterfactualsPage() {
           </div>
         </header>
 
-        {/* Top 3 Context & Baseline Cards */}
-        <div className="cf-top-grid">
-          {/* Card 1: Input Reflection */}
-          <div className="cf-top-card">
-            <div className="cf-top-card-header">
-              <h2 className="cf-top-card-title">
-                <span>📝</span>
-                <span>Input Reflection</span>
-              </h2>
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  color: "#4338ca",
-                  background: "#e0e7ff",
-                  padding: "2px 8px",
-                  borderRadius: "4px",
-                }}
-              >
-                {caseLanguage}
-              </span>
-            </div>
+        {/* Screening Support Banner & Non-Diagnostic Notice */}
+        <aside className="cf-notice" aria-label="Non-diagnostic boundary">
+          <strong>Mandatory Practice Notice:</strong> Screening support only. Requires counsellor-assisted interpretation and does not replace professional counselling.
+          <span style={{ display: "block", color: "#475569", marginTop: "3px", fontSize: "10.5px" }}>
+            Model: Temporary sentiment model — C4 development (cardiffnlp/twitter-xlm-roberta-base-sentiment). Outputs represent model behaviour perturbations, not clinical recommendations. Does not claim validated Sinhala, Romanized Sinhala, or code-mixed diagnostic accuracy.
+          </span>
+        </aside>
 
-            {submissionText ? (
-              <>
-                <div
-                  style={{
-                    background: "#f8fafc",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    padding: "10px 12px",
-                    fontSize: "12.5px",
-                    lineHeight: "1.5",
-                    color: "#1e293b",
-                    maxHeight: "120px",
-                    overflowY: "auto",
-                    whiteSpace: "pre-wrap",
-                    flex: 1,
-                  }}
-                >
-                  {submissionText}
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: "10px",
-                    fontSize: "11px",
-                    color: "#64748b",
-                  }}
-                >
-                  <span>
-                    {submissionText.trim().split(/\s+/).length} words · {submissionText.length} chars
-                  </span>
-                  <span style={{ fontWeight: 600, color: "#475569" }}>
-                    {snapshot ? "Development Input" : "Assigned Case"}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "16px 12px",
-                  background: "#f8fafc",
-                  borderRadius: "8px",
-                  border: "1px dashed #cbd5e1",
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <p style={{ margin: "0 0 4px", fontSize: "13px", fontWeight: 600, color: "#334155" }}>
-                  No reflection active
-                </p>
-                <p style={{ margin: "0 0 12px", fontSize: "11.5px", color: "#64748b", maxWidth: "260px" }}>
-                  Load a synthetic student reflection to explore minimal counterfactual edits, or enter your own narrative on Development Input.
-                </p>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
-                  <button
-                    type="button"
-                    onClick={handleLoadDefaultSample}
-                    style={{
-                      padding: "6px 12px",
-                      background: "#4f46e5",
-                      color: "#ffffff",
-                      border: "none",
-                      borderRadius: "6px",
-                      fontSize: "11.5px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    <span>⚡</span>
-                    <span>Load Sample Reflection</span>
-                  </button>
-                  <Link
-                    href="/c4-dev-input"
-                    style={{
-                      padding: "6px 12px",
-                      background: "#ffffff",
-                      color: "#4338ca",
-                      border: "1px solid #cbd5e1",
-                      borderRadius: "6px",
-                      fontSize: "11.5px",
-                      fontWeight: 600,
-                      textDecoration: "none",
-                    }}
-                  >
-                    Custom Input →
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Card 2: Model Prediction (Baseline) */}
-          <div className="cf-top-card">
-            <div className="cf-top-card-header">
-              <h2 className="cf-top-card-title">
-                <span>🎯</span>
-                <span>Original Prediction (Baseline)</span>
-              </h2>
-              <span style={{ fontSize: "10.5px", color: "#64748b", fontFamily: "monospace" }}>
-                xlm-roberta
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "10px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    color: SENTIMENT_COLORS[baselineClass] || "#0f172a",
-                  }}
-                >
-                  {baselineClass}
-                </span>
-                <span style={{ fontSize: "11.5px", fontWeight: 600, color: "#64748b" }}>
-                  ({(baselineConfidence * 100).toFixed(1)}% confidence)
-                </span>
-              </div>
-              <span
-                style={{
-                  fontSize: "10.5px",
-                  background: "#f1f5f9",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                  color: "#475569",
-                  fontWeight: 600,
-                }}
-              >
-                Original Class
-              </span>
-            </div>
-
-            <div style={{ marginTop: "4px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              {(["Negative", "Neutral", "Positive"] as const).map((cls) => {
-                const prob = baselineProbs[cls] ?? 0;
-                return (
-                  <div
-                    key={cls}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      fontSize: "11px",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span style={{ width: "52px", color: "#475569", fontWeight: 500 }}>{cls}:</span>
-                    <div
-                      style={{
-                        flex: 1,
-                        background: "#f1f5f9",
-                        height: "6px",
-                        borderRadius: "3px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${Math.round(prob * 100)}%`,
-                          background: SENTIMENT_COLORS[cls] || "#6366f1",
-                          height: "100%",
-                          transition: "width 0.3s ease",
-                        }}
-                      />
-                    </div>
-                    <span
-                      style={{
-                        width: "36px",
-                        textAlign: "right",
-                        color: "#64748b",
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      {(prob * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Card 3: Counterfactual Target & Limits */}
-          <div className="cf-top-card">
-            <div className="cf-top-card-header">
-              <h2 className="cf-top-card-title">
-                <span>🔄</span>
-                <span>Counterfactual Objective</span>
-              </h2>
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: SENTIMENT_COLORS[targetClass] || "#6366f1",
-                  background: `${SENTIMENT_COLORS[targetClass] || "#6366f1"}15`,
-                  padding: "2px 8px",
-                  borderRadius: "4px",
-                }}
-              >
-                Target: {targetClass}
-              </span>
-            </div>
-
-            <p style={{ margin: "0 0 10px", fontSize: "12px", color: "#334155", lineHeight: "1.45" }}>
-              Perturb reflection tokens to flip the verified classifier decision from{" "}
-              <strong>{baselineClass}</strong> to <strong>{targetClass}</strong>.
-            </p>
-
-            <div
-              style={{
-                background: "#f8fafc",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                border: "1px solid #f1f5f9",
-                fontSize: "11px",
-                color: "#64748b",
-                marginTop: "auto",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                <span>Max Edits:</span>
-                <strong style={{ color: "#0f172a" }}>2 (Deletions / Synonyms)</strong>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                <span>Search Budget:</span>
-                <strong style={{ color: "#0f172a" }}>50 candidates</strong>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Minimality:</span>
-                <strong style={{ color: "#0f172a" }}>Fewest edits, then target prob</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mandatory Screening & Non-Diagnostic Notice */}
-        <section className="cf-notice-box" aria-label="Non-diagnostic safety notice">
-          <div className="cf-notice-title">
-            <span>🛡️</span>
-            <span>Non-Diagnostic Wellbeing Decision Support</span>
-          </div>
-          <div>
-            Counterfactual examples illustrate local decision boundaries and sensitivity of the sentiment classifier.
-            Outputs represent model behaviour examples requiring authorized counsellor interpretation, and must{" "}
-            <strong>never</strong> be interpreted as advice or recommendations for altering a student&apos;s personal wellbeing or life circumstances.
-          </div>
-        </section>
-
-        {/* Error and Status Banners */}
+        {/* Alerts */}
         {error && (
-          <div
-            style={{
-              padding: "12px 16px",
-              background: "#fff1f2",
-              border: "1px solid #fecdd3",
-              borderRadius: "8px",
-              color: "#9f1239",
-              fontSize: "13px",
-              marginBottom: "16px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-            role="alert"
-          >
+          <div className="cf-alert cf-alert-error" role="alert">
             <span>{error}</span>
             <button
               type="button"
               onClick={() => setError("")}
-              style={{ background: "none", border: "none", color: "#9f1239", cursor: "pointer", fontWeight: 700 }}
+              className="cf-alert-close"
+              aria-label="Dismiss error"
             >
               ✕
             </button>
@@ -718,139 +429,312 @@ export default function CounterfactualsPage() {
         )}
 
         {statusMessage && (
-          <div
-            style={{
-              padding: "10px 16px",
-              background: "#ecfdf5",
-              border: "1px solid #a7f3d0",
-              borderRadius: "8px",
-              color: "#065f46",
-              fontSize: "12.5px",
-              marginBottom: "16px",
-            }}
-            role="status"
-          >
+          <div className="cf-alert cf-alert-success" role="status">
             {statusMessage}
           </div>
         )}
 
-        {/* Control Toolbar */}
-        <section className="cf-toolbar" aria-label="Counterfactual Search Controls">
-          <div className="cf-toolbar-left">
-            <span className="cf-toolbar-label">Target Class:</span>
-            <div className="cf-target-button-group" role="radiogroup" aria-label="Target Class Selector">
-              {(["Negative", "Neutral", "Positive"] as const).map((cls) => {
-                const isActive = targetClass === cls;
-                return (
-                  <button
-                    key={cls}
-                    type="button"
-                    role="radio"
-                    aria-checked={isActive}
-                    className={`cf-target-btn ${isActive ? `cf-target-btn-active-${cls}` : ""}`}
-                    onClick={() => {
-                      setTargetClass(cls);
-                      setSelectedSentimentClass(cls);
+        {/* DASHBOARD GRID */}
+        <div className="cf-grid">
+          {/* ROW 1: Input Text | Model Prediction | Counterfactual Objective */}
+          <div className="cf-row cf-row-3-cols">
+            {/* Card 1: Input Text */}
+            <div className="cf-card cf-card-input-text">
+              <div className="cf-card-header">
+                <div className="cf-card-title-group">
+                  <svg className="cf-card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                  <h3 className="cf-card-title">Input Text</h3>
+                </div>
+              </div>
+
+              <div className="cf-input-box">
+                {submissionText ? (
+                  <p className="cf-input-line-1">{submissionText}</p>
+                ) : (
+                  <div role="status" style={{ padding: "12px 6px", textAlign: "center" }}>
+                    <p style={{ fontSize: "13px", fontWeight: 700, color: "#1e293b", margin: "0 0 4px" }}>
+                      No reflection narrative active
+                    </p>
+                    <p style={{ color: "#64748b", fontSize: "11.5px", margin: "0 0 10px", lineHeight: 1.45 }}>
+                      Load a synthetic student reflection to explore minimal counterfactual edits, or enter your own narrative on Development Input.
+                    </p>
+                    <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        onClick={handleLoadDefaultSample}
+                        className="cf-btn-primary-sm"
+                      >
+                        ⚡ Load Sample Reflection
+                      </button>
+                      <Link href="/c4-dev-input" className="cf-btn-secondary-sm">
+                        Custom Input →
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="cf-input-meta-row">
+                <span className="cf-meta-label">Detected Language:</span>
+                <span className={caseLanguage === "Sinhala" ? "cf-meta-pill-sinhala" : "cf-meta-pill-english"}>
+                  Language: {caseLanguage}
+                </span>
+              </div>
+
+              <div className="cf-input-bottom-row">
+                <span>
+                  Words: <strong>{submissionText ? submissionText.trim().split(/\s+/).length : 0}</strong> · Chars: <strong>{submissionText ? submissionText.length : 0}</strong>
+                </span>
+                <span>
+                  Target Class: <span className="cf-target-class-val" style={{ color: SENTIMENT_COLORS[targetClass] }}>{targetClass}</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: Model Prediction */}
+            <div className="cf-card cf-card-orig-prediction">
+              <div className="cf-card-header">
+                <div className="cf-card-title-group">
+                  <svg className="cf-card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10z" />
+                  </svg>
+                  <h3 className="cf-card-title">Model Prediction</h3>
+                </div>
+                <span style={{ fontSize: "9.5px", color: "#6366f1", fontWeight: 600 }}>Temporary sentiment model</span>
+              </div>
+
+              <div className="cf-prediction-main-row">
+                <div>
+                  <span style={{ fontSize: "10.5px", color: "#64748b", display: "block" }}>Predicted Sentiment:</span>
+                  <div
+                    className="cf-stress-label"
+                    style={{
+                      color:
+                        baselineClass === "Negative"
+                          ? "#ef4444"
+                          : baselineClass === "Positive"
+                          ? "#16a34a"
+                          : "#3b82f6",
                     }}
-                    disabled={isBusy}
                   >
-                    {cls}
-                  </button>
-                );
-              })}
+                    {baselineClass}
+                  </div>
+                </div>
+                <div className="cf-confidence-badge">
+                  <span className="cf-score-percent">
+                    {Math.round(baselineConfidence * 100)}%
+                  </span>
+                  <span className="cf-score-sublabel">Confidence</span>
+                </div>
+              </div>
+
+              {/* Sentiment Probabilities Progress Bars */}
+              <div className="cf-prob-section">
+                {(["Negative", "Neutral", "Positive"] as const).map((cls) => {
+                  const prob = baselineProbs[cls] ?? 0;
+                  return (
+                    <div key={cls} className="cf-prob-bar-row">
+                      <span className="cf-prob-label">{cls}:</span>
+                      <div className="cf-prob-track">
+                        <div
+                          className={`cf-prob-fill cf-prob-fill-${cls.toLowerCase()}`}
+                          style={{
+                            width: `${Math.round(prob * 100)}%`,
+                            backgroundColor: SENTIMENT_COLORS[cls],
+                          }}
+                        />
+                      </div>
+                      <span className="cf-prob-val">{(prob * 100).toFixed(0)}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ fontSize: "10px", color: "#64748b", marginTop: "auto", borderTop: "1px solid #f1f5f9", paddingTop: "6px", display: "flex", justifyContent: "space-between" }}>
+                <span>Model: <strong>twitter-xlm-roberta</strong></span>
+                <span>Status: <strong style={{ color: "#16a34a" }}>READY</strong></span>
+              </div>
             </div>
 
-            <div style={{ fontSize: "12px", color: "#64748b", marginLeft: "8px" }}>
-              Language rules: <strong>{caseLanguage}</strong>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="cf-generate-btn"
-            onClick={handleGenerate}
-            disabled={isBusy || !submissionText}
-          >
-            {isBusy ? (
-              <>
+            {/* Card 3: Counterfactual Objective & Bounds */}
+            <div className="cf-card cf-card-explanation-summary">
+              <div className="cf-card-header">
+                <div className="cf-card-title-group">
+                  <svg className="cf-card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 4 23 10 17 10" />
+                    <polyline points="1 20 1 14 7 14" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  </svg>
+                  <h3 className="cf-card-title">Counterfactual Objective</h3>
+                </div>
                 <span
+                  className="cf-strength-badge"
                   style={{
-                    display: "inline-block",
-                    width: "12px",
-                    height: "12px",
-                    border: "2px solid #ffffff",
-                    borderTopColor: "transparent",
-                    borderRadius: "50%",
-                    animation: "spin 0.8s linear infinite",
+                    backgroundColor: `${SENTIMENT_COLORS[targetClass]}15`,
+                    color: SENTIMENT_COLORS[targetClass],
+                    borderColor: `${SENTIMENT_COLORS[targetClass]}30`,
                   }}
-                />
-                <span>Searching Bounded Space…</span>
-              </>
-            ) : (
-              <>
-                <span>⚡</span>
-                <span>Generate Counterfactuals</span>
-              </>
-            )}
-          </button>
-        </section>
+                >
+                  Target: {targetClass}
+                </span>
+              </div>
 
-        {/* Empty State: No Input Text */}
-        {!submissionText && (
-          <div className="cf-state-card" role="status">
-            <h3 className="cf-state-title">No Input Text Selected</h3>
-            <p className="cf-state-desc">
-              Please select an assigned case from the selector above or navigate to{" "}
-              <Link href="/c4-dev-input" style={{ color: "#6366f1", textDecoration: "underline" }}>
-                Development Input
-              </Link>{" "}
-              to prepare a fictional academic reflection.
-            </p>
+              <p style={{ margin: "0 0 10px", fontSize: "12px", color: "#334155", lineHeight: "1.45" }}>
+                Find minimal token perturbations required to change predicted sentiment from <strong>{baselineClass}</strong> to <strong>{targetClass}</strong>.
+              </p>
+
+              <div className="cf-summary-legend-list">
+                <div className="cf-legend-item-row">
+                  <div className="cf-legend-left">
+                    <span className="cf-dot cf-dot-red" />
+                    <span>Max Perturbation Edits:</span>
+                  </div>
+                  <span className="cf-legend-item-val">2 (Deletions / Synonyms)</span>
+                </div>
+
+                <div className="cf-legend-item-row">
+                  <div className="cf-legend-left">
+                    <span className="cf-dot cf-dot-gray" />
+                    <span>Search Budget:</span>
+                  </div>
+                  <span className="cf-legend-item-val">50 candidates</span>
+                </div>
+
+                <div className="cf-legend-item-row">
+                  <div className="cf-legend-left">
+                    <span className="cf-dot cf-dot-green" />
+                    <span>Minimality Criterion:</span>
+                  </div>
+                  <span className="cf-legend-item-val">Fewest edits, target prob</span>
+                </div>
+              </div>
+
+              <div className="cf-strength-row">
+                <span className="cf-strength-label">Search Space:</span>
+                <span className="cf-strength-badge">Bounded Local Search</span>
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Loading State */}
-        {isBusy && (
-          <div className="cf-state-card" role="status">
-            <div
-              style={{
-                width: "28px",
-                height: "28px",
-                border: "3px solid #6366f1",
-                borderTopColor: "transparent",
-                borderRadius: "50%",
-                margin: "0 auto 12px auto",
-                animation: "spin 0.8s linear infinite",
-              }}
-            />
-            <h3 className="cf-state-title">Evaluating Bounded Perturbations</h3>
-            <p className="cf-state-desc">
-              Generating token deletions and language-specific replacements, running batch inference through the
-              shared classifier, and verifying predicted class outcomes…
-            </p>
+          {/* ROW 2: Control Toolbar */}
+          <div className="cf-card cf-toolbar-card">
+            <div className="cf-toolbar-inner">
+              <div className="cf-toolbar-left">
+                <span className="cf-toolbar-label">Target Sentiment Class:</span>
+                <div className="cf-target-button-group" role="radiogroup" aria-label="Target Class Selector">
+                  {(["Negative", "Neutral", "Positive"] as const).map((cls) => {
+                    const isActive = targetClass === cls;
+                    return (
+                      <button
+                        key={cls}
+                        type="button"
+                        role="radio"
+                        aria-checked={isActive}
+                        className={`cf-target-btn ${isActive ? `cf-target-btn-active-${cls}` : ""}`}
+                        onClick={() => {
+                          setTargetClass(cls);
+                          setSelectedSentimentClass(cls);
+                        }}
+                        disabled={isBusy}
+                      >
+                        {cls}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div style={{ fontSize: "11.5px", color: "#64748b", marginLeft: "8px" }}>
+                  Language rules: <strong>{caseLanguage}</strong>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="cf-generate-btn"
+                onClick={handleGenerate}
+                disabled={isBusy || !submissionText}
+              >
+                {isBusy ? (
+                  <>
+                    <span className="cf-spinner-sm" />
+                    <span>Searching Bounded Space…</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    <span>Generate Counterfactuals</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        )}
 
-        {/* Results Section */}
-        {result && !isBusy && (
-          <section aria-label="Counterfactual Results">
-            {/* Outcome Overview Banner */}
-            <div
-              style={{
-                background: result.outcome === "SUCCESS" ? "#f0fdf4" : result.outcome === "ALREADY_TARGET_CLASS" ? "#eff6ff" : "#fffbeb",
-                border: `1px solid ${result.outcome === "SUCCESS" ? "#bbf7d0" : result.outcome === "ALREADY_TARGET_CLASS" ? "#bfdbfe" : "#fef3c7"}`,
-                borderRadius: "10px",
-                padding: "16px 20px",
-                marginBottom: "20px",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
+          {/* Empty State: No Input Text */}
+          {!submissionText && (
+            <div className="cf-state-card" role="status">
+              <h3 className="cf-state-title">No Input Text Selected</h3>
+              <p className="cf-state-desc">
+                Please select an assigned case from the selector above or navigate to{" "}
+                <Link href="/c4-dev-input" style={{ color: "#4f46e5", textDecoration: "underline" }}>
+                  Development Input
+                </Link>{" "}
+                to prepare a fictional academic reflection.
+              </p>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {isBusy && (
+            <div className="cf-state-card" role="status">
+              <div
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  border: "3px solid #4f46e5",
+                  borderTopColor: "transparent",
+                  borderRadius: "50%",
+                  margin: "0 auto 12px auto",
+                  animation: "spin 0.8s linear infinite",
+                }}
+              />
+              <h3 className="cf-state-title">Evaluating Bounded Perturbations</h3>
+              <p className="cf-state-desc">
+                Generating token deletions and language-specific replacements, running batch inference through the
+                shared classifier, and verifying predicted class outcomes…
+              </p>
+            </div>
+          )}
+
+          {/* Results Section */}
+          {result && !isBusy && (
+            <section aria-label="Counterfactual Results">
+              {/* Outcome Overview Banner */}
+              <div
+                className={`cf-outcome-card ${
+                  result.outcome === "SUCCESS"
+                    ? "cf-outcome-success"
+                    : result.outcome === "ALREADY_TARGET_CLASS"
+                    ? "cf-outcome-info"
+                    : "cf-outcome-warning"
+                }`}
+              >
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                     <strong
                       style={{
                         fontSize: "14px",
-                        color: result.outcome === "SUCCESS" ? "#166534" : result.outcome === "ALREADY_TARGET_CLASS" ? "#1e40af" : "#92400e",
+                        color:
+                          result.outcome === "SUCCESS"
+                            ? "#166534"
+                            : result.outcome === "ALREADY_TARGET_CLASS"
+                            ? "#1e40af"
+                            : "#92400e",
                       }}
                     >
                       Outcome: {result.outcome}
@@ -869,146 +753,241 @@ export default function CounterfactualsPage() {
                   {result.execution_time_ms && <div>Execution: {result.execution_time_ms}ms</div>}
                 </div>
               </div>
+
+              {/* Honest No Result Found State */}
+              {result.outcome === "NO_COUNTERFACTUAL_FOUND" && (
+                <div className="cf-state-card cf-state-no-result" role="status">
+                  <h3 className="cf-state-title" style={{ color: "#92400e" }}>
+                    No Counterfactual Found Within Search Bounds
+                  </h3>
+                  <p className="cf-state-desc" style={{ color: "#78350f" }}>
+                    {result.outcome_message}
+                  </p>
+                  <div style={{ marginTop: "12px", fontSize: "12px", color: "#92400e" }}>
+                    The classifier&apos;s decision boundary for this text is robust against bounded token deletions
+                    and automatic dictionary replacements. No synthetic counterfactual has been fabricated.
+                  </div>
+                </div>
+              )}
+
+              {/* Candidate Cards */}
+              {result.candidates && result.candidates.length > 0 && (
+                <div className="cf-candidate-grid">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h2 style={{ fontSize: "15px", fontWeight: 700, color: "#1e293b", margin: 0 }}>
+                      Verified Counterfactual Candidates ({result.candidates.length})
+                    </h2>
+                    <span style={{ fontSize: "11.5px", color: "#64748b" }}>
+                      Ranked by fewest edits, then target probability
+                    </span>
+                  </div>
+
+                  {result.candidates.map((cand, idx) => {
+                    const isBest = cand.minimality_rank === 1;
+                    return (
+                      <article
+                        key={idx}
+                        className={`cf-card cf-candidate-card ${isBest ? "cf-card-best" : ""}`}
+                        aria-label={`Counterfactual Candidate ${cand.minimality_rank}`}
+                      >
+                        {/* Card Header */}
+                        <div className="cf-candidate-header">
+                          <div className="cf-card-title-group">
+                            <span className={`cf-rank-badge ${isBest ? "cf-rank-badge-best" : ""}`}>
+                              Rank #{cand.minimality_rank} {isBest ? "· Smallest Edit" : ""}
+                            </span>
+                            <span className="cf-minimality-tag">
+                              {cand.minimality_description}
+                            </span>
+                          </div>
+
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span className="cf-edit-count-badge">
+                              {cand.edit_count} {cand.edit_count === 1 ? "edit" : "edits"}
+                            </span>
+                            <span className="cf-verified-badge">
+                              Verified: {cand.predicted_class}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card Body */}
+                        <div className="cf-candidate-body">
+                          {/* Changed Text Display with Spans */}
+                          <div>
+                            <div style={{ fontSize: "11px", fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "6px" }}>
+                              Perturbed Reflection Narrative:
+                            </div>
+                            {renderCandidateText(cand)}
+                          </div>
+
+                          {/* Sub-split: Probability Chart & Operations Table */}
+                          <div className="cf-sub-cards-split">
+                            <div>{renderProbabilityComparison(cand)}</div>
+
+                            <div>
+                              <div className="cf-prob-header">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                                <span>Edit Operations Breakdown ({cand.edits?.length || 0})</span>
+                              </div>
+                              <div className="cf-features-table-wrap">
+                                <table className="cf-features-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Operation</th>
+                                      <th>Original Token</th>
+                                      <th>Replacement</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {cand.edits && cand.edits.length > 0 ? (
+                                      cand.edits.map((op, opIdx) => (
+                                        <tr
+                                          key={opIdx}
+                                          className={op.op === "delete" ? "cf-row-delete" : "cf-row-replace"}
+                                        >
+                                          <td>
+                                            <span
+                                              className={`cf-table-op-badge ${
+                                                op.op === "delete" ? "cf-table-op-delete" : "cf-table-op-replace"
+                                              }`}
+                                            >
+                                              {op.op}
+                                            </span>
+                                          </td>
+                                          <td>
+                                            <strong>&ldquo;{op.original}&rdquo;</strong>
+                                          </td>
+                                          <td>
+                                            {op.op === "delete" ? (
+                                              <span style={{ color: "#94a3b8" }}>— (deleted)</span>
+                                            ) : (
+                                              <strong style={{ color: "#4338ca" }}>&ldquo;{op.replacement}&rdquo;</strong>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      ))
+                                    ) : (
+                                      <tr>
+                                        <td colSpan={3} style={{ textAlign: "center", color: "#64748b" }}>
+                                          No explicit token edits recorded
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Metrics Summary Row */}
+                          <div className="cf-metrics-grid">
+                            <div className="cf-metric-col">
+                              <span className="cf-metric-title">Verified Prediction</span>
+                              <span
+                                className="cf-metric-val"
+                                style={{ color: SENTIMENT_COLORS[cand.predicted_class] || "#0f172a" }}
+                              >
+                                {cand.predicted_class}
+                              </span>
+                            </div>
+
+                            <div className="cf-metric-col">
+                              <span className="cf-metric-title">Target Probability</span>
+                              <span className="cf-metric-val">
+                                {(cand.target_probability * 100).toFixed(1)}%
+                              </span>
+                            </div>
+
+                            <div className="cf-metric-col">
+                              <span className="cf-metric-title">Target Shift Delta</span>
+                              <span
+                                className={`cf-metric-val ${cand.target_probability_delta >= 0 ? "cf-metric-delta-pos" : "cf-metric-delta-neg"}`}
+                              >
+                                {cand.target_probability_delta >= 0 ? "+" : ""}
+                                {(cand.target_probability_delta * 100).toFixed(1)}%
+                              </span>
+                            </div>
+
+                            <div className="cf-metric-col">
+                              <span className="cf-metric-title">Edit Distance</span>
+                              <span className="cf-metric-val">
+                                {cand.edit_count} {cand.edit_count === 1 ? "operation" : "operations"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ROW 3: How to Read Counterfactual Explanations */}
+          <div className="cf-card cf-card-how-to">
+            <div className="cf-card-header" style={{ marginBottom: 8 }}>
+              <div className="cf-card-title-group">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                  <path d="M9 18h6" />
+                  <path d="M10 22h4" />
+                </svg>
+                <h3 className="cf-card-title">How to Read Counterfactual Explanations</h3>
+              </div>
             </div>
 
-            {/* Honest No Result Found State */}
-            {result.outcome === "NO_COUNTERFACTUAL_FOUND" && (
-              <div className="cf-state-card cf-state-no-result" role="status">
-                <h3 className="cf-state-title" style={{ color: "#92400e" }}>
-                  No Counterfactual Found Within Search Bounds
-                </h3>
-                <p className="cf-state-desc" style={{ color: "#78350f" }}>
-                  {result.outcome_message}
-                </p>
-                <div style={{ marginTop: "12px", fontSize: "12px", color: "#92400e" }}>
-                  The classifier&apos;s decision boundary for this text is robust against bounded token deletions
-                  and automatic dictionary replacements. No synthetic counterfactual has been fabricated.
+            <div className="cf-how-to-columns">
+              <div className="cf-how-to-item">
+                <div className="cf-how-to-icon cf-icon-green">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <div className="cf-how-to-content">
+                  <span className="cf-how-to-title">Minimal Edits (Green)</span>
+                  <p className="cf-how-to-desc">
+                    Highlighted tokens show the minimal word edits required to flip the sentiment decision to <strong>{targetClass}</strong>.
+                  </p>
                 </div>
               </div>
-            )}
 
-            {/* Candidate Cards */}
-            {result.candidates && result.candidates.length > 0 && (
-              <div className="cf-candidate-grid">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <h2 style={{ fontSize: "16px", fontWeight: 700, color: "#1e293b", margin: 0 }}>
-                    Verified Counterfactual Candidates ({result.candidates.length})
-                  </h2>
-                  <span style={{ fontSize: "11.5px", color: "#64748b" }}>
-                    Ranked by fewest edits, then target probability
-                  </span>
+              <div className="cf-how-to-item">
+                <div className="cf-how-to-icon cf-icon-red">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
                 </div>
-
-                {result.candidates.map((cand, idx) => {
-                  const isBest = cand.minimality_rank === 1;
-                  return (
-                    <article
-                      key={idx}
-                      className={`cf-card ${isBest ? "cf-card-best" : ""}`}
-                      aria-label={`Counterfactual Candidate ${cand.minimality_rank}`}
-                    >
-                      {/* Card Header */}
-                      <div className="cf-card-header">
-                        <div className="cf-card-title-group">
-                          <span className={`cf-rank-badge ${isBest ? "cf-rank-badge-best" : ""}`}>
-                            Rank #{cand.minimality_rank} {isBest ? "· Smallest Edit" : ""}
-                          </span>
-                          <span className="cf-minimality-tag">
-                            {cand.minimality_description}
-                          </span>
-                        </div>
-
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span className="cf-edit-count-badge">
-                            {cand.edit_count} {cand.edit_count === 1 ? "edit" : "edits"}
-                          </span>
-                          <span className="cf-verified-badge">
-                            Verified: {cand.predicted_class}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Card Body */}
-                      <div className="cf-card-body">
-                        {/* Changed Text Display with Spans */}
-                        <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px" }}>
-                          Perturbed Reflection Narrative:
-                        </div>
-                        {renderCandidateText(cand)}
-
-                        {/* Edit Operations List */}
-                        {cand.edits && cand.edits.length > 0 && (
-                          <div style={{ marginTop: "12px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px" }}>
-                              Edit Operations ({cand.edits.length}):
-                            </div>
-                            <div className="cf-operations-list">
-                              {cand.edits.map((op, opIdx) => (
-                                <span
-                                  key={opIdx}
-                                  className={`cf-op-badge ${op.op === "delete" ? "cf-op-delete" : "cf-op-replace"}`}
-                                >
-                                  <strong>{op.op.toUpperCase()}:</strong>
-                                  {op.op === "delete" ? (
-                                    <span>&ldquo;{op.original}&rdquo;</span>
-                                  ) : (
-                                    <span>
-                                      &ldquo;{op.original}&rdquo; → &ldquo;{op.replacement}&rdquo;
-                                    </span>
-                                  )}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Metrics Summary Row */}
-                        <div className="cf-metrics-grid">
-                          <div className="cf-metric-col">
-                            <span className="cf-metric-title">Verified Prediction</span>
-                            <span
-                              className="cf-metric-val"
-                              style={{ color: SENTIMENT_COLORS[cand.predicted_class] || "#0f172a" }}
-                            >
-                              {cand.predicted_class}
-                            </span>
-                          </div>
-
-                          <div className="cf-metric-col">
-                            <span className="cf-metric-title">Target Probability</span>
-                            <span className="cf-metric-val">
-                              {(cand.target_probability * 100).toFixed(1)}%
-                            </span>
-                          </div>
-
-                          <div className="cf-metric-col">
-                            <span className="cf-metric-title">Target Shift Delta</span>
-                            <span
-                              className={`cf-metric-val ${cand.target_probability_delta >= 0 ? "cf-metric-delta-pos" : "cf-metric-delta-neg"}`}
-                            >
-                              {cand.target_probability_delta >= 0 ? "+" : ""}
-                              {(cand.target_probability_delta * 100).toFixed(1)}%
-                            </span>
-                          </div>
-
-                          <div className="cf-metric-col">
-                            <span className="cf-metric-title">Edit Distance</span>
-                            <span className="cf-metric-val">
-                              {cand.edit_count} {cand.edit_count === 1 ? "operation" : "operations"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Probability Comparison Recharts Chart */}
-                        {renderProbabilityComparison(cand)}
-                      </div>
-                    </article>
-                  );
-                })}
+                <div className="cf-how-to-content">
+                  <span className="cf-how-to-title">Decision Boundary Distance</span>
+                  <p className="cf-how-to-desc">
+                    Smaller edit distances (e.g. 1 edit) indicate the student reflection was positioned near the classifier&apos;s decision boundary.
+                  </p>
+                </div>
               </div>
-            )}
-          </section>
-        )}
+
+              <div className="cf-how-to-item">
+                <div className="cf-how-to-icon cf-icon-blue">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </div>
+                <div className="cf-how-to-content">
+                  <span className="cf-how-to-title">Non-Diagnostic Support</span>
+                  <p className="cf-how-to-desc">
+                    Counterfactuals illustrate NLP model behaviour for authorized counsellors, and are never recommendations for altering student wellbeing.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
