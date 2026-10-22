@@ -7,7 +7,7 @@ from datetime import timedelta
 from threading import Barrier, Event
 from uuid import UUID, uuid4
 
-from orchestrator import main, workflow
+from orchestrator import demo, main, workflow
 from research_common.database import Audit, Case, Consent, Job, Review, Withdrawal, engine
 from research_common.web import SafeError
 from research_contracts import ErrorCode, WithdrawalRequest, now
@@ -253,6 +253,33 @@ def run():
         with Session(engine()) as db:
             assert db.get(Consent, consent.id).status == "WITHDRAWN"
         results.append("concurrent_submission_withdrawal")
+
+        # The observer takes case -> consent locks, matching withdrawal and workers.
+        owner, consent, case_id = create_case()
+        workflow.process_job(*workflow.claim_job(), adapter=synthetic_adapter)
+
+        def observe():
+            with Session(engine(), expire_on_commit=False) as db:
+                return demo.evidence(UUID(consent.id), owner, db)
+
+        with Session(engine()) as blocker:
+            blocker.scalar(select(Case).where(Case.id == case_id).with_for_update())
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                observed = pool.submit(observe)
+                withdrawn = pool.submit(withdraw, owner, consent)
+                try:
+                    wait_for_lock_wait()
+                finally:
+                    blocker.rollback()
+                snapshot = observed.result(timeout=15)
+                withdrawn.result(timeout=15)
+        if snapshot.receipt_only:
+            assert not snapshot.provenance_validated and snapshot.disposal_confirmed
+        else:
+            assert snapshot.provenance_validated and not snapshot.disposal_confirmed
+        final = observe()
+        assert final.receipt_only and final.disposal_confirmed and not final.provenance_validated
+        results.append("demo_observer_withdrawal_coherent_lock_order")
     return {
         "synthetic": True,
         "database": "PostgreSQL",

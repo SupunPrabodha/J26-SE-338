@@ -45,7 +45,7 @@ bash scripts/bootstrap-dev.sh
 docker compose up --build
 ```
 
-Bootstrap creates gitignored `.env` with random development credentials and preserves existing files. Privately read `DEV_COUNSELLOR_USERNAME` and `DEV_COUNSELLOR_PASSWORD` for dashboard login. Use separate browser profiles for student and counsellor because localhost apps share cookies.
+Bootstrap creates gitignored `.env` with random development credentials and preserves existing files. Privately read `DEV_COUNSELLOR_USERNAME` and `DEV_COUNSELLOR_PASSWORD` for dashboard login. Application cookies are isolated; separate browser profiles remain recommended for clear student/counsellor demo roles. Sign in again after upgrading from the legacy shared-cookie proxy.
 
 Record synthetic consent, select a fixed fixture, submit and refresh its status. The worker runs C2 → C3 → C4 and creates an assigned review task only after all stages succeed. Sign in as the designated synthetic counsellor, refresh tasks, start review and record completion. Withdrawal cancels pending work, removes evidence/assignment and blocks further review.
 
@@ -54,6 +54,7 @@ Record synthetic consent, select a fixed fixture, submit and refresh its status.
 | Service | Host URL/port | Internal port |
 |---|---|---|
 | Student portal | http://localhost:3000 | 3000 |
+| C1 PP1 demonstration | http://localhost:3000/demo | 3000 |
 | Counsellor shell | http://localhost:3001 | 3001 |
 | Orchestrator API/docs | http://localhost:8000/docs | 8000 |
 | Preprocessing / NLP / XAI | Not exposed | each 8000 |
@@ -62,6 +63,14 @@ Record synthetic consent, select a fixed fixture, submit and refresh its status.
 | Worker | No HTTP port | none |
 
 All host bindings are loopback-only. Each API has `/health`, `/ready` and `/version`. Internal services intentionally do not expose suggested ports 8001–8003.
+
+Open `/demo` as the read-only C1 requirements checklist and `/` as the only student
+consent/submission/withdrawal form, in two tabs of the same browser profile. After recording
+consent, refresh the checklist and explicitly select that run. It observes owner-scoped
+server records with bounded polling, including consent before a case exists. Use a separate
+browser profile for the counsellor application. Namespaced proxy cookies prevent role collisions. No tokens or
+case references are stored in browser storage. Recorded tests and configuration are labelled
+separately from live evidence. See the [checklist mapping and verification](docs/evidence/c1-demo-checklist.md).
 
 ## Verification
 

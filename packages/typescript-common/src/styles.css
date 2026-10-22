@@ -73,5 +73,35 @@ dialog { max-width: 480px; width: calc(100% - 32px); border: 1px solid var(--bor
 dialog::backdrop { background: #17324777; }
 .skip { position: absolute; left: -10000px; }
 .skip:focus { z-index: 20; left: 1rem; top: 0; background: white; padding: 10px; }
+.demo-nav { display: flex; gap: 12px 24px; flex-wrap: wrap; margin: 18px 0; font-size: .88rem; }
+.demo-nav a, .demo-handoff a { color: var(--teal); font-weight: 650; text-underline-offset: 3px; }
+.demo-overview { margin: 0 0 12px; padding: 18px 22px; }
+.boundary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.boundary-grid p { margin: 0 0 10px; font-size: .82rem; }
+.boundary-grid strong, .boundary-grid span { display: block; }
+.boundary-grid span { color: var(--muted); }
+.demo-overview .hint { margin: 0; }
+.workflow-snapshot { border: 1px solid #b9d8d2; border-radius: 8px; padding: 14px; margin: 16px 0; background: #f7fbfa; }
+.workflow-snapshot .eyebrow { font-size: .7rem; }
+.snapshot-state { overflow-wrap: anywhere; font-size: .9rem; }
+.workflow-reference { padding-left: 22px; font-size: .8rem; color: var(--muted); }
+.workflow-reference li { padding: 5px 0; }
+.workflow-reference span { display: block; }
+.demo-evidence, .demo-handoff { margin-top: 20px; }
+.demo-handoff p { font-size: .88rem; }
+.demo-handoff .hint { margin: 12px 0 0; }
+.evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; align-items: start; }
+.evidence-item { border: 1px solid var(--border); padding: 14px; border-radius: 8px; }
+.evidence-item summary span { display: block; color: var(--muted); font-size: .82rem; margin-top: 5px; font-weight: 400; }
+.evidence-item dd { font-size: .8rem; font-weight: 400; margin-bottom: 12px; }
 @media (max-width: 760px) { main { padding: 20px 16px; } .page-header { flex-direction: column; gap: 12px; } .student-grid, .review-grid { grid-template-columns: 1fr; } .toolbar { align-items: flex-start; flex-direction: column; } .card { padding: 18px; } .steps { gap: 14px; font-size: .76rem; } }
 @media (max-width: 400px) { .steps { gap: 9px; } .steps span { display: none; } .evidence-list { grid-template-columns: 1fr; } .actions button { flex: 1 1 auto; } }
+.checklist-row { padding: 1rem 0; border-bottom: 1px solid #d7e2e6; }
+.checklist-heading { display: flex; justify-content: space-between; align-items: start; gap: 1rem; flex-wrap: wrap; }
+.checklist-heading h3 { margin: 0; flex: 1 1 18rem; }
+.checklist-row [data-result] { background: #edf0f3; color: #43515f; border-color: #cbd3da; }
+.checklist-row [data-result="Verified for this run"] { background: #def4e6; color: #14522d; }
+.checklist-row [data-result="Failed"] { background: #ffe4e4; color: #8a1520; }
+.checklist-row [data-result="Unavailable/stale"] { background: #fff0cd; color: #684700; }
+.checklist-row [data-result="Mock dependency"] { background: #eae4fa; color: #4b3373; }
+.checklist-row details { margin-top: .5rem; }

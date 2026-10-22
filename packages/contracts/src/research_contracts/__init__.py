@@ -317,3 +317,52 @@ class AccountResponse(Contract):
 
 class FixturesResponse(Contract):
     fixtures: dict[str, str]
+
+
+class DemoRun(Contract):
+    run_id: UUID
+    created_at: AwareDatetime
+    consent_status: ConsentState
+    case_id: UUID | None = None
+    processing_status: WorkflowState | None = None
+
+
+class DemoRunPage(Contract):
+    runs: Annotated[list[DemoRun], Field(max_length=20)]
+    next_offset: int | None = None
+
+
+class DemoReceipt(Contract):
+    event: Literal[
+        "CONSENT_RECORDED",
+        "CONSENT_EXPIRED",
+        "OPERATION_BLOCKED",
+        "SUBMISSION_REPLAY",
+        "WORKFLOW_TRANSITION",
+        "JOB_RETRY",
+        "JOB_TERMINAL",
+        "HUMAN_REVIEW",
+        "WITHDRAWAL",
+        "RETENTION",
+    ]
+    occurred_at: AwareDatetime
+
+
+class DemoEvidence(Contract):
+    run: DemoRun
+    observed_at: AwareDatetime
+    receipt_only: bool
+    consent_recorded: bool
+    consent_policy_valid: bool
+    blocking_observed: bool
+    replay_observed: bool
+    failure_observed: bool
+    provenance_validated: bool
+    review_task_authorized: bool
+    review_started_at: AwareDatetime | None = None
+    review_completed_at: AwareDatetime | None = None
+    withdrawn_at: AwareDatetime | None = None
+    disposal_confirmed: bool
+    receipts: Annotated[list[DemoReceipt], Field(max_length=50)]
+    receipts_truncated: bool
+    provider: Literal["MOCK_SYNTHETIC_DEVELOPMENT_ONLY"] = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY"

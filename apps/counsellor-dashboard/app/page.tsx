@@ -18,7 +18,7 @@ export default function Dashboard() {
       if (account.role !== "COUNSELLOR") return;
       const values = await api<ReviewTask[]>("/review-tasks");
       if (live) { setAuthorized(true); setTasks(values); }
-    }).catch(() => { if (live) setAuthorized(false); }).finally(() => { if (live) setChecking(false); });
+    }).catch(cause => { if (live) { setAuthorized(false); setError(cause instanceof ApiError ? cause.message : "Session check unavailable. Check the connection and retry."); } }).finally(() => { if (live) setChecking(false); });
     return () => { live = false; };
   }, []);
 

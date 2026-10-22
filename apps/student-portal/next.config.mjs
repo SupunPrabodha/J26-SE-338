@@ -4,7 +4,6 @@ const config = {
   outputFileTracingRoot: fileURLToPath(new URL("../..", import.meta.url)),
   transpilePackages: ["@j26/common"],
   poweredByHeader: false,
-  async rewrites() { return [{ source: "/api/v1/:path*", destination: `${process.env.API_INTERNAL_URL || "http://localhost:8000"}/api/v1/:path*` }]; },
   async headers() { return [{ source: "/:path*", headers: [
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "no-referrer" },

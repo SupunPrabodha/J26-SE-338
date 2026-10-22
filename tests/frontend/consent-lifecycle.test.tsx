@@ -11,6 +11,7 @@ function setup(retained = false, failWithdrawal = false) {
   const state = () => ({ consent: { ...consent, consent_status: withdrawn ? "WITHDRAWN" : consent.consent_status }, case: retained ? { processing_status: "WITHDRAWN" } : null, disposal_reason: retained ? "RETENTION" : null, explicitly_withdrawn_at: withdrawn ? new Date().toISOString() : null });
   const fetch = vi.fn().mockImplementation(async (url: string, options?: {body?: string}) => {
     let data: unknown = {};
+    if (url.endsWith("/auth/me")) data = { role: "STUDENT" };
     if (url.endsWith("/fixtures")) data = { fixtures: { english: "SYNTHETIC: fixed fixture" } };
     if (url.endsWith("/consents")) { consent.consent_status = JSON.parse(options?.body || "{}").consent_status; data = consent; }
     if (url.endsWith("/withdraw")) {
@@ -34,6 +35,7 @@ async function accept() {
 
 test("accepted consent can be withdrawn before submission with confirmation", async () => {
   const fetch = setup(); await accept();
+  expect(fetch.mock.calls.some(([url]) => url.endsWith("/auth/student-session"))).toBe(false);
   fireEvent.click(screen.getByText("Read the full consent and privacy notice"));
   expect(screen.getByText(/Consent notice dev-notice-1/)).toBeVisible();
   screen.getByText("Withdraw consent").focus();
@@ -82,4 +84,33 @@ test("failed withdrawal retains confirmation and the same retry key", async () =
   expect(calls).toHaveLength(2);
   expect(calls[0][1].body).toEqual(calls[1][1].body);
   expect(screen.getByText("No explicit owner withdrawal recorded.")).toBeVisible();
+});
+
+for (const mode of ["new", "refresh", "wrong-role", "refresh-unavailable"]) test(`student session handling: ${mode}`, async () => {
+  let refreshed = false;
+  const fetch = vi.fn(async (url: string) => {
+    let data: unknown = {};
+    if (url.endsWith("/fixtures")) data = { fixtures: { english: "SYNTHETIC: fixture" } };
+    if (url.endsWith("/auth/me")) {
+      if (mode !== "wrong-role" && !refreshed) return { ok: false, status: 401 };
+      data = { role: mode === "wrong-role" ? "COUNSELLOR" : "STUDENT" };
+    }
+    if (url.endsWith("/auth/refresh")) {
+      if (mode === "new") return { ok: false, status: 401 };
+      if (mode === "refresh-unavailable") return { ok: false, status: 503 };
+      refreshed = true;
+    }
+    if (url.endsWith("/auth/student-session")) data = { role: "STUDENT" };
+    if (url.endsWith("/consents")) data = { consent_id: crypto.randomUUID(), consent_status: "ACTIVE", expires_at: new Date(Date.now() + 3600000).toISOString() };
+    return { ok: true, status: 200, json: async () => data };
+  });
+  vi.stubGlobal("fetch", fetch); render(<StudentPortal />);
+  await screen.findByRole("option", { name: "english" });
+  fireEvent.change(screen.getByLabelText("Consent choice"), { target: { value: "ACTIVE" } });
+  fireEvent.click(screen.getByText("Record consent decision"));
+  if (["wrong-role", "refresh-unavailable"].includes(mode)) {
+    await screen.findByRole("alert");
+    expect(fetch.mock.calls.some(([url]) => url.endsWith("/consents"))).toBe(false);
+  } else await screen.findByText("ACTIVE");
+  expect(fetch.mock.calls.some(([url]) => url.endsWith("/auth/student-session"))).toBe(mode === "new");
 });

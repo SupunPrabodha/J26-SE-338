@@ -1,6 +1,6 @@
 # Trust boundaries and data flow
 
-Browser → same-origin Next.js `/api/v1` proxy → C1. Cookie authentication is checked in C1 on every protected request; the UI role check is only presentation. Next.js receives no signing keys or database credentials. Both localhost applications share browser cookies; use separate browser profiles to demonstrate student and counsellor sessions concurrently.
+Browser → same-origin Next.js `/api/v1` proxy → C1. Cookie authentication is checked in C1 on every protected request; the UI role check is only presentation. Next.js receives no signing keys or database credentials. Localhost ports share a cookie jar. Application-specific cookie names and filtering Next route proxies now isolate student and counsellor session selection; C1 still enforces all roles and ownership. Use separate browser profiles for clear demo roles.
 
 C1 identity/access and linkage tables are separated from NLP-facing workflow tables. Only C1/worker receive database credentials. C2–C4 receive one audience-specific service key and Redis access, with no identity-store connection. Service payloads contain case/correlation/idempotency IDs, purpose/consent metadata and synthetic processing evidence. User IDs and JWT claims never become NLP request fields.
 
