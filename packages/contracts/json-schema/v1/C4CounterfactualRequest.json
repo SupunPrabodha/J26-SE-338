@@ -1,4 +1,55 @@
 {
+  "$defs": {
+    "TextSpanLock": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "title": "TextSpanLock",
+      "type": "object"
+    }
+  },
   "$id": "https://j26.invalid/contracts/1.0.0/C4CounterfactualRequest.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
@@ -8,6 +59,16 @@
       "default": true,
       "title": "Development Only",
       "type": "boolean"
+    },
+    "edit_mode": {
+      "default": "both",
+      "enum": [
+        "both",
+        "replace_only",
+        "delete_only"
+      ],
+      "title": "Edit Mode",
+      "type": "string"
     },
     "idempotency_key": {
       "anyOf": [
@@ -40,8 +101,16 @@
       "default": null,
       "title": "Language"
     },
+    "locked_spans": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TextSpanLock"
+      },
+      "title": "Locked Spans",
+      "type": "array"
+    },
     "max_candidates": {
-      "default": 50,
+      "default": 40,
       "title": "Max Candidates",
       "type": "integer"
     },

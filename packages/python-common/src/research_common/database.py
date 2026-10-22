@@ -218,6 +218,114 @@ class CounterfactualRecord(Entity, Base):
     )
 
 
+class CounterfactualFeedbackRecord(Entity, Base):
+    __tablename__ = "c4_counterfactual_feedback"
+    counterfactual_id: Mapped[str] = mapped_column(
+        ForeignKey("c4_counterfactuals.id", ondelete="CASCADE"), index=True
+    )
+    candidate_id: Mapped[str] = mapped_column(String(64), index=True)
+    reviewer_account_id: Mapped[str] = mapped_column(
+        ForeignKey("access_accounts.id"), index=True
+    )
+    natural_wording: Mapped[str | None] = mapped_column(String(10))
+    context_preserved: Mapped[str | None] = mapped_column(String(10))
+    useful: Mapped[str | None] = mapped_column(String(10))
+    comment: Mapped[str | None] = mapped_column(String(500))
+    __table_args__ = (
+        UniqueConstraint(
+            "counterfactual_id",
+            "candidate_id",
+            "reviewer_account_id",
+            name="uq_c4_feedback_candidate_reviewer",
+        ),
+    )
+
+
+class FaithfulnessRecord(Entity, Base):
+    __tablename__ = "c4_faithfulness_evaluations"
+    explanation_id: Mapped[str] = mapped_column(
+        ForeignKey("c4_explanations.id", ondelete="CASCADE"), index=True
+    )
+    account_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"), index=True)
+    source_reference: Mapped[str | None] = mapped_column(String(100), index=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(64), index=True)
+    request_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    method: Mapped[str] = mapped_column(String(20))
+    explained_class: Mapped[str] = mapped_column(String(50))
+    baseline_probability: Mapped[float] = mapped_column(Float)
+    model_id: Mapped[str] = mapped_column(String(150))
+    model_version: Mapped[str | None] = mapped_column(String(150))
+    model_revision: Mapped[str | None] = mapped_column(String(100))
+    explainer_version: Mapped[str | None] = mapped_column(String(50))
+    settings: Mapped[dict | None] = mapped_column(JSON)
+    selected_occurrence_offsets: Mapped[list | None] = mapped_column(JSON)
+    step_results: Mapped[list | None] = mapped_column(JSON)
+    aopc: Mapped[float | None] = mapped_column(Float)
+    final_comprehensiveness_drop: Mapped[float | None] = mapped_column(Float)
+    final_sufficiency_gap: Mapped[float | None] = mapped_column(Float)
+    final_random_mean_drop: Mapped[float | None] = mapped_column(Float)
+    final_difference_from_random: Mapped[float | None] = mapped_column(Float)
+    total_eligible_words: Mapped[int] = mapped_column(Integer, default=0)
+    budget_evaluated: Mapped[int] = mapped_column(Integer, default=0)
+    completed_steps: Mapped[int] = mapped_column(Integer, default=0)
+    completed_trials: Mapped[int] = mapped_column(Integer, default=0)
+    total_inferences: Mapped[int] = mapped_column(Integer, default=0)
+    execution_time_ms: Mapped[float | None] = mapped_column(Float)
+    outcome: Mapped[str] = mapped_column(String(50))
+    outcome_message: Mapped[str | None] = mapped_column(String(255))
+    stopping_reason: Mapped[str | None] = mapped_column(String(255))
+    is_development: Mapped[bool] = mapped_column(Boolean, default=True)
+    expires_at: Mapped[object | None] = mapped_column(UTCDateTime, index=True)
+    __table_args__ = (
+        UniqueConstraint(
+            "account_id", "idempotency_key", name="uq_c4_faithfulness_account_idempotency"
+        ),
+    )
+
+
+class StabilityRecord(Entity, Base):
+    __tablename__ = "c4_stability_evaluations"
+    explanation_id: Mapped[str] = mapped_column(
+        ForeignKey("c4_explanations.id", ondelete="CASCADE"), index=True
+    )
+    account_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"), index=True)
+    source_reference: Mapped[str | None] = mapped_column(String(100), index=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(64), index=True)
+    request_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    method: Mapped[str] = mapped_column(String(20))
+    explained_class: Mapped[str] = mapped_column(String(50))
+    baseline_probability: Mapped[float] = mapped_column(Float)
+    model_id: Mapped[str] = mapped_column(String(150))
+    model_version: Mapped[str | None] = mapped_column(String(150))
+    model_revision: Mapped[str | None] = mapped_column(String(100))
+    explainer_version: Mapped[str | None] = mapped_column(String(50))
+    settings: Mapped[dict | None] = mapped_column(JSON)
+    selected_occurrence_offsets: Mapped[list | None] = mapped_column(JSON)
+    runs: Mapped[list | None] = mapped_column(JSON)
+    word_consistency: Mapped[list | None] = mapped_column(JSON)
+    mean_top_k_overlap: Mapped[float | None] = mapped_column(Float)
+    mean_rank_correlation: Mapped[float | None] = mapped_column(Float)
+    mean_attribution_std: Mapped[float | None] = mapped_column(Float)
+    requested_runs: Mapped[int] = mapped_column(Integer, default=0)
+    completed_runs: Mapped[int] = mapped_column(Integer, default=0)
+    effective_k: Mapped[int] = mapped_column(Integer, default=0)
+    total_eligible_words: Mapped[int] = mapped_column(Integer, default=0)
+    is_deterministic: Mapped[bool] = mapped_column(Boolean, default=False)
+    determinism_notice: Mapped[str | None] = mapped_column(String(255))
+    execution_time_ms: Mapped[float | None] = mapped_column(Float)
+    outcome: Mapped[str] = mapped_column(String(50))
+    outcome_message: Mapped[str | None] = mapped_column(String(255))
+    stopping_reason: Mapped[str | None] = mapped_column(String(255))
+    is_development: Mapped[bool] = mapped_column(Boolean, default=True)
+    expires_at: Mapped[object | None] = mapped_column(UTCDateTime, index=True)
+    __table_args__ = (
+        UniqueConstraint(
+            "account_id", "idempotency_key", name="uq_c4_stability_account_idempotency"
+        ),
+    )
+
+
+
 class Audit(Base):
     __tablename__ = "audit_events"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)

@@ -227,12 +227,85 @@
 /* Card 1: Input Text */
 .cf-card-input-text .cf-input-box {
   background: #f8fafc;
-  border: 1px solid #edf2f7;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 12px;
   max-height: 140px;
   overflow-y: auto;
+}
+
+/* Token interactive locking container */
+.cf-tokens-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  line-height: 1.85;
+  font-family: inherit;
+}
+
+.cf-token-word {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 1px 6px;
+  margin: 2px 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+
+.cf-token-word:hover {
+  background: #eef2ff;
+  border-color: #6366f1;
+  color: #312e81;
+  transform: translateY(-1px);
+}
+
+.cf-token-locked {
+  background: #fef3c7 !important;
+  border-color: #f59e0b !important;
+  color: #92400e !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(245, 158, 11, 0.2);
+}
+
+.cf-token-protected {
+  background: #f3e8ff !important;
+  border-color: #c084fc !important;
+  color: #6b21a8 !important;
+  cursor: default !important;
+  font-weight: 600;
+}
+
+.cf-token-delimiter {
+  display: inline;
+  color: #1e293b;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.cf-clear-locks-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cf-clear-locks-btn:hover {
+  background: #fecaca;
+  border-color: #f87171;
 }
 
 .cf-input-line-1 {
@@ -990,13 +1063,333 @@
 }
 
 /* ==========================================================================
-   RESPONSIVENESS
+   RESPONSIVENESS & COUNSELLOR TOOL STYLES
    ========================================================================== */
 
-@media (max-width: 1200px) {
+/* Token Locking */
+.cf-tokens-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+  align-items: center;
+  font-size: 13px;
+  line-height: 1.8;
+}
 
+.cf-token-word {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.cf-token-word:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.cf-token-locked {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.cf-token-protected {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+  font-style: italic;
+  cursor: not-allowed;
+}
+
+.cf-token-delimiter {
+  white-space: pre;
+}
+
+.cf-locks-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.cf-clear-locks-btn {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+/* Side-by-Side Comparison */
+.cf-side-by-side-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cf-side-panel {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.cf-side-panel-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Collapsible Details */
+.cf-collapsible-details {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.cf-collapsible-summary {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.cf-collapsible-summary:hover {
+  background: #f1f5f9;
+}
+
+.cf-collapsible-content {
+  padding: 14px 16px;
+}
+
+.cf-alt-candidate-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cf-alt-candidate-card:hover {
+  border-color: #6366f1;
+  background: #fbfbfe;
+}
+
+.cf-alt-candidate-card-active {
+  border-color: #6366f1;
+  background: #f5f3ff;
+  box-shadow: 0 0 0 1px #6366f1;
+}
+
+/* Manual "What If?" Editor */
+.cf-manual-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  resize: vertical;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.cf-manual-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.cf-manual-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.cf-stale-badge {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Reviewer Feedback Panel */
+.cf-feedback-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.cf-feedback-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.cf-feedback-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cf-feedback-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cf-feedback-options {
+  display: flex;
+  gap: 6px;
+}
+
+.cf-feedback-btn {
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cf-feedback-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.cf-feedback-btn-selected {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+.cf-comment-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 10px;
+  font-size: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.cf-comment-counter {
+  font-size: 10.5px;
+  color: #64748b;
+  text-align: right;
+  margin-top: 2px;
+}
+
+/* Target class button group */
+.cf-target-button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.cf-target-btn {
+  flex: 1;
+  padding: 6px 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease-in-out;
+}
+
+.cf-target-btn:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
+}
+
+.cf-target-btn-active-Negative {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 1px 2px rgba(239, 68, 68, 0.25);
+}
+
+.cf-target-btn-active-Neutral {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 1px 2px rgba(59, 130, 246, 0.25);
+}
+
+.cf-target-btn-active-Positive {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border-color: #15803d !important;
+  box-shadow: 0 1px 2px rgba(22, 163, 74, 0.25);
+}
+
+.cf-target-btn-current {
+  opacity: 0.85;
+}
+
+@media (max-width: 1200px) {
   .cf-row-3-cols,
   .cf-sub-cards-split,
+  .cf-side-by-side-wrap,
+  .cf-feedback-grid,
   .cf-how-to-columns,
   .cf-metrics-grid {
     grid-template-columns: 1fr;

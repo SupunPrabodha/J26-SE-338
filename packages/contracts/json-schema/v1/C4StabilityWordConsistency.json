@@ -1,0 +1,76 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4StabilityWordConsistency.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "end": {
+      "title": "End",
+      "type": "integer"
+    },
+    "mean_weight": {
+      "title": "Mean Weight",
+      "type": "number"
+    },
+    "occurrence_id": {
+      "title": "Occurrence Id",
+      "type": "string"
+    },
+    "run_occurrence_count": {
+      "title": "Run Occurrence Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "start": {
+      "title": "Start",
+      "type": "integer"
+    },
+    "std_dev": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Std Dev"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "top_k_frequency": {
+      "title": "Top K Frequency",
+      "type": "number"
+    },
+    "word": {
+      "default": "",
+      "title": "Word",
+      "type": "string"
+    }
+  },
+  "required": [
+    "occurrence_id",
+    "start",
+    "end",
+    "mean_weight",
+    "top_k_frequency",
+    "run_occurrence_count"
+  ],
+  "title": "C4StabilityWordConsistency",
+  "type": "object"
+}

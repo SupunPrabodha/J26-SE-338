@@ -20,8 +20,14 @@ from research_contracts import (
     C4EncoderCheckResponse,
     C4ExplanationRequest,
     C4ExplanationResponse,
+    C4FaithfulnessResponse,
+    C4InternalFaithfulnessRequest,
+    C4InternalStabilityRequest,
+    C4ManualEvaluationRequest,
+    C4ManualEvaluationResponse,
     C4PredictionRequest,
     C4PredictionResponse,
+    C4StabilityResponse,
     ErrorCode,
 )
 
@@ -199,4 +205,112 @@ def dev_counterfactuals(
     except Exception as exc:
         logger.exception("Counterfactual generation failed: %s", exc)
         raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+
+
+@app.post(
+    "/internal/v1/dev/counterfactuals/manual",
+    response_model=C4ManualEvaluationResponse,
+    dependencies=[Depends(service_auth("xai"))],
+)
+def dev_manual_counterfactual(
+    request: C4ManualEvaluationRequest, http_request: Request
+) -> C4ManualEvaluationResponse:
+    """Evaluate counsellor manual edit against original text with verified model probabilities."""
+    if settings().environment != "development":
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not request.original_text or not request.original_text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+    if not request.edited_text or not request.edited_text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    classifier = _get_or_init_classifier()
+    if classifier is None:
+        raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503)
+
+    try:
+        from xai.counterfactual_generator import evaluate_manual_edit
+
+        return evaluate_manual_edit(request, classifier)
+    except ValueError:
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422) from None
+    except Exception as exc:
+        logger.exception("Manual counterfactual evaluation failed: %s", exc)
+        raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+
+
+@app.post(
+    "/internal/v1/dev/faithfulness",
+    response_model=C4FaithfulnessResponse,
+    dependencies=[Depends(service_auth("xai"))],
+)
+def dev_faithfulness(
+    request: C4InternalFaithfulnessRequest, http_request: Request
+) -> C4FaithfulnessResponse:
+    """Evaluate explanation faithfulness using real progressive token deletion, retention, and random baseline."""
+    if settings().environment != "development":
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not request.text or not request.text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    classifier = _get_or_init_classifier()
+    if classifier is None:
+        return C4FaithfulnessResponse(
+            explanation_id=request.explanation_id,
+            method=request.method,
+            explained_class=request.explained_class,
+            baseline_probability=0.0,
+            outcome="UNAVAILABLE_MODEL",
+            outcome_message="Sentiment classifier model is unavailable.",
+        )
+
+    try:
+        from xai.faithfulness_evaluator import evaluate_faithfulness
+
+        return evaluate_faithfulness(request, classifier)
+    except ValueError:
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422) from None
+    except Exception as exc:
+        logger.exception("Faithfulness evaluation failed: %s", exc)
+        raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+
+
+@app.post(
+    "/internal/v1/dev/stability",
+    response_model=C4StabilityResponse,
+    dependencies=[Depends(service_auth("xai"))],
+)
+def dev_stability(
+    request: C4InternalStabilityRequest, http_request: Request
+) -> C4StabilityResponse:
+    """Evaluate repeated-run stability of a LIME or SHAP explanation using fresh computations and distinct seeds."""
+    if settings().environment != "development":
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    if not request.text or not request.text.strip():
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422)
+
+    classifier = _get_or_init_classifier()
+    if classifier is None:
+        return C4StabilityResponse(
+            explanation_id=request.explanation_id,
+            method=request.method,
+            explained_class=request.explained_class,
+            baseline_probability=0.0,
+            outcome="UNAVAILABLE_MODEL",
+            outcome_message="Sentiment classifier model is unavailable.",
+        )
+
+    try:
+        from xai.stability_evaluator import evaluate_stability
+
+        return evaluate_stability(request, classifier)
+    except ValueError:
+        raise SafeError(ErrorCode.CONTRACT_INVALID, 422) from None
+    except Exception as exc:
+        logger.exception("Stability evaluation failed: %s", exc)
+        raise SafeError(ErrorCode.INTERNAL_ERROR, 500) from None
+
+
 

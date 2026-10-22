@@ -130,6 +130,16 @@
             "title": "Development Only",
             "type": "boolean"
           },
+          "edit_mode": {
+            "default": "both",
+            "enum": [
+              "both",
+              "replace_only",
+              "delete_only"
+            ],
+            "title": "Edit Mode",
+            "type": "string"
+          },
           "idempotency_key": {
             "anyOf": [
               {
@@ -159,8 +169,16 @@
             ],
             "title": "Language"
           },
+          "locked_spans": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TextSpanLock"
+            },
+            "title": "Locked Spans",
+            "type": "array"
+          },
           "max_candidates": {
-            "default": 50,
+            "default": 40,
             "title": "Max Candidates",
             "type": "integer"
           },
@@ -267,6 +285,11 @@
             "title": "Development Only",
             "type": "boolean"
           },
+          "evaluated_candidate_count": {
+            "default": 0,
+            "title": "Evaluated Candidate Count",
+            "type": "integer"
+          },
           "execution_time_ms": {
             "anyOf": [
               {
@@ -357,6 +380,17 @@
             "title": "Outcome Message",
             "type": "string"
           },
+          "request_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Hash"
+          },
           "schema_version": {
             "const": "1.0.0",
             "default": "1.0.0",
@@ -391,6 +425,22 @@
               }
             ],
             "title": "Source Reference"
+          },
+          "stopping_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stopping Reason"
+          },
+          "successful_candidate_count": {
+            "default": 0,
+            "title": "Successful Candidate Count",
+            "type": "integer"
           },
           "supported_languages": {
             "default": [
@@ -1057,6 +1107,962 @@
         "title": "C4ExplanationSummary",
         "type": "object"
       },
+      "C4FaithfulnessListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/C4FaithfulnessSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "C4FaithfulnessListResponse",
+        "type": "object"
+      },
+      "C4FaithfulnessOccurrence": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "end": {
+            "title": "End",
+            "type": "integer"
+          },
+          "occurrence_id": {
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "integer"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "weight": {
+            "title": "Weight",
+            "type": "number"
+          },
+          "word": {
+            "title": "Word",
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurrence_id",
+          "word",
+          "start",
+          "end",
+          "weight",
+          "rank"
+        ],
+        "title": "C4FaithfulnessOccurrence",
+        "type": "object"
+      },
+      "C4FaithfulnessRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "explanation_id": {
+            "format": "uuid",
+            "title": "Explanation Id",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "enum": [
+                  "English",
+                  "Sinhala",
+                  "Romanized Sinhala",
+                  "Code-mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "max_removal_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Removal Pct"
+          },
+          "max_removal_words": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Removal Words"
+          },
+          "random_trials": {
+            "default": 5,
+            "title": "Random Trials",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "seed": {
+            "default": 42,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "explanation_id",
+          "text"
+        ],
+        "title": "C4FaithfulnessRequest",
+        "type": "object"
+      },
+      "C4FaithfulnessResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "aopc": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aopc"
+          },
+          "baseline_probability": {
+            "title": "Baseline Probability",
+            "type": "number"
+          },
+          "budget_evaluated": {
+            "default": 0,
+            "title": "Budget Evaluated",
+            "type": "integer"
+          },
+          "budget_requested": {
+            "default": 0,
+            "title": "Budget Requested",
+            "type": "integer"
+          },
+          "completed_steps": {
+            "default": 0,
+            "title": "Completed Steps",
+            "type": "integer"
+          },
+          "completed_trials": {
+            "default": 0,
+            "title": "Completed Trials",
+            "type": "integer"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "evaluation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Id"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms"
+          },
+          "explained_class": {
+            "title": "Explained Class",
+            "type": "string"
+          },
+          "explanation_id": {
+            "format": "uuid",
+            "title": "Explanation Id",
+            "type": "string"
+          },
+          "final_comprehensiveness_drop": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Comprehensiveness Drop"
+          },
+          "final_difference_from_random": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Difference From Random"
+          },
+          "final_random_mean_drop": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Random Mean Drop"
+          },
+          "final_sufficiency_gap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Sufficiency Gap"
+          },
+          "is_development": {
+            "default": true,
+            "title": "Is Development",
+            "type": "boolean"
+          },
+          "method": {
+            "enum": [
+              "LIME",
+              "SHAP"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "model_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Revision"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "non_diagnostic_notice": {
+            "default": "Model-behaviour evaluation only. Non-diagnostic output for screening support; requires authorized human interpretation and does not replace professional counselling.",
+            "title": "Non Diagnostic Notice",
+            "type": "string"
+          },
+          "outcome": {
+            "default": "SUCCESS",
+            "enum": [
+              "SUCCESS",
+              "PARTIAL",
+              "NO_SUPPORTING_WORDS",
+              "UNSUPPORTED_ALIGNMENT",
+              "INCOMPATIBLE_MODEL",
+              "TEXT_MISMATCH",
+              "OVERLENGTH_TEXT",
+              "TIMEOUT",
+              "UNAVAILABLE_MODEL",
+              "INFERENCE_FAILED"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "outcome_message": {
+            "title": "Outcome Message",
+            "type": "string"
+          },
+          "ranked_words": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/C4FaithfulnessOccurrence"
+            },
+            "title": "Ranked Words",
+            "type": "array"
+          },
+          "saved": {
+            "default": false,
+            "title": "Saved",
+            "type": "boolean"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "seed": {
+            "default": 42,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "steps": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/C4FaithfulnessStepResult"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "stopping_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stopping Reason"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "total_eligible_words": {
+            "default": 0,
+            "title": "Total Eligible Words",
+            "type": "integer"
+          },
+          "total_inferences": {
+            "default": 0,
+            "title": "Total Inferences",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "explanation_id",
+          "method",
+          "explained_class",
+          "baseline_probability",
+          "outcome_message"
+        ],
+        "title": "C4FaithfulnessResponse",
+        "type": "object"
+      },
+      "C4FaithfulnessStepResult": {
+        "additionalProperties": false,
+        "properties": {
+          "comprehensiveness_drop": {
+            "title": "Comprehensiveness Drop",
+            "type": "number"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "difference_from_random": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difference From Random"
+          },
+          "keep_remaining_probability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keep Remaining Probability"
+          },
+          "modified_text": {
+            "default": "",
+            "title": "Modified Text",
+            "type": "string"
+          },
+          "random_mean_drop": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Random Mean Drop"
+          },
+          "random_mean_probability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Random Mean Probability"
+          },
+          "random_std_drop": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Random Std Drop"
+          },
+          "random_trial_count": {
+            "default": 0,
+            "title": "Random Trial Count",
+            "type": "integer"
+          },
+          "remaining_probability": {
+            "title": "Remaining Probability",
+            "type": "number"
+          },
+          "removed_occurrence_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Removed Occurrence Ids",
+            "type": "array"
+          },
+          "removed_words": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Removed Words",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "step": {
+            "title": "Step",
+            "type": "integer"
+          },
+          "sufficiency_gap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sufficiency Gap"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "step",
+          "remaining_probability",
+          "comprehensiveness_drop"
+        ],
+        "title": "C4FaithfulnessStepResult",
+        "type": "object"
+      },
+      "C4FaithfulnessSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "aopc": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aopc"
+          },
+          "baseline_probability": {
+            "title": "Baseline Probability",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "evaluation_id": {
+            "format": "uuid",
+            "title": "Evaluation Id",
+            "type": "string"
+          },
+          "explained_class": {
+            "title": "Explained Class",
+            "type": "string"
+          },
+          "explanation_id": {
+            "format": "uuid",
+            "title": "Explanation Id",
+            "type": "string"
+          },
+          "is_development": {
+            "default": true,
+            "title": "Is Development",
+            "type": "boolean"
+          },
+          "method": {
+            "enum": [
+              "LIME",
+              "SHAP"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "evaluation_id",
+          "explanation_id",
+          "created_at",
+          "method",
+          "explained_class",
+          "baseline_probability",
+          "outcome"
+        ],
+        "title": "C4FaithfulnessSummary",
+        "type": "object"
+      },
+      "C4ManualEvaluationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "edited_text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Edited Text",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "enum": [
+                  "English",
+                  "Sinhala",
+                  "Romanized Sinhala",
+                  "Code-mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "original_text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Original Text",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_class": {
+            "enum": [
+              "Negative",
+              "Neutral",
+              "Positive"
+            ],
+            "title": "Target Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "original_text",
+          "edited_text",
+          "target_class"
+        ],
+        "title": "C4ManualEvaluationRequest",
+        "type": "object"
+      },
+      "C4ManualEvaluationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "diff_spans": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TextSpanDiff"
+            },
+            "title": "Diff Spans",
+            "type": "array"
+          },
+          "edit_count": {
+            "title": "Edit Count",
+            "type": "integer"
+          },
+          "edited_predicted_class": {
+            "title": "Edited Predicted Class",
+            "type": "string"
+          },
+          "edited_probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": {},
+            "title": "Edited Probabilities",
+            "type": "object"
+          },
+          "edits": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/EditOperation"
+            },
+            "title": "Edits",
+            "type": "array"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms"
+          },
+          "flip_status_label": {
+            "title": "Flip Status Label",
+            "type": "string"
+          },
+          "is_flip": {
+            "title": "Is Flip",
+            "type": "boolean"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "model_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Revision"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "non_diagnostic_notice": {
+            "default": "Model-behaviour exploration only. Non-diagnostic output for screening support; requires authorized human interpretation and does not constitute wellbeing or treatment advice.",
+            "title": "Non Diagnostic Notice",
+            "type": "string"
+          },
+          "original_predicted_class": {
+            "title": "Original Predicted Class",
+            "type": "string"
+          },
+          "original_probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": {},
+            "title": "Original Probabilities",
+            "type": "object"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "target_class": {
+            "title": "Target Class",
+            "type": "string"
+          },
+          "target_probability_after": {
+            "title": "Target Probability After",
+            "type": "number"
+          },
+          "target_probability_before": {
+            "title": "Target Probability Before",
+            "type": "number"
+          },
+          "target_probability_delta": {
+            "title": "Target Probability Delta",
+            "type": "number"
+          }
+        },
+        "required": [
+          "target_class",
+          "original_predicted_class",
+          "edited_predicted_class",
+          "target_probability_before",
+          "target_probability_after",
+          "target_probability_delta",
+          "is_flip",
+          "flip_status_label",
+          "edit_count"
+        ],
+        "title": "C4ManualEvaluationResponse",
+        "type": "object"
+      },
       "C4PredictionRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1206,6 +2212,758 @@
           "truncated"
         ],
         "title": "C4PredictionResponse",
+        "type": "object"
+      },
+      "C4StabilityListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/C4StabilitySummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "C4StabilityListResponse",
+        "type": "object"
+      },
+      "C4StabilityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "base_seed": {
+            "default": 42,
+            "maximum": 2147483647.0,
+            "minimum": 0.0,
+            "title": "Base Seed",
+            "type": "integer"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "explainer_evals": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 10.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explainer Evals"
+          },
+          "explanation_id": {
+            "format": "uuid",
+            "title": "Explanation Id",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "enum": [
+                  "English",
+                  "Sinhala",
+                  "Romanized Sinhala",
+                  "Code-mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "run_count": {
+            "default": 5,
+            "maximum": 20.0,
+            "minimum": 2.0,
+            "title": "Run Count",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "top_k": {
+            "default": 5,
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "explanation_id",
+          "text"
+        ],
+        "title": "C4StabilityRequest",
+        "type": "object"
+      },
+      "C4StabilityResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline_probability": {
+            "title": "Baseline Probability",
+            "type": "number"
+          },
+          "completed_runs": {
+            "default": 0,
+            "title": "Completed Runs",
+            "type": "integer"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "determinism_notice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Determinism Notice"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "effective_k": {
+            "default": 0,
+            "title": "Effective K",
+            "type": "integer"
+          },
+          "evaluation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Id"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms"
+          },
+          "explained_class": {
+            "title": "Explained Class",
+            "type": "string"
+          },
+          "explainer_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explainer Version"
+          },
+          "explanation_id": {
+            "format": "uuid",
+            "title": "Explanation Id",
+            "type": "string"
+          },
+          "is_deterministic": {
+            "default": false,
+            "title": "Is Deterministic",
+            "type": "boolean"
+          },
+          "is_development": {
+            "default": true,
+            "title": "Is Development",
+            "type": "boolean"
+          },
+          "mean_attribution_std": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Attribution Std"
+          },
+          "mean_rank_correlation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Rank Correlation"
+          },
+          "mean_top_k_overlap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Top K Overlap"
+          },
+          "method": {
+            "enum": [
+              "LIME",
+              "SHAP"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "model_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Revision"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "non_diagnostic_notice": {
+            "default": "Model-behaviour stability analysis only. Measures repeated-run consistency, not correctness, faithfulness, or clinical validity. Output supports counsellor review and does not replace professional counselling.",
+            "title": "Non Diagnostic Notice",
+            "type": "string"
+          },
+          "outcome": {
+            "default": "SUCCESS",
+            "enum": [
+              "SUCCESS",
+              "PARTIAL",
+              "UNSUPPORTED_ALIGNMENT",
+              "INCOMPATIBLE_MODEL",
+              "TEXT_MISMATCH",
+              "OVERLENGTH_TEXT",
+              "TIMEOUT",
+              "UNAVAILABLE_MODEL",
+              "INFERENCE_FAILED"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "outcome_message": {
+            "title": "Outcome Message",
+            "type": "string"
+          },
+          "requested_runs": {
+            "default": 5,
+            "title": "Requested Runs",
+            "type": "integer"
+          },
+          "runs": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/C4StabilityRunResult"
+            },
+            "title": "Runs",
+            "type": "array"
+          },
+          "saved": {
+            "default": false,
+            "title": "Saved",
+            "type": "boolean"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "stopping_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stopping Reason"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "total_eligible_words": {
+            "default": 0,
+            "title": "Total Eligible Words",
+            "type": "integer"
+          },
+          "word_consistency": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/C4StabilityWordConsistency"
+            },
+            "title": "Word Consistency",
+            "type": "array"
+          }
+        },
+        "required": [
+          "explanation_id",
+          "method",
+          "explained_class",
+          "baseline_probability",
+          "outcome_message"
+        ],
+        "title": "C4StabilityResponse",
+        "type": "object"
+      },
+      "C4StabilityRunResult": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms"
+          },
+          "is_reference": {
+            "default": false,
+            "title": "Is Reference",
+            "type": "boolean"
+          },
+          "rank_correlation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Correlation"
+          },
+          "run_index": {
+            "title": "Run Index",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "status": {
+            "default": "SUCCESS",
+            "enum": [
+              "SUCCESS",
+              "FAILED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "top_k_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Top K Ids",
+            "type": "array"
+          },
+          "top_k_overlap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top K Overlap"
+          },
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": {},
+            "title": "Weights",
+            "type": "object"
+          }
+        },
+        "required": [
+          "run_index"
+        ],
+        "title": "C4StabilityRunResult",
+        "type": "object"
+      },
+      "C4StabilitySummary": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_runs": {
+            "title": "Completed Runs",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "evaluation_id": {
+            "format": "uuid",
+            "title": "Evaluation Id",
+            "type": "string"
+          },
+          "explained_class": {
+            "title": "Explained Class",
+            "type": "string"
+          },
+          "explanation_id": {
+            "format": "uuid",
+            "title": "Explanation Id",
+            "type": "string"
+          },
+          "is_development": {
+            "default": true,
+            "title": "Is Development",
+            "type": "boolean"
+          },
+          "mean_attribution_std": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Attribution Std"
+          },
+          "mean_rank_correlation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Rank Correlation"
+          },
+          "mean_top_k_overlap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Top K Overlap"
+          },
+          "method": {
+            "enum": [
+              "LIME",
+              "SHAP"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "requested_runs": {
+            "title": "Requested Runs",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "evaluation_id",
+          "explanation_id",
+          "created_at",
+          "method",
+          "explained_class",
+          "requested_runs",
+          "completed_runs",
+          "outcome"
+        ],
+        "title": "C4StabilitySummary",
+        "type": "object"
+      },
+      "C4StabilityWordConsistency": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "end": {
+            "title": "End",
+            "type": "integer"
+          },
+          "mean_weight": {
+            "title": "Mean Weight",
+            "type": "number"
+          },
+          "occurrence_id": {
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "run_occurrence_count": {
+            "title": "Run Occurrence Count",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "integer"
+          },
+          "std_dev": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Std Dev"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "top_k_frequency": {
+            "title": "Top K Frequency",
+            "type": "number"
+          },
+          "word": {
+            "default": "",
+            "title": "Word",
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurrence_id",
+          "start",
+          "end",
+          "mean_weight",
+          "top_k_frequency",
+          "run_occurrence_count"
+        ],
+        "title": "C4StabilityWordConsistency",
         "type": "object"
       },
       "ConsentDecision": {
@@ -1399,6 +3157,17 @@
       "CounterfactualCandidate": {
         "additionalProperties": false,
         "properties": {
+          "candidate_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Id"
+          },
           "candidate_text": {
             "anyOf": [
               {
@@ -1436,8 +3205,18 @@
             "title": "Edits",
             "type": "array"
           },
+          "feedback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CounterfactualFeedback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "minimality_description": {
-            "default": "Smallest edit distance found within this bounded search; not a global guarantee.",
+            "default": "Fewest edits found within this search.",
             "title": "Minimality Description",
             "type": "string"
           },
@@ -1493,6 +3272,239 @@
         "title": "CounterfactualCandidate",
         "type": "object"
       },
+      "CounterfactualFeedback": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_id": {
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "context_preserved": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Yes",
+                  "No",
+                  "Unsure"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Preserved"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "feedback_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Id"
+          },
+          "natural_wording": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Yes",
+                  "No",
+                  "Unsure"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Natural Wording"
+          },
+          "reviewer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer Id"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "useful": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Yes",
+                  "No",
+                  "Unsure"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Useful"
+          }
+        },
+        "required": [
+          "candidate_id"
+        ],
+        "title": "CounterfactualFeedback",
+        "type": "object"
+      },
+      "CounterfactualFeedbackRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "context_preserved": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Yes",
+                  "No",
+                  "Unsure"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Preserved"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "natural_wording": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Yes",
+                  "No",
+                  "Unsure"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Natural Wording"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "useful": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Yes",
+                  "No",
+                  "Unsure"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Useful"
+          }
+        },
+        "required": [
+          "candidate_id"
+        ],
+        "title": "CounterfactualFeedbackRequest",
+        "type": "object"
+      },
       "EditOperation": {
         "additionalProperties": false,
         "properties": {
@@ -1501,6 +3513,17 @@
             "default": true,
             "title": "Development Only",
             "type": "boolean"
+          },
+          "end_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Offset"
           },
           "index": {
             "title": "Index",
@@ -1542,6 +3565,17 @@
             "default": "1.0.0",
             "title": "Schema Version",
             "type": "string"
+          },
+          "start_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Offset"
           },
           "synthetic": {
             "const": true,
@@ -2445,6 +4479,54 @@
           "type"
         ],
         "title": "TextSpanDiff",
+        "type": "object"
+      },
+      "TextSpanLock": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "end": {
+            "title": "End",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "integer"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "TextSpanLock",
         "type": "object"
       },
       "VersionResponse": {
@@ -3492,6 +5574,140 @@
         "summary": "Create C4 Counterfactual"
       }
     },
+    "/api/v1/c4/counterfactuals/manual": {
+      "post": {
+        "description": "Evaluate a counsellor's manual 'What If?' edit with CSRF and role protection.",
+        "operationId": "manual_c4_counterfactual_api_v1_c4_counterfactuals_manual_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/C4ManualEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4ManualEvaluationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Manual C4 Counterfactual"
+      }
+    },
     "/api/v1/c4/counterfactuals/{counterfactual_id}": {
       "get": {
         "description": "Retrieve an authenticated user's saved counterfactual by ID.",
@@ -3626,6 +5842,152 @@
           }
         ],
         "summary": "Get C4 Counterfactual"
+      }
+    },
+    "/api/v1/c4/counterfactuals/{counterfactual_id}/feedback": {
+      "post": {
+        "description": "Submit or update reviewer feedback for a counterfactual candidate with DB persistence.",
+        "operationId": "save_c4_counterfactual_feedback_api_v1_c4_counterfactuals__counterfactual_id__feedback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "counterfactual_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Counterfactual Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterfactualFeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterfactualFeedback"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Save C4 Counterfactual Feedback"
       }
     },
     "/api/v1/c4/explanations": {
@@ -4042,9 +6404,559 @@
         "summary": "Get C4 Explanation"
       }
     },
+    "/api/v1/c4/faithfulness": {
+      "get": {
+        "description": "Return a bounded, paginated list of the current user's faithfulness evaluations.",
+        "operationId": "list_c4_faithfulness_api_v1_c4_faithfulness_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4FaithfulnessListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "List C4 Faithfulness"
+      },
+      "post": {
+        "description": "Evaluate faithfulness of a saved explanation with exact source text verification and model provenance.",
+        "operationId": "evaluate_c4_faithfulness_api_v1_c4_faithfulness_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/C4FaithfulnessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4FaithfulnessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Evaluate C4 Faithfulness"
+      }
+    },
+    "/api/v1/c4/faithfulness/by-explanation/{explanation_id}": {
+      "get": {
+        "description": "Retrieve the latest saved faithfulness evaluation for a given explanation ID.",
+        "operationId": "get_c4_faithfulness_by_explanation_api_v1_c4_faithfulness_by_explanation__explanation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "explanation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Explanation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4FaithfulnessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Get C4 Faithfulness By Explanation"
+      }
+    },
+    "/api/v1/c4/faithfulness/{evaluation_id}": {
+      "get": {
+        "description": "Retrieve an authenticated user's saved faithfulness evaluation record by ID.",
+        "operationId": "get_c4_faithfulness_api_v1_c4_faithfulness__evaluation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evaluation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Evaluation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4FaithfulnessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Get C4 Faithfulness"
+      }
+    },
     "/api/v1/c4/predict": {
       "post": {
-        "description": "Authenticated sentiment prediction route proxying to XAI service.",
+        "description": "Sentiment prediction route proxying to XAI service with CSRF & origin protection.",
         "operationId": "create_c4_predict_api_v1_c4_predict_post",
         "requestBody": {
           "content": {
@@ -4174,6 +7086,556 @@
           }
         ],
         "summary": "Create C4 Predict"
+      }
+    },
+    "/api/v1/c4/stability": {
+      "get": {
+        "description": "Return a bounded, paginated list of the current user's stability evaluations.",
+        "operationId": "list_c4_stability_api_v1_c4_stability_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4StabilityListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "List C4 Stability"
+      },
+      "post": {
+        "description": "Evaluate repeated-run stability of a saved explanation with exact source text verification and model provenance.",
+        "operationId": "evaluate_c4_stability_api_v1_c4_stability_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/C4StabilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4StabilityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Evaluate C4 Stability"
+      }
+    },
+    "/api/v1/c4/stability/by-explanation/{explanation_id}": {
+      "get": {
+        "description": "Retrieve the latest saved stability evaluation for a given explanation ID.",
+        "operationId": "get_c4_stability_by_explanation_api_v1_c4_stability_by_explanation__explanation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "explanation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Explanation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4StabilityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Get C4 Stability By Explanation"
+      }
+    },
+    "/api/v1/c4/stability/{evaluation_id}": {
+      "get": {
+        "description": "Retrieve an authenticated user's saved stability evaluation record by ID.",
+        "operationId": "get_c4_stability_api_v1_c4_stability__evaluation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evaluation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Evaluation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/C4StabilityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Get C4 Stability"
       }
     },
     "/api/v1/cases/{case_id}/assign": {

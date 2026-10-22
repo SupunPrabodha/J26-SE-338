@@ -9,6 +9,18 @@
       "title": "Development Only",
       "type": "boolean"
     },
+    "end_offset": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "End Offset"
+    },
     "index": {
       "title": "Index",
       "type": "integer"
@@ -51,6 +63,18 @@
       "default": "1.0.0",
       "title": "Schema Version",
       "type": "string"
+    },
+    "start_offset": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Start Offset"
     },
     "synthetic": {
       "const": true,

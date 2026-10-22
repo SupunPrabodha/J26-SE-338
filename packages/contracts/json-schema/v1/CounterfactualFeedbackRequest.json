@@ -1,0 +1,100 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/CounterfactualFeedbackRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "comment": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comment"
+    },
+    "context_preserved": {
+      "anyOf": [
+        {
+          "enum": [
+            "Yes",
+            "No",
+            "Unsure"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Context Preserved"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "natural_wording": {
+      "anyOf": [
+        {
+          "enum": [
+            "Yes",
+            "No",
+            "Unsure"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Natural Wording"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "useful": {
+      "anyOf": [
+        {
+          "enum": [
+            "Yes",
+            "No",
+            "Unsure"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Useful"
+    }
+  },
+  "required": [
+    "candidate_id"
+  ],
+  "title": "CounterfactualFeedbackRequest",
+  "type": "object"
+}

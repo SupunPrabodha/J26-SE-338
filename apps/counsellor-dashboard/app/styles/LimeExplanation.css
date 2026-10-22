@@ -24,6 +24,26 @@
   padding: 16px 14px 18px 14px;
   flex-shrink: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  z-index: 50;
+  box-sizing: border-box;
+}
+
+.lime-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.lime-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lime-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
 }
 
 .lime-brand {
@@ -94,11 +114,18 @@
   cursor: pointer;
   text-align: left;
   transition: all 0.15s ease-in-out;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .lime-nav-btn:hover {
   background-color: rgba(255, 255, 255, 0.06);
   color: #f1f5f9;
+}
+
+.lime-nav-btn.lime-nav-btn-disabled:hover {
+  background-color: transparent !important;
+  color: #94a3b8 !important;
 }
 
 .lime-nav-btn-active {

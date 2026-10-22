@@ -582,6 +582,31 @@ export default function LimePage() {
                     Submit text on Development Input to enable LIME explanations.
                   </p>
                 )}
+                {explanation?.explanation_id && (
+                  <Link
+                    href={`/faithfulness?exp_id=${explanation.explanation_id}`}
+                    style={{
+                      marginTop: "8px",
+                      width: "100%",
+                      padding: "7px 12px",
+                      borderRadius: "7px",
+                      border: "1px solid #c7d2fe",
+                      background: "#eef2ff",
+                      color: "#4338ca",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      textDecoration: "none",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    → Evaluate Faithfulness
+                  </Link>
+                )}
               </div>
             </div>
 

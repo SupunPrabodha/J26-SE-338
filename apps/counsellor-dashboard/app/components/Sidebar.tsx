@@ -2,18 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useReviewCase } from "../context/CaseContext";
 
 interface SidebarProps {
   isClassifierConnected?: boolean;
 }
 
-export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
+export function Sidebar({ isClassifierConnected }: SidebarProps) {
   const pathname = usePathname();
+  const { authorized } = useReviewCase();
+
+  // Connected if explicitly true, or fallback to user authorization state
+  const connected =
+    isClassifierConnected !== undefined ? isClassifierConnected : (authorized ?? true);
+
+  const isActive = (path: string) => {
+    if (!pathname) return false;
+    if (path === "/") return pathname === "/";
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
 
   return (
     <aside className="lime-sidebar" aria-label="Counsellor Navigation">
-      {/* Brand Logo */}
-      <div className="lime-brand">
+      {/* Brand Logo - Clickable link to overview */}
+      <Link href="/" className="lime-brand" style={{ textDecoration: "none" }} title="Return to Overview">
         <div className="lime-brand-logo-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <rect width="24" height="24" rx="7" fill="url(#limeBrandGrad)" />
@@ -31,13 +43,15 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
           <h2 className="lime-brand-name">XAI Dashboard</h2>
           <span className="lime-brand-tagline">Faithfulness Evaluator</span>
         </div>
-      </div>
+      </Link>
 
       {/* Navigation Menu */}
       <nav className="lime-nav">
         <Link
           href="/"
-          className={`lime-nav-btn ${pathname === "/" ? "lime-nav-btn-active active" : ""}`}
+          className={`lime-nav-btn ${isActive("/") ? "lime-nav-btn-active active" : ""}`}
+          aria-current={isActive("/") ? "page" : undefined}
+          title="Review tasks and system overview"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -50,8 +64,9 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
         <div className="lime-nav-heading">EXPLANATIONS</div>
         <Link
           href="/lime"
-          className={`lime-nav-btn ${pathname === "/lime" ? "lime-nav-btn-active active" : ""}`}
-          aria-current={pathname === "/lime" ? "page" : undefined}
+          className={`lime-nav-btn ${isActive("/lime") ? "lime-nav-btn-active active" : ""}`}
+          aria-current={isActive("/lime") ? "page" : undefined}
+          title="Local Interpretable Model-agnostic Explanations"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="18" cy="18" r="3" />
@@ -64,8 +79,9 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
 
         <Link
           href="/shap"
-          className={`lime-nav-btn ${pathname === "/shap" ? "lime-nav-btn-active active" : ""}`}
-          aria-current={pathname === "/shap" ? "page" : undefined}
+          className={`lime-nav-btn ${isActive("/shap") ? "lime-nav-btn-active active" : ""}`}
+          aria-current={isActive("/shap") ? "page" : undefined}
+          title="SHapley Additive exPlanations"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="20" x2="18" y2="10" />
@@ -77,8 +93,9 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
 
         <Link
           href="/counterfactuals"
-          className={`lime-nav-btn ${pathname === "/counterfactuals" ? "lime-nav-btn-active active" : ""}`}
-          aria-current={pathname === "/counterfactuals" ? "page" : undefined}
+          className={`lime-nav-btn ${isActive("/counterfactuals") ? "lime-nav-btn-active active" : ""}`}
+          aria-current={isActive("/counterfactuals") ? "page" : undefined}
+          title="Minimal perturbation counterfactual examples"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m16 3 4 4-4 4" />
@@ -91,53 +108,57 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
 
         {/* Section: EVALUATION */}
         <div className="lime-nav-heading">EVALUATION</div>
-        <div
-          className="lime-nav-btn"
-          style={{ opacity: 0.6, cursor: "not-allowed" }}
-          title="Awaiting C4 Faithfulness module"
-          aria-disabled="true"
+        <Link
+          href="/faithfulness"
+          className={`lime-nav-btn ${isActive("/faithfulness") ? "lime-nav-btn-active active" : ""}`}
+          aria-current={isActive("/faithfulness") ? "page" : undefined}
+          title="Progressive deletion & sufficiency testing"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             <path d="m9 12 2 2 4-4" />
           </svg>
           <span>Faithfulness Tests</span>
-        </div>
+        </Link>
 
-        <div
-          className="lime-nav-btn"
-          style={{ opacity: 0.6, cursor: "not-allowed" }}
-          title="Awaiting C4 Stability module"
-          aria-disabled="true"
+        <Link
+          href="/stability"
+          className={`lime-nav-btn ${isActive("/stability") ? "lime-nav-btn-active active" : ""}`}
+          aria-current={isActive("/stability") ? "page" : undefined}
+          title="Repeated-run explainer consistency and perturbation variability"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
           </svg>
           <span>Stability Analysis</span>
-        </div>
+        </Link>
+
 
         <div
-          className="lime-nav-btn"
-          style={{ opacity: 0.6, cursor: "not-allowed" }}
-          title="Awaiting C4 Comparison module"
+          className="lime-nav-btn lime-nav-btn-disabled"
+          style={{ opacity: 0.6, cursor: "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+          title="Component 4 module in research pipeline"
           aria-disabled="true"
         >
-          <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
-            <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
-            <path d="M7 21h10" />
-            <path d="M12 3v18" />
-            <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
-          </svg>
-          <span>Comparison</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+              <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+              <path d="M7 21h10" />
+              <path d="M12 3v18" />
+              <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+            </svg>
+            <span>Comparison</span>
+          </div>
+          <span style={{ fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(255,255,255,0.08)", color: "#94a3b8", fontWeight: 600 }}>Soon</span>
         </div>
 
         {/* Section: DATA & SETTINGS */}
         <div className="lime-nav-heading">DATA & SETTINGS</div>
         <Link
           href="/c4-dev-input"
-          className={`lime-nav-btn ${pathname === "/c4-dev-input" || pathname === "/input" ? "lime-nav-btn-active active" : ""}`}
-          aria-current={pathname === "/c4-dev-input" || pathname === "/input" ? "page" : undefined}
+          className={`lime-nav-btn ${isActive("/c4-dev-input") || isActive("/input") ? "lime-nav-btn-active active" : ""}`}
+          aria-current={isActive("/c4-dev-input") || isActive("/input") ? "page" : undefined}
           title="C4 development — fictional text only"
         >
           <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -151,15 +172,19 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
         </Link>
 
         <div
-          className="lime-nav-btn"
-          style={{ opacity: 0.6, cursor: "not-allowed" }}
+          className="lime-nav-btn lime-nav-btn-disabled"
+          style={{ opacity: 0.6, cursor: "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+          title="Development configuration"
           aria-disabled="true"
         >
-          <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-          <span>Settings</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <svg className="lime-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span>Settings</span>
+          </div>
+          <span style={{ fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(255,255,255,0.08)", color: "#94a3b8", fontWeight: 600 }}>Dev</span>
         </div>
       </nav>
 
@@ -183,9 +208,9 @@ export function Sidebar({ isClassifierConnected = false }: SidebarProps) {
         <div className="lime-model-status-badge">
           <span
             className="lime-status-indicator"
-            style={{ backgroundColor: isClassifierConnected ? "#10b981" : "#eab308" }}
+            style={{ backgroundColor: connected ? "#10b981" : "#eab308" }}
           ></span>
-          <span>{isClassifierConnected ? "Connected" : "Loading / Disconnected"}</span>
+          <span>{connected ? "Connected" : "Loading / Disconnected"}</span>
         </div>
       </div>
     </aside>

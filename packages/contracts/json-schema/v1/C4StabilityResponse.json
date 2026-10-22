@@ -1,0 +1,487 @@
+{
+  "$defs": {
+    "C4StabilityRunResult": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "error_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Message"
+        },
+        "execution_time_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Execution Time Ms"
+        },
+        "is_reference": {
+          "default": false,
+          "title": "Is Reference",
+          "type": "boolean"
+        },
+        "rank_correlation": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rank Correlation"
+        },
+        "run_index": {
+          "title": "Run Index",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seed"
+        },
+        "status": {
+          "default": "SUCCESS",
+          "enum": [
+            "SUCCESS",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "top_k_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Top K Ids",
+          "type": "array"
+        },
+        "top_k_overlap": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Top K Overlap"
+        },
+        "weights": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "default": {},
+          "title": "Weights",
+          "type": "object"
+        }
+      },
+      "required": [
+        "run_index"
+      ],
+      "title": "C4StabilityRunResult",
+      "type": "object"
+    },
+    "C4StabilityWordConsistency": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "mean_weight": {
+          "title": "Mean Weight",
+          "type": "number"
+        },
+        "occurrence_id": {
+          "title": "Occurrence Id",
+          "type": "string"
+        },
+        "run_occurrence_count": {
+          "title": "Run Occurrence Count",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        },
+        "std_dev": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Std Dev"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "top_k_frequency": {
+          "title": "Top K Frequency",
+          "type": "number"
+        },
+        "word": {
+          "default": "",
+          "title": "Word",
+          "type": "string"
+        }
+      },
+      "required": [
+        "occurrence_id",
+        "start",
+        "end",
+        "mean_weight",
+        "top_k_frequency",
+        "run_occurrence_count"
+      ],
+      "title": "C4StabilityWordConsistency",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C4StabilityResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baseline_probability": {
+      "title": "Baseline Probability",
+      "type": "number"
+    },
+    "completed_runs": {
+      "default": 0,
+      "title": "Completed Runs",
+      "type": "integer"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    },
+    "determinism_notice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Determinism Notice"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "effective_k": {
+      "default": 0,
+      "title": "Effective K",
+      "type": "integer"
+    },
+    "evaluation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evaluation Id"
+    },
+    "execution_time_ms": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Execution Time Ms"
+    },
+    "explained_class": {
+      "title": "Explained Class",
+      "type": "string"
+    },
+    "explainer_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Explainer Version"
+    },
+    "explanation_id": {
+      "format": "uuid",
+      "title": "Explanation Id",
+      "type": "string"
+    },
+    "is_deterministic": {
+      "default": false,
+      "title": "Is Deterministic",
+      "type": "boolean"
+    },
+    "is_development": {
+      "default": true,
+      "title": "Is Development",
+      "type": "boolean"
+    },
+    "mean_attribution_std": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mean Attribution Std"
+    },
+    "mean_rank_correlation": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mean Rank Correlation"
+    },
+    "mean_top_k_overlap": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mean Top K Overlap"
+    },
+    "method": {
+      "enum": [
+        "LIME",
+        "SHAP"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "model_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
+    "model_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Version"
+    },
+    "non_diagnostic_notice": {
+      "default": "Model-behaviour stability analysis only. Measures repeated-run consistency, not correctness, faithfulness, or clinical validity. Output supports counsellor review and does not replace professional counselling.",
+      "title": "Non Diagnostic Notice",
+      "type": "string"
+    },
+    "outcome": {
+      "default": "SUCCESS",
+      "enum": [
+        "SUCCESS",
+        "PARTIAL",
+        "UNSUPPORTED_ALIGNMENT",
+        "INCOMPATIBLE_MODEL",
+        "TEXT_MISMATCH",
+        "OVERLENGTH_TEXT",
+        "TIMEOUT",
+        "UNAVAILABLE_MODEL",
+        "INFERENCE_FAILED"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "outcome_message": {
+      "title": "Outcome Message",
+      "type": "string"
+    },
+    "requested_runs": {
+      "default": 5,
+      "title": "Requested Runs",
+      "type": "integer"
+    },
+    "runs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/C4StabilityRunResult"
+      },
+      "title": "Runs",
+      "type": "array"
+    },
+    "saved": {
+      "default": false,
+      "title": "Saved",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_reference": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Reference"
+    },
+    "stopping_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stopping Reason"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "total_eligible_words": {
+      "default": 0,
+      "title": "Total Eligible Words",
+      "type": "integer"
+    },
+    "word_consistency": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/C4StabilityWordConsistency"
+      },
+      "title": "Word Consistency",
+      "type": "array"
+    }
+  },
+  "required": [
+    "explanation_id",
+    "method",
+    "explained_class",
+    "baseline_probability",
+    "outcome_message"
+  ],
+  "title": "C4StabilityResponse",
+  "type": "object"
+}

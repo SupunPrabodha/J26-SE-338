@@ -3,6 +3,18 @@
     "CounterfactualCandidate": {
       "additionalProperties": false,
       "properties": {
+        "candidate_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidate Id"
+        },
         "candidate_text": {
           "anyOf": [
             {
@@ -41,8 +53,19 @@
           "title": "Edits",
           "type": "array"
         },
+        "feedback": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CounterfactualFeedback"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "minimality_description": {
-          "default": "Smallest edit distance found within this bounded search; not a global guarantee.",
+          "default": "Fewest edits found within this search.",
           "title": "Minimality Description",
           "type": "string"
         },
@@ -98,6 +121,153 @@
       "title": "CounterfactualCandidate",
       "type": "object"
     },
+    "CounterfactualFeedback": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "context_preserved": {
+          "anyOf": [
+            {
+              "enum": [
+                "Yes",
+                "No",
+                "Unsure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Preserved"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created At"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "feedback_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Feedback Id"
+        },
+        "natural_wording": {
+          "anyOf": [
+            {
+              "enum": [
+                "Yes",
+                "No",
+                "Unsure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Natural Wording"
+        },
+        "reviewer_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer Id"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated At"
+        },
+        "useful": {
+          "anyOf": [
+            {
+              "enum": [
+                "Yes",
+                "No",
+                "Unsure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Useful"
+        }
+      },
+      "required": [
+        "candidate_id"
+      ],
+      "title": "CounterfactualFeedback",
+      "type": "object"
+    },
     "EditOperation": {
       "additionalProperties": false,
       "properties": {
@@ -106,6 +276,18 @@
           "default": true,
           "title": "Development Only",
           "type": "boolean"
+        },
+        "end_offset": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Offset"
         },
         "index": {
           "title": "Index",
@@ -149,6 +331,18 @@
           "default": "1.0.0",
           "title": "Schema Version",
           "type": "string"
+        },
+        "start_offset": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start Offset"
         },
         "synthetic": {
           "const": true,
@@ -275,6 +469,11 @@
       "title": "Development Only",
       "type": "boolean"
     },
+    "evaluated_candidate_count": {
+      "default": 0,
+      "title": "Evaluated Candidate Count",
+      "type": "integer"
+    },
     "execution_time_ms": {
       "anyOf": [
         {
@@ -370,6 +569,18 @@
       "title": "Outcome Message",
       "type": "string"
     },
+    "request_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Request Hash"
+    },
     "schema_version": {
       "const": "1.0.0",
       "default": "1.0.0",
@@ -405,6 +616,23 @@
       ],
       "default": null,
       "title": "Source Reference"
+    },
+    "stopping_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stopping Reason"
+    },
+    "successful_candidate_count": {
+      "default": 0,
+      "title": "Successful Candidate Count",
+      "type": "integer"
     },
     "supported_languages": {
       "default": [

@@ -1,0 +1,124 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4StabilityRunResult.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "error_message": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Message"
+    },
+    "execution_time_ms": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Execution Time Ms"
+    },
+    "is_reference": {
+      "default": false,
+      "title": "Is Reference",
+      "type": "boolean"
+    },
+    "rank_correlation": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rank Correlation"
+    },
+    "run_index": {
+      "title": "Run Index",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Seed"
+    },
+    "status": {
+      "default": "SUCCESS",
+      "enum": [
+        "SUCCESS",
+        "FAILED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "top_k_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Top K Ids",
+      "type": "array"
+    },
+    "top_k_overlap": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Top K Overlap"
+    },
+    "weights": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "default": {},
+      "title": "Weights",
+      "type": "object"
+    }
+  },
+  "required": [
+    "run_index"
+  ],
+  "title": "C4StabilityRunResult",
+  "type": "object"
+}

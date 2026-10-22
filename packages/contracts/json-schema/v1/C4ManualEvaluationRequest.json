@@ -1,0 +1,71 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4ManualEvaluationRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "edited_text": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Edited Text",
+      "type": "string"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "enum": [
+            "English",
+            "Sinhala",
+            "Romanized Sinhala",
+            "Code-mixed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Language"
+    },
+    "original_text": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Original Text",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "target_class": {
+      "enum": [
+        "Negative",
+        "Neutral",
+        "Positive"
+      ],
+      "title": "Target Class",
+      "type": "string"
+    }
+  },
+  "required": [
+    "original_text",
+    "edited_text",
+    "target_class"
+  ],
+  "title": "C4ManualEvaluationRequest",
+  "type": "object"
+}

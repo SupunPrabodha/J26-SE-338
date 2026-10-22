@@ -1,0 +1,499 @@
+{
+  "$defs": {
+    "C4FaithfulnessOccurrence": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "occurrence_id": {
+          "title": "Occurrence Id",
+          "type": "string"
+        },
+        "rank": {
+          "title": "Rank",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        },
+        "word": {
+          "title": "Word",
+          "type": "string"
+        }
+      },
+      "required": [
+        "occurrence_id",
+        "word",
+        "start",
+        "end",
+        "weight",
+        "rank"
+      ],
+      "title": "C4FaithfulnessOccurrence",
+      "type": "object"
+    },
+    "C4FaithfulnessStepResult": {
+      "additionalProperties": false,
+      "properties": {
+        "comprehensiveness_drop": {
+          "title": "Comprehensiveness Drop",
+          "type": "number"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "difference_from_random": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Difference From Random"
+        },
+        "keep_remaining_probability": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Keep Remaining Probability"
+        },
+        "modified_text": {
+          "default": "",
+          "title": "Modified Text",
+          "type": "string"
+        },
+        "random_mean_drop": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Mean Drop"
+        },
+        "random_mean_probability": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Mean Probability"
+        },
+        "random_std_drop": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Std Drop"
+        },
+        "random_trial_count": {
+          "default": 0,
+          "title": "Random Trial Count",
+          "type": "integer"
+        },
+        "remaining_probability": {
+          "title": "Remaining Probability",
+          "type": "number"
+        },
+        "removed_occurrence_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed Occurrence Ids",
+          "type": "array"
+        },
+        "removed_words": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed Words",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "step": {
+          "title": "Step",
+          "type": "integer"
+        },
+        "sufficiency_gap": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sufficiency Gap"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "step",
+        "remaining_probability",
+        "comprehensiveness_drop"
+      ],
+      "title": "C4FaithfulnessStepResult",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C4FaithfulnessResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aopc": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Aopc"
+    },
+    "baseline_probability": {
+      "title": "Baseline Probability",
+      "type": "number"
+    },
+    "budget_evaluated": {
+      "default": 0,
+      "title": "Budget Evaluated",
+      "type": "integer"
+    },
+    "budget_requested": {
+      "default": 0,
+      "title": "Budget Requested",
+      "type": "integer"
+    },
+    "completed_steps": {
+      "default": 0,
+      "title": "Completed Steps",
+      "type": "integer"
+    },
+    "completed_trials": {
+      "default": 0,
+      "title": "Completed Trials",
+      "type": "integer"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "evaluation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evaluation Id"
+    },
+    "execution_time_ms": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Execution Time Ms"
+    },
+    "explained_class": {
+      "title": "Explained Class",
+      "type": "string"
+    },
+    "explanation_id": {
+      "format": "uuid",
+      "title": "Explanation Id",
+      "type": "string"
+    },
+    "final_comprehensiveness_drop": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Final Comprehensiveness Drop"
+    },
+    "final_difference_from_random": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Final Difference From Random"
+    },
+    "final_random_mean_drop": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Final Random Mean Drop"
+    },
+    "final_sufficiency_gap": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Final Sufficiency Gap"
+    },
+    "is_development": {
+      "default": true,
+      "title": "Is Development",
+      "type": "boolean"
+    },
+    "method": {
+      "enum": [
+        "LIME",
+        "SHAP"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "model_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
+    "model_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Version"
+    },
+    "non_diagnostic_notice": {
+      "default": "Model-behaviour evaluation only. Non-diagnostic output for screening support; requires authorized human interpretation and does not replace professional counselling.",
+      "title": "Non Diagnostic Notice",
+      "type": "string"
+    },
+    "outcome": {
+      "default": "SUCCESS",
+      "enum": [
+        "SUCCESS",
+        "PARTIAL",
+        "NO_SUPPORTING_WORDS",
+        "UNSUPPORTED_ALIGNMENT",
+        "INCOMPATIBLE_MODEL",
+        "TEXT_MISMATCH",
+        "OVERLENGTH_TEXT",
+        "TIMEOUT",
+        "UNAVAILABLE_MODEL",
+        "INFERENCE_FAILED"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "outcome_message": {
+      "title": "Outcome Message",
+      "type": "string"
+    },
+    "ranked_words": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/C4FaithfulnessOccurrence"
+      },
+      "title": "Ranked Words",
+      "type": "array"
+    },
+    "saved": {
+      "default": false,
+      "title": "Saved",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "default": 42,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "source_reference": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Reference"
+    },
+    "steps": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/C4FaithfulnessStepResult"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "stopping_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stopping Reason"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "total_eligible_words": {
+      "default": 0,
+      "title": "Total Eligible Words",
+      "type": "integer"
+    },
+    "total_inferences": {
+      "default": 0,
+      "title": "Total Inferences",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "explanation_id",
+    "method",
+    "explained_class",
+    "baseline_probability",
+    "outcome_message"
+  ],
+  "title": "C4FaithfulnessResponse",
+  "type": "object"
+}

@@ -431,6 +431,14 @@ class EditOperation(Contract):
     index: int
     original: str | None = None
     replacement: str | None = None
+    start_offset: int | None = None
+    end_offset: int | None = None
+
+
+class TextSpanLock(Contract):
+    start: int
+    end: int
+    text: str | None = None
 
 
 class TextSpanDiff(Contract):
@@ -439,7 +447,28 @@ class TextSpanDiff(Contract):
     original_text: str | None = None
 
 
+class CounterfactualFeedback(Contract):
+    feedback_id: UUID | None = None
+    candidate_id: str
+    reviewer_id: str | None = None
+    natural_wording: Literal["Yes", "No", "Unsure"] | None = None
+    context_preserved: Literal["Yes", "No", "Unsure"] | None = None
+    useful: Literal["Yes", "No", "Unsure"] | None = None
+    comment: Annotated[str, Field(max_length=500)] | None = None
+    created_at: AwareDatetime | None = None
+    updated_at: AwareDatetime | None = None
+
+
+class CounterfactualFeedbackRequest(Contract):
+    candidate_id: Annotated[str, Field(min_length=1, max_length=64)]
+    natural_wording: Literal["Yes", "No", "Unsure"] | None = None
+    context_preserved: Literal["Yes", "No", "Unsure"] | None = None
+    useful: Literal["Yes", "No", "Unsure"] | None = None
+    comment: Annotated[str, Field(max_length=500)] | None = None
+
+
 class CounterfactualCandidate(Contract):
+    candidate_id: str | None = None
     candidate_text: str | None = None
     edits: list[EditOperation] = []
     edit_count: int
@@ -450,9 +479,10 @@ class CounterfactualCandidate(Contract):
     diff_spans: list[TextSpanDiff] = []
     minimality_rank: int = 1
     minimality_description: str = (
-        "Smallest edit distance found within this bounded search; not a global guarantee."
+        "Fewest edits found within this search."
     )
     verified: bool = True
+    feedback: CounterfactualFeedback | None = None
 
 
 class C4CounterfactualRequest(Contract):
@@ -464,7 +494,9 @@ class C4CounterfactualRequest(Contract):
     idempotency_key: UUID | None = None
     source_reference: Annotated[str, Field(max_length=100)] | None = None
     max_edits: int = 2
-    max_candidates: int = 50
+    max_candidates: int = 40
+    edit_mode: Literal["both", "replace_only", "delete_only"] = "both"
+    locked_spans: list[TextSpanLock] = []
 
 
 class C4CounterfactualResponse(Contract):
@@ -491,6 +523,10 @@ class C4CounterfactualResponse(Contract):
     is_development: bool = True
     source_reference: str | None = None
     execution_time_ms: float | None = None
+    evaluated_candidate_count: int = 0
+    successful_candidate_count: int = 0
+    stopping_reason: str | None = None
+    request_hash: str | None = None
     supported_languages: list[str] = [
         "English",
         "Sinhala",
@@ -520,6 +556,291 @@ class C4CounterfactualListResponse(Contract):
     total: int
     limit: int
     offset: int
+
+
+class C4ManualEvaluationRequest(Contract):
+    original_text: Annotated[str, Field(min_length=1, max_length=2000)]
+    edited_text: Annotated[str, Field(min_length=1, max_length=2000)]
+    target_class: Literal["Negative", "Neutral", "Positive"]
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+
+
+class C4ManualEvaluationResponse(Contract):
+    target_class: str
+    original_predicted_class: str
+    original_probabilities: dict[str, float] = {}
+    edited_predicted_class: str
+    edited_probabilities: dict[str, float] = {}
+    target_probability_before: float
+    target_probability_after: float
+    target_probability_delta: float
+    is_flip: bool
+    flip_status_label: str
+    edit_count: int
+    edits: list[EditOperation] = []
+    diff_spans: list[TextSpanDiff] = []
+    model_id: str | None = None
+    model_version: str | None = None
+    model_revision: str | None = None
+    execution_time_ms: float | None = None
+    non_diagnostic_notice: str = (
+        "Model-behaviour exploration only. Non-diagnostic output for screening support; "
+        "requires authorized human interpretation and does not constitute wellbeing or treatment advice."
+    )
+
+
+class C4FaithfulnessOccurrence(Contract):
+    occurrence_id: str
+    word: str
+    start: int
+    end: int
+    weight: float
+    rank: int
+
+
+class C4FaithfulnessStepResult(Contract):
+    step: int
+    removed_words: list[str] = []
+    removed_occurrence_ids: list[str] = []
+    modified_text: str = ""
+    remaining_probability: float
+    comprehensiveness_drop: float
+    keep_remaining_probability: float | None = None
+    sufficiency_gap: float | None = None
+    random_mean_probability: float | None = None
+    random_mean_drop: float | None = None
+    random_std_drop: float | None = None
+    random_trial_count: int = 0
+    difference_from_random: float | None = None
+
+
+class C4FaithfulnessRequest(Contract):
+    explanation_id: UUID
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+    max_removal_words: int | None = None
+    max_removal_pct: float | None = None
+    random_trials: int = 5
+    seed: int = 42
+    idempotency_key: UUID | None = None
+    source_reference: Annotated[str, Field(max_length=100)] | None = None
+
+
+class C4InternalFaithfulnessRequest(Contract):
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    explanation_id: UUID
+    method: Literal["LIME", "SHAP"]
+    explained_class: str
+    tokens: list[str] = []
+    weights: list[float] = []
+    contributions: list[FeatureContribution] = []
+    model_revision: str | None = None
+    target_class_probability: float | None = None
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+    max_removal_words: int | None = None
+    max_removal_pct: float | None = None
+    random_trials: int = 5
+    seed: int = 42
+
+
+class C4FaithfulnessResponse(Contract):
+    evaluation_id: UUID | None = None
+    created_at: AwareDatetime | None = None
+    explanation_id: UUID
+    method: Literal["LIME", "SHAP"]
+    explained_class: str
+    baseline_probability: float
+    model_id: str | None = None
+    model_version: str | None = None
+    model_revision: str | None = None
+    outcome: Literal[
+        "SUCCESS",
+        "PARTIAL",
+        "NO_SUPPORTING_WORDS",
+        "UNSUPPORTED_ALIGNMENT",
+        "INCOMPATIBLE_MODEL",
+        "TEXT_MISMATCH",
+        "OVERLENGTH_TEXT",
+        "TIMEOUT",
+        "UNAVAILABLE_MODEL",
+        "INFERENCE_FAILED",
+    ] = "SUCCESS"
+    outcome_message: str
+    ranked_words: list[C4FaithfulnessOccurrence] = []
+    steps: list[C4FaithfulnessStepResult] = []
+    aopc: float | None = None
+    final_comprehensiveness_drop: float | None = None
+    final_sufficiency_gap: float | None = None
+    final_random_mean_drop: float | None = None
+    final_difference_from_random: float | None = None
+    total_eligible_words: int = 0
+    budget_requested: int = 0
+    budget_evaluated: int = 0
+    completed_steps: int = 0
+    completed_trials: int = 0
+    total_inferences: int = 0
+    execution_time_ms: float | None = None
+    seed: int = 42
+    stopping_reason: str | None = None
+    is_development: bool = True
+    source_reference: str | None = None
+    saved: bool = False
+    non_diagnostic_notice: str = (
+        "Model-behaviour evaluation only. Non-diagnostic output for screening support; "
+        "requires authorized human interpretation and does not replace professional counselling."
+    )
+
+
+class C4FaithfulnessSummary(Contract):
+    evaluation_id: UUID
+    explanation_id: UUID
+    created_at: AwareDatetime
+    method: Literal["LIME", "SHAP"]
+    explained_class: str
+    baseline_probability: float
+    aopc: float | None = None
+    outcome: str
+    is_development: bool = True
+    source_reference: str | None = None
+
+
+class C4FaithfulnessListResponse(Contract):
+    items: list[C4FaithfulnessSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+class C4StabilityWordConsistency(Contract):
+    occurrence_id: str
+    word: str = ""
+    start: int
+    end: int
+    mean_weight: float
+    std_dev: float | None = None
+    top_k_frequency: float
+    run_occurrence_count: int
+
+
+class C4StabilityRunResult(Contract):
+    run_index: int
+    seed: int | None = None
+    is_reference: bool = False
+    status: Literal["SUCCESS", "FAILED"] = "SUCCESS"
+    error_message: str | None = None
+    execution_time_ms: float | None = None
+    top_k_overlap: float | None = None
+    rank_correlation: float | None = None
+    weights: dict[str, float] = {}
+    top_k_ids: list[str] = []
+
+
+class C4StabilityRequest(Contract):
+    explanation_id: UUID
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+    run_count: Annotated[int, Field(ge=2, le=20)] = 5
+    top_k: Annotated[int, Field(ge=1, le=50)] = 5
+    base_seed: Annotated[int, Field(ge=0, le=2147483647)] = 42
+    explainer_evals: Annotated[int, Field(ge=10, le=500)] | None = None
+    idempotency_key: UUID | None = None
+    source_reference: Annotated[str, Field(max_length=100)] | None = None
+
+
+class C4InternalStabilityRequest(Contract):
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+    explanation_id: UUID
+    method: Literal["LIME", "SHAP"]
+    explained_class: str
+    model_revision: str | None = None
+    target_class_probability: float | None = None
+    run_count: int = 5
+    top_k: int = 5
+    base_seed: int = 42
+    explainer_evals: int | None = None
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+
+
+class C4StabilityResponse(Contract):
+    evaluation_id: UUID | None = None
+    created_at: AwareDatetime | None = None
+    explanation_id: UUID
+    method: Literal["LIME", "SHAP"]
+    explained_class: str
+    baseline_probability: float
+    model_id: str | None = None
+    model_version: str | None = None
+    model_revision: str | None = None
+    explainer_version: str | None = None
+    outcome: Literal[
+        "SUCCESS",
+        "PARTIAL",
+        "UNSUPPORTED_ALIGNMENT",
+        "INCOMPATIBLE_MODEL",
+        "TEXT_MISMATCH",
+        "OVERLENGTH_TEXT",
+        "TIMEOUT",
+        "UNAVAILABLE_MODEL",
+        "INFERENCE_FAILED",
+    ] = "SUCCESS"
+    outcome_message: str
+    stopping_reason: str | None = None
+    runs: list[C4StabilityRunResult] = []
+    word_consistency: list[C4StabilityWordConsistency] = []
+    mean_top_k_overlap: float | None = None
+    mean_rank_correlation: float | None = None
+    mean_attribution_std: float | None = None
+    requested_runs: int = 5
+    completed_runs: int = 0
+    effective_k: int = 0
+    total_eligible_words: int = 0
+    is_deterministic: bool = False
+    determinism_notice: str | None = None
+    execution_time_ms: float | None = None
+    is_development: bool = True
+    source_reference: str | None = None
+    saved: bool = False
+    non_diagnostic_notice: str = (
+        "Model-behaviour stability analysis only. Measures repeated-run consistency, "
+        "not correctness, faithfulness, or clinical validity. Output supports counsellor "
+        "review and does not replace professional counselling."
+    )
+
+
+class C4StabilitySummary(Contract):
+    evaluation_id: UUID
+    explanation_id: UUID
+    created_at: AwareDatetime
+    method: Literal["LIME", "SHAP"]
+    explained_class: str
+    mean_top_k_overlap: float | None = None
+    mean_rank_correlation: float | None = None
+    mean_attribution_std: float | None = None
+    requested_runs: int
+    completed_runs: int
+    outcome: str
+    is_development: bool = True
+    source_reference: str | None = None
+
+
+class C4StabilityListResponse(Contract):
+    items: list[C4StabilitySummary]
+    total: int
+    limit: int
+    offset: int
+
+
+
 
 
 

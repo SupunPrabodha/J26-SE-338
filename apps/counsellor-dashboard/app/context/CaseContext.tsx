@@ -15,7 +15,7 @@ export interface DevelopmentInputSnapshot {
   readonly id: string;
   readonly text: string;
   readonly language: string;
-  readonly prediction: C4PredictionResponse;
+  readonly prediction?: C4PredictionResponse;
   readonly targetClass: "Negative" | "Neutral" | "Positive";
   readonly modelVersion?: string;
   readonly submittedAt: number;

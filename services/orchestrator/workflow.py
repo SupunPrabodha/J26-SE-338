@@ -14,9 +14,11 @@ from research_common.database import (
     Consent,
     CounterfactualRecord,
     Explanation,
+    FaithfulnessRecord,
     Job,
     Retention,
     Review,
+    StabilityRecord,
     engine,
 )
 from research_common.mocks import context
@@ -384,4 +386,17 @@ def enforce_retention():
                 CounterfactualRecord.expires_at <= now(),
             )
         )
+        db.execute(
+            delete(FaithfulnessRecord).where(
+                FaithfulnessRecord.expires_at.is_not(None),
+                FaithfulnessRecord.expires_at <= now(),
+            )
+        )
+        db.execute(
+            delete(StabilityRecord).where(
+                StabilityRecord.expires_at.is_not(None),
+                StabilityRecord.expires_at <= now(),
+            )
+        )
+
 
