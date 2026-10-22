@@ -111,7 +111,7 @@ describe("C4 Counsellor Dashboard LIME Page (Review Prototype)", () => {
       ).length
     ).toBeGreaterThanOrEqual(1);
 
-    expect(screen.getAllByText("Model Prediction: Pending C3 integration").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Model Prediction").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Input Text")).toBeVisible();
     expect(screen.getByText("Case Summary")).toBeVisible();
   });
@@ -119,9 +119,9 @@ describe("C4 Counsellor Dashboard LIME Page (Review Prototype)", () => {
   it("renders Input navigation link in sidebar", () => {
     render(<LimePage />);
 
-    const inputLink = screen.getByRole("link", { name: "Input" });
+    const inputLink = screen.getAllByRole("link", { name: /Development Input/i })[0];
     expect(inputLink).toBeVisible();
-    expect(inputLink).toHaveAttribute("href", "/input");
+    expect(inputLink).toHaveAttribute("href", "/c4-dev-input");
   });
 
   it("removes developer input controls (no textareas, sample buttons, manual selectors, or Clear buttons)", () => {
@@ -141,13 +141,12 @@ describe("C4 Counsellor Dashboard LIME Page (Review Prototype)", () => {
     render(<LimePage />);
 
     // Verification of contract gap handling without inventing text
-    expect(screen.getByText("Submission text unavailable")).toBeVisible();
+    expect(screen.getAllByText("Submit text first").length).toBeGreaterThanOrEqual(1);
     expect(
       screen.getByText(
-        "Current C1 ReviewTask contract provides inference & explanation receipts, but excludes raw/preprocessed submission text."
+        "No reflection submission is active in shared context. Enter and analyse fictional reflection text on the Development Input page before generating explanations."
       )
     ).toBeVisible();
-    expect(screen.getByText("Contract extension required: extend ReviewTask with PreprocessResponse")).toBeVisible();
 
     // Compute button is disabled
     const computeBtn = screen.getByRole("button", { name: "Compute LIME Attributions" });
@@ -155,9 +154,7 @@ describe("C4 Counsellor Dashboard LIME Page (Review Prototype)", () => {
 
     // Disabled hint is visible
     expect(
-      screen.getByText(
-        "Explanation action disabled: submission text is unavailable in the current ReviewTask contract and C3 classifier connection is pending."
-      )
+      screen.getByText("Submit text on Development Input to enable LIME explanations.")
     ).toBeVisible();
 
     // Visualizations show empty states
@@ -227,7 +224,7 @@ describe("C4 Counsellor Dashboard LIME Page (Review Prototype)", () => {
 
     // Verify contributions table
     expect(screen.getAllByText("deadlines").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("+0.3500")).toBeVisible();
+    expect(screen.getByText("+0.350")).toBeVisible();
     expect(screen.getAllByText("overwhelmed").length).toBeGreaterThanOrEqual(1);
 
     // Verify signed bar chart & highlighter
@@ -257,7 +254,7 @@ describe("C4 Counsellor Dashboard SHAP Page (Review Prototype)", () => {
       ).length
     ).toBeGreaterThanOrEqual(1);
 
-    expect(screen.getAllByText("Model Prediction: Pending C3 integration").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Model Prediction").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Input Text")).toBeVisible();
     expect(screen.getByText("Case Summary")).toBeVisible();
 
@@ -271,10 +268,10 @@ describe("C4 Counsellor Dashboard SHAP Page (Review Prototype)", () => {
 
     // Rejection of beeswarm plot for single examples
     expect(
-      screen.getByText(
+      screen.getAllByText(
         /Beeswarm plots are designed for dataset-level multi-example distributions and are not shown for individual predictions\./
-      )
-    ).toBeVisible();
+      ).length
+    ).toBeGreaterThanOrEqual(1);
 
     // Disabled CSV export
     const csvBtn = screen.getByRole("button", { name: /Export contributions as CSV/ });
@@ -331,7 +328,7 @@ describe("C4 Counsellor Dashboard SHAP Page (Review Prototype)", () => {
     // Waterfall chart metrics
     expect(screen.getByLabelText("SHAP Local Waterfall Plot")).toBeVisible();
     expect(screen.getByText("0.1500")).toBeVisible(); // Base value
-    expect(screen.getByText("0.8800")).toBeVisible(); // Output value
+    expect(screen.getAllByText("0.8800").length).toBeGreaterThanOrEqual(1); // Output value
     expect(screen.getAllByText("deadlines").length).toBeGreaterThanOrEqual(1);
 
     // CSV export enabled

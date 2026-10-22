@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
-import { SignedBarChart } from "../components/SignedBarChart";
 import { WaterfallChart } from "../components/WaterfallChart";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
 import { api } from "@j26/common/api";
@@ -315,6 +314,28 @@ export default function ShapPage() {
       ? (contributions.reduce((acc, c) => acc + c.abs_weight, 0) / contributions.length).toFixed(4)
       : "0.0000";
   const strengthLabel = totalWeight > 0.6 ? "Strong" : totalWeight > 0.25 ? "Moderate" : "Subtle";
+
+  // Split contributions into positive and negative, ordered by impact
+  const posContributions = contributions
+    .filter((c) => c.weight >= 0)
+    .sort((a, b) => b.weight - a.weight);
+
+  const negContributions = contributions
+    .filter((c) => c.weight < 0)
+    .sort((a, b) => a.weight - b.weight);
+
+  const displayContributions = [
+    ...posContributions.slice(0, 5),
+    ...negContributions.slice(0, 5),
+  ];
+
+  const maxAbsWeight = Math.max(
+    ...displayContributions.map((c) => Math.abs(c.weight)),
+    0.0001
+  );
+
+  const posLabel = targetClass === "Negative" ? "High Stress" : targetClass;
+  const negLabel = targetClass === "Negative" ? "Low Stress" : `Opposes ${targetClass}`;
 
   const handleDownloadCsv = () => {
     if (!hasResults || contributions.length === 0) return;
@@ -770,12 +791,15 @@ export default function ShapPage() {
             <div className="shap-card shap-card-features-table">
               <div className="shap-card-header">
                 <div className="shap-card-title-group">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10" />
-                    <line x1="12" y1="20" x2="12" y2="4" />
-                    <line x1="6" y1="20" x2="6" y2="14" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3730a3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
-                  <h3 className="shap-card-title">SHAP Feature Importance</h3>
+                  <h3 className="shap-card-title" style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                    SHAP Feature Importance
+                    <span style={{ fontSize: "11.5px", fontWeight: 400, color: "#64748b" }}>
+                      (mean |SHAP value)
+                    </span>
+                  </h3>
                   <span className="shap-info-icon-small" title={`Feature attribution for class: ${targetClass}`}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
@@ -788,36 +812,44 @@ export default function ShapPage() {
 
               {hasResults ? (
                 <>
-                  <div style={{ marginBottom: "10px" }}>
-                    <SignedBarChart contributions={contributions} method="SHAP" targetClass={targetClass} />
-                  </div>
-
-                  <div className="shap-features-table-wrap">
+                  <div className="shap-features-table-wrap" aria-label="SHAP Feature Importance Table">
                     <table className="shap-features-table">
                       <thead>
                         <tr>
-                          <th style={{ textAlign: "left", paddingLeft: 8 }}>Feature (Token)</th>
-                          <th style={{ textAlign: "left" }}>SHAP Value</th>
-                          <th style={{ textAlign: "left" }}>Impact ({targetClass})</th>
+                          <th style={{ textAlign: "left", paddingLeft: "8px" }}>Feature (Token)</th>
+                          <th style={{ textAlign: "center" }}>SHAP Value</th>
+                          <th style={{ textAlign: "right", paddingRight: "16px" }}>Impact</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {contributions.map((item, i) => {
+                        {displayContributions.map((item, i) => {
                           const isPositive = item.weight >= 0;
+                          const barPercent = isPositive
+                            ? Math.min(100, Math.max(8, Math.round((item.weight / maxAbsWeight) * 100)))
+                            : 0;
                           const formattedWeight =
-                            (item.weight >= 0 ? "+" : "") + item.weight.toFixed(4);
+                            (isPositive ? "+" : "") + item.weight.toFixed(3);
                           return (
                             <tr key={i} className={isPositive ? "shap-row-pos" : "shap-row-neg"}>
-                              <td className="shap-feat-name">{item.token}</td>
+                              <td className={`shap-feat-name ${isPositive ? "" : "shap-neg-cell-start"}`}>
+                                {item.token}
+                              </td>
                               <td
                                 className={`shap-feat-weight ${
-                                  isPositive ? "shap-weight-pos" : "shap-weight-neg"
+                                  isPositive ? "shap-weight-pos" : "shap-weight-neg shap-neg-cell-end"
                                 }`}
                               >
                                 {formattedWeight}
                               </td>
-                              <td style={{ fontSize: "11px", fontWeight: 600, color: isPositive ? "#dc2626" : "#15803d" }}>
-                                {isPositive ? `Supports ${targetClass}` : `Opposes ${targetClass}`}
+                              <td className="shap-feat-bar-col">
+                                {isPositive && (
+                                  <div className="shap-feat-bar-track">
+                                    <div
+                                      className="shap-feat-bar-fill-red"
+                                      style={{ width: `${barPercent}%` }}
+                                    />
+                                  </div>
+                                )}
                               </td>
                             </tr>
                           );
@@ -829,11 +861,11 @@ export default function ShapPage() {
                   <div className="shap-table-legend-row">
                     <div className="shap-table-legend-item">
                       <span className="shap-legend-square shap-square-red"></span>
-                      <span>Pushes prediction towards {targetClass}</span>
+                      <span>Pushes prediction towards {posLabel}</span>
                     </div>
                     <div className="shap-table-legend-item">
                       <span className="shap-legend-square shap-square-green"></span>
-                      <span>Opposes {targetClass}</span>
+                      <span>Pushes prediction towards {negLabel}</span>
                     </div>
                   </div>
                 </>
@@ -850,7 +882,10 @@ export default function ShapPage() {
                   }}
                 >
                   <p style={{ fontWeight: 600, color: "#64748b", marginBottom: "4px" }}>
-                    {!submissionText ? "Submit text first" : "No Attribution Values Available"}
+                    No Attribution Values Available
+                  </p>
+                  <p style={{ margin: 0, fontSize: "11px" }}>
+                    No Attribution Bar Chart Available
                   </p>
                   <p style={{ margin: 0, fontSize: "11px" }}>
                     {!submissionText

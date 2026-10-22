@@ -599,54 +599,71 @@
    ========================================================================== */
 
 /* Left Card: SHAP Feature Importance Table */
-.shap-card-features {
-  min-height: 520px;
+.shap-card-features-table {
+  min-height: 440px;
 }
 
 .shap-features-table-wrap {
   width: 100%;
-  margin-bottom: 12px;
+  margin-top: 4px;
+  margin-bottom: 8px;
 }
 
 .shap-features-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+  font-size: 12px;
 }
 
 .shap-features-table th {
   padding: 6px 8px;
   color: #0f172a;
   font-weight: 700;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 10.5px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 11px;
 }
 
 .shap-features-table td {
-  padding: 4px 8px;
+  padding: 5px 8px;
   vertical-align: middle;
 }
 
 .shap-row-pos {
-  background-color: #fff5f5;
+  background-color: transparent;
 }
 
 .shap-row-neg {
-  background-color: #f2fbf6;
+  background-color: transparent;
+}
+
+.shap-neg-cell-start {
+  background-color: #f0fdf4;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  color: #15803d !important;
+}
+
+.shap-neg-cell-end {
+  background-color: #f0fdf4;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  color: #15803d !important;
 }
 
 .shap-feat-name {
   font-weight: 600;
   color: #0f172a;
   text-align: left;
-  width: 110px;
+  width: 38%;
 }
 
 .shap-feat-weight {
-  text-align: left;
+  text-align: center;
   font-family: inherit;
   font-weight: 600;
-  width: 80px;
+  width: 26%;
+  font-variant-numeric: tabular-nums;
 }
 
 .shap-weight-pos {
@@ -658,43 +675,48 @@
 }
 
 .shap-feat-bar-col {
-  width: 130px;
-  text-align: left;
+  width: 36%;
+  padding-right: 12px;
 }
 
 .shap-feat-bar-track {
-  height: 9px;
+  height: 8px;
   border-radius: 999px;
   background-color: transparent;
   display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
 }
 
 .shap-feat-bar-fill-red {
-  height: 100%;
-  background-color: #dc2626;
+  height: 8px;
+  background-color: #ef4444;
   border-radius: 999px;
+  transition: width 0.25s ease-in-out;
 }
 
 .shap-table-legend-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 10px;
-  color: #475569;
-  font-weight: 500;
-  margin-top: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
+  font-size: 11px;
+  color: #334155;
+  font-weight: 600;
+  margin-top: 14px;
+  margin-bottom: 14px;
+  padding-left: 4px;
 }
 
 .shap-table-legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .shap-legend-square {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 2px;
   flex-shrink: 0;
 }

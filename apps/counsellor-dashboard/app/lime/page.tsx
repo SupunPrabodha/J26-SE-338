@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
 import { useReviewCase } from "../context/CaseContext";
-import { SignedBarChart } from "../components/SignedBarChart";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
 import { api } from "@j26/common/api";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
@@ -306,6 +305,27 @@ export default function LimePage() {
   const circ = 2 * Math.PI * 34;
   const redDash = (posPct / 100) * circ;
   const greenDash = (negPct / 100) * circ;
+  // Split contributions into positive and negative, ordered by impact
+  const posContributions = contributions
+    .filter((c) => c.weight >= 0)
+    .sort((a, b) => b.weight - a.weight);
+
+  const negContributions = contributions
+    .filter((c) => c.weight < 0)
+    .sort((a, b) => a.weight - b.weight);
+
+  const displayContributions = [
+    ...posContributions.slice(0, 5),
+    ...negContributions.slice(0, 5),
+  ];
+
+  const maxAbsWeight = Math.max(
+    ...displayContributions.map((c) => Math.abs(c.weight)),
+    0.0001
+  );
+
+  const posLabel = targetClass === "Negative" ? "High Stress" : targetClass;
+  const negLabel = targetClass === "Negative" ? "Low Stress" : `Opposes ${targetClass}`;
 
   const handleDownloadCsv = () => {
     if (!hasResults || contributions.length === 0) return;
@@ -754,11 +774,15 @@ export default function LimePage() {
             <div className="lime-card lime-card-features-table">
               <div className="lime-card-header">
                 <div className="lime-card-title-group">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3730a3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
-                  <h3 className="lime-card-title">LIME Feature Importance</h3>
+                  <h3 className="lime-card-title" style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                    LIME Feature Importance
+                    <span style={{ fontSize: "11.5px", fontWeight: 400, color: "#64748b" }}>
+                      (mean |weight|)
+                    </span>
+                  </h3>
                   <span className="lime-info-icon-small" title={`Feature weights for class: ${targetClass}`}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
@@ -771,36 +795,44 @@ export default function LimePage() {
 
               {hasResults ? (
                 <>
-                  <div style={{ marginBottom: "10px" }}>
-                    <SignedBarChart contributions={contributions} method="LIME" targetClass={targetClass} />
-                  </div>
-
                   <div className="lime-features-table-wrap" aria-label="LIME Diverging Signed Bar Chart">
                     <table className="lime-features-table">
                       <thead>
                         <tr>
-                          <th style={{ textAlign: "left", paddingLeft: 8 }}>Feature (Word/Phrase)</th>
-                          <th style={{ textAlign: "left" }}>Weight</th>
-                          <th style={{ textAlign: "left" }}>Direction ({targetClass})</th>
+                          <th style={{ textAlign: "left", paddingLeft: "8px" }}>Feature (Token)</th>
+                          <th style={{ textAlign: "center" }}>LIME Weight</th>
+                          <th style={{ textAlign: "right", paddingRight: "16px" }}>Impact</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {contributions.map((item, i) => {
+                        {displayContributions.map((item, i) => {
                           const isPositive = item.weight >= 0;
+                          const barPercent = isPositive
+                            ? Math.min(100, Math.max(8, Math.round((item.weight / maxAbsWeight) * 100)))
+                            : 0;
                           const formattedWeight =
-                            (item.weight >= 0 ? "+" : "") + item.weight.toFixed(4);
+                            (isPositive ? "+" : "") + item.weight.toFixed(3);
                           return (
                             <tr key={i} className={isPositive ? "lime-row-pos" : "lime-row-neg"}>
-                              <td className="lime-feat-name">{item.token}</td>
+                              <td className={`lime-feat-name ${isPositive ? "" : "lime-neg-cell-start"}`}>
+                                {item.token}
+                              </td>
                               <td
                                 className={`lime-feat-weight ${
-                                  isPositive ? "lime-weight-pos" : "lime-weight-neg"
+                                  isPositive ? "lime-weight-pos" : "lime-weight-neg lime-neg-cell-end"
                                 }`}
                               >
                                 {formattedWeight}
                               </td>
-                              <td style={{ fontSize: "11px", fontWeight: 600, color: isPositive ? "#dc2626" : "#15803d" }}>
-                                {isPositive ? `Supports ${targetClass}` : `Opposes ${targetClass}`}
+                              <td className="lime-feat-bar-col">
+                                {isPositive && (
+                                  <div className="lime-feat-bar-track">
+                                    <div
+                                      className="lime-feat-bar-fill-red"
+                                      style={{ width: `${barPercent}%` }}
+                                    />
+                                  </div>
+                                )}
                               </td>
                             </tr>
                           );
@@ -812,11 +844,11 @@ export default function LimePage() {
                   <div className="lime-table-legend-row">
                     <div className="lime-table-legend-item">
                       <span className="lime-legend-square lime-square-red"></span>
-                      <span>Pushes prediction towards {targetClass}</span>
+                      <span>Pushes prediction towards {posLabel}</span>
                     </div>
                     <div className="lime-table-legend-item">
                       <span className="lime-legend-square lime-square-green"></span>
-                      <span>Opposes {targetClass}</span>
+                      <span>Pushes prediction towards {negLabel}</span>
                     </div>
                   </div>
                 </>
@@ -833,10 +865,10 @@ export default function LimePage() {
                   }}
                 >
                   <p style={{ fontWeight: 600, color: "#64748b", marginBottom: "4px" }}>
-                    {!submissionText ? "Submit text first" : "No Attribution Values Available"}
+                    No Attribution Values Available
                   </p>
                   <p style={{ margin: 0, fontSize: "11px" }}>
-                    {!submissionText ? "No attribution chart available" : "No Attribution Bar Chart Available"}
+                    No Attribution Bar Chart Available
                   </p>
                   <p style={{ margin: "4px 0 0", fontSize: "11px" }}>
                     {!submissionText
