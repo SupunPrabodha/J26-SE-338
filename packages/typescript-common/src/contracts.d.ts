@@ -4,6 +4,16 @@ export type Contracts =
   | AccountResponse
   | AssignmentRequest
   | AuditEvent
+  | C2AnnotationAnswer
+  | C2AnnotationDetail
+  | C2AnnotationItem
+  | C2AnnotationLabels
+  | C2AnnotationPrepareRequest
+  | C2AnnotationQueue
+  | C2AnnotationRevision
+  | C2AnnotationSaveRequest
+  | C2AnnotationSubmission
+  | C2AnnotationSubmissionQueue
   | C2CustomDemoRequest
   | C2CustomDemoResponse
   | C2DemoCatalogue
@@ -69,15 +79,22 @@ export type ServiceName = "orchestrator";
 export type ServiceVersion = "0.1.0";
 export type Status = string;
 export type Synthetic2 = true;
-export type LanguageHint = "sinhala" | "english" | "romanized-si" | "code-mixed" | "unsure";
-export type Strategy = "presidio";
-export type Text = string;
-export type BlockingReasons = string[];
+export type AdjudicationStatus = "PENDING";
+export type AgreementStatus = "NOT_EVALUATED";
+export type AnnotationStatus = "PENDING" | "DRAFT" | "SUBMITTED" | "PAIR_FINALIZED";
+export type CanSubmit = boolean;
 export type DevelopmentOnly3 = true;
+export type FinalizedCount = number;
 export type HumanReleaseRequired = true;
-export type IndependentResearchValidation = false;
-export type LanguageHint1 = "sinhala" | "english" | "romanized-si" | "code-mixed" | "unsure";
+export type AnnotationSchemaVersion = "c2-dataset-annotation-v1";
 export type DevelopmentOnly4 = true;
+export type PipelineVersion = string;
+export type Preprocessing = C2DemoResponse | C2CustomDemoResponse;
+export type BlockingReasons = string[];
+export type DevelopmentOnly5 = true;
+export type HumanReleaseRequired1 = true;
+export type IndependentResearchValidation = false;
+export type DevelopmentOnly6 = true;
 export type Issues = string[];
 export type Limitation = string;
 export type PipelineStage = "release_privacy_gate";
@@ -88,10 +105,10 @@ export type Synthetic3 = true;
 export type TotalRecords = number;
 export type BlockingReasons1 = string[];
 export type DataQualityGate = "PASSED" | "FAILED";
-export type DevelopmentOnly5 = true;
+export type DevelopmentOnly7 = true;
 export type DuplicateTextMeaning = string;
 export type ComparisonCaseInsensitive = boolean;
-export type DevelopmentOnly6 = true;
+export type DevelopmentOnly8 = true;
 export type SchemaVersion4 = "1.0.0";
 export type ShortTextReviewBelow = number;
 export type Synthetic4 = true;
@@ -102,8 +119,8 @@ export type SchemaVersion5 = "1.0.0";
 export type Synthetic5 = true;
 export type TotalRecords1 = number;
 export type AnonymizedText = string;
-export type DevelopmentOnly7 = true;
-export type DevelopmentOnly8 = true;
+export type DevelopmentOnly9 = true;
+export type DevelopmentOnly10 = true;
 export type Language = "sinhala" | "english" | "romanized-si" | "code-mixed" | "uncertain" | "unknown";
 export type Method = "c2-rule-language-v1" | "c2-rule-language-v1.1" | "c2-rule-language-v1.2";
 export type Reason =
@@ -141,13 +158,8 @@ export type Tokens = string[] | null;
 export type Transformations = string[];
 export type Records = C2DemoRecord[];
 export type ReleaseReady = boolean;
-export type SchemaVersion8 = "1.0.0";
-export type Strategy1 = "presidio";
-export type Synthetic8 = true;
-export type DefaultStrategy = "regex";
-export type DevelopmentOnly9 = true;
-export type LanguageLabelsAreFixtureMetadata = true;
-export type DevelopmentOnly10 = true;
+export type ReleaseReadyMeaning1 = "Automated prerequisites only; human release approval remains required.";
+export type DevelopmentOnly11 = true;
 export type Label = string;
 export type LanguageLabel = "english" | "sinhala" | "romanized-si" | "code-mixed" | "not-applicable";
 export type RecordCount = number;
@@ -167,12 +179,110 @@ export type ScenarioId =
   | "duplicate"
   | "masking-collision"
   | "empty-batch";
+export type SchemaVersion8 = "1.0.0";
+export type Synthetic8 = true;
 export type SchemaVersion9 = "1.0.0";
+export type Strategy = "regex" | "presidio" | "hybrid";
 export type Synthetic9 = true;
-export type Scenarios = C2DemoScenario[];
+export type BlockingReasons2 = string[];
+export type DevelopmentOnly12 = true;
+export type HumanReleaseRequired2 = true;
+export type IndependentResearchValidation1 = false;
+export type LanguageHint = "sinhala" | "english" | "romanized-si" | "code-mixed" | "unsure";
+export type Records1 = C2DemoRecord[];
+export type ReleaseReady1 = boolean;
 export type SchemaVersion10 = "1.0.0";
-export type Strategies = ("regex" | "presidio" | "hybrid")[];
+export type Strategy1 = "presidio";
 export type Synthetic10 = true;
+export type RecordId1 = string;
+export type RecordVersion = string;
+export type SchemaVersion11 = "1.0.0";
+export type Synthetic11 = true;
+export type VocabularyVersion = "c2-provisional-vocabulary-v1";
+export type DevelopmentOnly13 = true;
+export type CodeMixing = ("none" | "insertion" | "intra-sentential" | "inter-sentential" | "uncertain") | null;
+export type DevelopmentOnly14 = true;
+export type Emotion = ("neutral" | "sadness" | "worry-or-fear" | "anger" | "joy" | "mixed" | "uncertain") | null;
+export type Language1 = ("sinhala" | "english" | "romanized-si" | "code-mixed" | "other" | "uncertain") | null;
+export type SchemaVersion12 = "1.0.0";
+export type Synthetic12 = true;
+export type Wellbeing =
+  | (
+      | "academic-pressure"
+      | "sleep-or-energy"
+      | "concentration-or-motivation"
+      | "social-connection"
+      | "coping-or-support"
+      | "no-clear-indicator"
+      | "uncertain"
+    )
+  | null;
+export type Revision = number;
+export type SavedAt = string;
+export type SchemaVersion13 = "1.0.0";
+export type Status3 = "DRAFT" | "FINAL";
+export type Synthetic13 = true;
+export type OwnHistory = C2AnnotationRevision[];
+export type SchemaVersion14 = "1.0.0";
+export type Synthetic14 = true;
+export type BlockingReasons3 = string[];
+export type DevelopmentOnly15 = true;
+export type QuestionId = string;
+export type QuestionText = string;
+export type Required = boolean;
+export type SchemaVersion15 = "1.0.0";
+export type SourceRecordId = string;
+export type State = "AVAILABLE" | "WITHHELD" | "OPTIONAL_UNANSWERED" | "MISSING_REQUIRED";
+export type Synthetic15 = true;
+export type DevelopmentOnly16 = true;
+export type SchemaVersion16 = "1.0.0";
+export type Synthetic16 = true;
+export type DevelopmentOnly17 = true;
+export type Items = C2AnnotationItem[];
+export type RequiredAnnotators = 2;
+export type SchemaVersion17 = "1.0.0";
+export type Synthetic17 = true;
+export type VocabularyStatus = "PROVISIONAL_DEMO_ONLY_NOT_EXPERT_APPROVED";
+export type AnnotationSchemaVersion1 = "c2-dataset-annotation-v1";
+export type DevelopmentOnly18 = true;
+export type ExpectedRevision = number;
+export type PipelineVersion1 = string;
+export type RecordVersion1 = string;
+export type SchemaVersion18 = "1.0.0";
+export type Status4 = "DRAFT" | "FINAL";
+export type Synthetic18 = true;
+export type VocabularyVersion1 = "c2-provisional-vocabulary-v1";
+export type AdjudicationStatus1 = "PENDING";
+export type AgreementStatus1 = "NOT_EVALUATED";
+export type Answers = C2AnnotationAnswer[];
+export type AvailableAnswers = number;
+export type BlockedAnswers = number;
+export type Complete = boolean;
+export type DevelopmentOnly19 = true;
+export type FinalizedAnswers = number;
+export type HumanReleaseRequired3 = true;
+export type RequiredAnswers = number;
+export type SchemaVersion19 = "1.0.0";
+export type SourceDatasetId = string;
+export type SourceFileSha256 = string;
+export type SubmissionId = string;
+export type SubmissionVersion = string;
+export type Synthetic19 = true;
+export type DevelopmentOnly20 = true;
+export type SchemaVersion20 = "1.0.0";
+export type Submissions = C2AnnotationSubmission[];
+export type Synthetic20 = true;
+export type VocabularyStatus1 = "PROVISIONAL_DEMO_ONLY_NOT_EXPERT_APPROVED";
+export type LanguageHint1 = "sinhala" | "english" | "romanized-si" | "code-mixed" | "unsure";
+export type Strategy2 = "presidio";
+export type Text = string;
+export type DefaultStrategy = "regex";
+export type DevelopmentOnly21 = true;
+export type LanguageLabelsAreFixtureMetadata = true;
+export type Scenarios = C2DemoScenario[];
+export type SchemaVersion21 = "1.0.0";
+export type Strategies = ("regex" | "presidio" | "hybrid")[];
+export type Synthetic21 = true;
 export type ScenarioId1 =
   | "english-person"
   | "sinhala-person"
@@ -189,27 +299,17 @@ export type ScenarioId1 =
   | "duplicate"
   | "masking-collision"
   | "empty-batch";
-export type Strategy2 = "regex" | "presidio" | "hybrid";
-export type BlockingReasons2 = string[];
-export type DevelopmentOnly11 = true;
-export type HumanReleaseRequired1 = true;
-export type IndependentResearchValidation1 = false;
-export type Records1 = C2DemoRecord[];
-export type ReleaseReady1 = boolean;
-export type ReleaseReadyMeaning1 = "Automated prerequisites only; human release approval remains required.";
-export type SchemaVersion11 = "1.0.0";
 export type Strategy3 = "regex" | "presidio" | "hybrid";
-export type Synthetic11 = true;
 export type ConsentStatus = "ACTIVE" | "REJECTED";
 export type ConsentVersion = "dev-notice-1";
-export type DevelopmentOnly12 = true;
+export type DevelopmentOnly22 = true;
 export type Purpose = "synthetic-wellbeing-screening";
-export type SchemaVersion12 = "1.0.0";
-export type Synthetic12 = true;
+export type SchemaVersion22 = "1.0.0";
+export type Synthetic22 = true;
 export type CaseId1 = string;
 export type CorrelationId1 = string;
 export type CreatedAt1 = string;
-export type DevelopmentOnly13 = true;
+export type DevelopmentOnly23 = true;
 export type ErrorCode =
   | "AUTH_REQUIRED"
   | "AUTH_INVALID"
@@ -237,28 +337,28 @@ export type WorkflowState =
   | "FAILED"
   | "WITHDRAWAL_REQUESTED"
   | "WITHDRAWN";
-export type SchemaVersion13 = "1.0.0";
-export type Synthetic13 = true;
+export type SchemaVersion23 = "1.0.0";
+export type Synthetic23 = true;
 export type UpdatedAt = string;
 export type ConsentId = string;
 export type ConsentState = "PENDING" | "ACTIVE" | "EXPIRED" | "WITHDRAWN" | "REJECTED" | "INVALID";
 export type ConsentVersion1 = string;
 export type CreatedAt2 = string;
-export type DevelopmentOnly14 = true;
+export type DevelopmentOnly24 = true;
 export type ExpiresAt = string;
 export type Purpose1 = string;
-export type SchemaVersion14 = "1.0.0";
-export type Synthetic14 = true;
-export type DevelopmentOnly15 = true;
+export type SchemaVersion24 = "1.0.0";
+export type Synthetic24 = true;
+export type DevelopmentOnly25 = true;
 export type DisposalReason = ("RETENTION" | "OWNER_WITHDRAWAL" | "LEGACY_DISPOSAL") | null;
 export type ExplicitlyWithdrawnAt = string | null;
-export type SchemaVersion15 = "1.0.0";
-export type Synthetic15 = true;
+export type SchemaVersion25 = "1.0.0";
+export type Synthetic25 = true;
 export type CaseId2 = string;
 export type ConsentStatus1 = "ACTIVE";
 export type ConsentVersion2 = "dev-notice-1";
 export type CorrelationId2 = string;
-export type DevelopmentOnly16 = true;
+export type DevelopmentOnly26 = true;
 export type IdempotencyKey = string;
 export type Calibrated = false;
 export type CaseId3 = string;
@@ -267,17 +367,17 @@ export type ConsentStatus2 = "ACTIVE";
 export type ConsentVersion3 = "dev-notice-1";
 export type CorrelationId3 = string;
 export type DatasetVersion = "synthetic-fixtures-1";
-export type DevelopmentOnly17 = true;
+export type DevelopmentOnly27 = true;
 export type EmotionalTone = "synthetic-neutral";
 export type IdempotencyKey1 = string;
 export type ModelVersion = "mock-1";
 export type Purpose2 = "synthetic-wellbeing-screening";
 export type ReviewPriority = "HUMAN_REVIEW_REQUIRED";
-export type SchemaVersion16 = "1.0.0";
+export type SchemaVersion26 = "1.0.0";
 export type ServiceName1 = "nlp";
 export type ServiceVersion1 = "0.1.0";
 export type StressLanguageSignals = "synthetic-busy-timetable"[];
-export type Synthetic16 = true;
+export type Synthetic26 = true;
 export type WellbeingIndicator = "synthetic-academic-pressure";
 export type AnonymizedText1 = string;
 export type CaseId4 = string;
@@ -285,28 +385,28 @@ export type ConsentStatus3 = "ACTIVE";
 export type ConsentVersion4 = "dev-notice-1";
 export type CorrelationId4 = string;
 export type DatasetVersion1 = "synthetic-fixtures-1";
-export type DevelopmentOnly18 = true;
+export type DevelopmentOnly28 = true;
 export type IdempotencyKey2 = string;
-export type Language1 = "en" | "si" | "romanized-si" | "mixed" | "uncertain";
+export type Language2 = "en" | "si" | "romanized-si" | "mixed" | "uncertain";
 export type NormalizedText1 = string;
-export type PipelineVersion = "mock-1";
+export type PipelineVersion2 = "mock-1";
 export type Purpose3 = "synthetic-wellbeing-screening";
-export type SchemaVersion17 = "1.0.0";
+export type SchemaVersion27 = "1.0.0";
 export type ServiceName2 = "preprocessing";
 export type ServiceVersion2 = "0.1.0";
-export type Synthetic17 = true;
+export type Synthetic27 = true;
 export type TokenOffsets1 = [unknown, unknown][];
 export type Tokens1 = string[];
 export type Transformations1 = string[];
 export type Purpose4 = "synthetic-wellbeing-screening";
-export type SchemaVersion18 = "1.0.0";
-export type Synthetic18 = true;
+export type SchemaVersion28 = "1.0.0";
+export type Synthetic28 = true;
 export type CaseId5 = string;
 export type ConsentStatus4 = "ACTIVE";
 export type ConsentVersion5 = "dev-notice-1";
 export type CorrelationId5 = string;
 export type Counterfactual = null;
-export type DevelopmentOnly19 = true;
+export type DevelopmentOnly29 = true;
 export type Evidence = string[];
 export type ExplainerVersion = "mock-1";
 export type Faithfulness = null;
@@ -314,37 +414,37 @@ export type IdempotencyKey3 = string;
 export type Method1 = "MOCK_FIXED_FIXTURE";
 export type Purpose5 = "synthetic-wellbeing-screening";
 export type ReliabilityStatus = "NOT_EVALUATED";
-export type SchemaVersion19 = "1.0.0";
+export type SchemaVersion29 = "1.0.0";
 export type ServiceName3 = "xai";
 export type ServiceVersion3 = "0.1.0";
 export type Stability = null;
-export type Synthetic19 = true;
-export type DevelopmentOnly20 = true;
-export type SchemaVersion20 = "1.0.0";
-export type Synthetic20 = true;
-export type DevelopmentOnly21 = true;
-export type SchemaVersion21 = "1.0.0";
+export type Synthetic29 = true;
+export type DevelopmentOnly30 = true;
+export type SchemaVersion30 = "1.0.0";
+export type Synthetic30 = true;
+export type DevelopmentOnly31 = true;
+export type SchemaVersion31 = "1.0.0";
 export type ServiceName4 = string;
-export type Status3 = "ok" | "unavailable";
-export type Synthetic21 = true;
+export type Status5 = "ok" | "unavailable";
+export type Synthetic31 = true;
 export type Action = "START_REVIEW" | "COMPLETE_REVIEW";
-export type DevelopmentOnly22 = true;
+export type DevelopmentOnly32 = true;
 export type IdempotencyKey4 = string;
-export type SchemaVersion22 = "1.0.0";
-export type Synthetic22 = true;
+export type SchemaVersion32 = "1.0.0";
+export type Synthetic32 = true;
 export type CaseId6 = string;
 export type ConsentStatus5 = "ACTIVE";
 export type ConsentVersion6 = "dev-notice-1";
 export type CorrelationId6 = string;
-export type DevelopmentOnly23 = true;
+export type DevelopmentOnly33 = true;
 export type IdempotencyKey5 = string;
 export type Purpose6 = "synthetic-wellbeing-screening";
-export type SchemaVersion23 = "1.0.0";
-export type Synthetic23 = true;
+export type SchemaVersion33 = "1.0.0";
+export type Synthetic33 = true;
 export type CaseId7 = string | null;
 export type CorrelationId7 = string;
 export type CreatedAt3 = string;
-export type DevelopmentOnly24 = true;
+export type DevelopmentOnly34 = true;
 export type EventId1 = string;
 export type EventType1 =
   | "AUTH_LOGIN"
@@ -366,96 +466,96 @@ export type EventType1 =
   | "RETENTION"
   | "ASSIGNMENT";
 export type PolicyExpiresAt = string | null;
-export type SchemaVersion24 = "1.0.0";
+export type SchemaVersion34 = "1.0.0";
 export type ServiceName5 = "orchestrator";
 export type ServiceVersion4 = "0.1.0";
-export type Status4 = string;
-export type Synthetic24 = true;
+export type Status6 = string;
+export type Synthetic34 = true;
 export type TraceId = string | null;
-export type DevelopmentOnly25 = true;
+export type DevelopmentOnly35 = true;
 export type Password = string;
-export type SchemaVersion25 = "1.0.0";
-export type Synthetic25 = true;
+export type SchemaVersion35 = "1.0.0";
+export type Synthetic35 = true;
 export type Username = string;
 export type CaseId8 = string;
 export type ConsentStatus6 = "ACTIVE";
 export type ConsentVersion7 = "dev-notice-1";
 export type CorrelationId8 = string;
-export type DevelopmentOnly26 = true;
+export type DevelopmentOnly36 = true;
 export type IdempotencyKey6 = string;
 export type Purpose7 = "synthetic-wellbeing-screening";
-export type SchemaVersion26 = "1.0.0";
-export type Synthetic26 = true;
+export type SchemaVersion36 = "1.0.0";
+export type Synthetic36 = true;
 export type Text1 = string;
 export type Action1 = "DELETE_DERIVED_EVIDENCE" | "EXPIRE_ACCESS";
 export type ActionId = string;
 export type CaseId9 = string;
 export type CreatedAt4 = string;
-export type DevelopmentOnly27 = true;
-export type SchemaVersion27 = "1.0.0";
-export type Status5 = "PENDING" | "COMPLETED" | "FAILED";
-export type Synthetic27 = true;
-export type DevelopmentOnly28 = true;
+export type DevelopmentOnly37 = true;
+export type SchemaVersion37 = "1.0.0";
+export type Status7 = "PENDING" | "COMPLETED" | "FAILED";
+export type Synthetic37 = true;
+export type DevelopmentOnly38 = true;
 export type HumanReviewRequired = true;
-export type SchemaVersion28 = "1.0.0";
-export type Synthetic28 = true;
+export type SchemaVersion38 = "1.0.0";
+export type Synthetic38 = true;
 export type TaskId = string;
 export type CaseId10 = string;
 export type ConsentStatus7 = "ACTIVE";
 export type ConsentVersion8 = "dev-notice-1";
 export type CorrelationId9 = string;
-export type DevelopmentOnly29 = true;
+export type DevelopmentOnly39 = true;
 export type IdempotencyKey7 = string;
 export type Purpose8 = "synthetic-wellbeing-screening";
-export type SchemaVersion29 = "1.0.0";
-export type Synthetic29 = true;
+export type SchemaVersion39 = "1.0.0";
+export type Synthetic39 = true;
 export type CorrelationId10 = string;
-export type DevelopmentOnly30 = true;
+export type DevelopmentOnly40 = true;
 export type Message = "Request could not be completed safely.";
-export type SchemaVersion30 = "1.0.0";
-export type Synthetic30 = true;
+export type SchemaVersion40 = "1.0.0";
+export type Synthetic40 = true;
 export type CorrelationId11 = string;
-export type DevelopmentOnly31 = true;
+export type DevelopmentOnly41 = true;
 export type ExplainerVersion1 = "mock-1";
 export type ModelDatasetVersion = "synthetic-fixtures-1";
 export type ModelVersion1 = "mock-1";
 export type NlpServiceVersion = "0.1.0";
-export type PipelineVersion1 = "mock-1";
+export type PipelineVersion3 = "mock-1";
 export type PreprocessingDatasetVersion = "synthetic-fixtures-1";
 export type PreprocessingServiceVersion = "0.1.0";
-export type SchemaVersion31 = "1.0.0";
-export type Synthetic31 = true;
+export type SchemaVersion41 = "1.0.0";
+export type Synthetic41 = true;
 export type XaiServiceVersion = "0.1.0";
-export type DevelopmentOnly32 = true;
+export type DevelopmentOnly42 = true;
 export type ExpiresAt1 = string;
-export type SchemaVersion32 = "1.0.0";
+export type SchemaVersion42 = "1.0.0";
 export type SessionId = string;
-export type Synthetic32 = true;
-export type DevelopmentOnly33 = true;
+export type Synthetic42 = true;
+export type DevelopmentOnly43 = true;
 export type Mode = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY" | "SYNTHETIC_DEVELOPMENT_ONLY";
-export type SchemaVersion33 = "1.0.0";
+export type SchemaVersion43 = "1.0.0";
 export type ServiceName6 = string;
 export type ServiceVersion5 = "0.1.0";
-export type Synthetic33 = true;
-export type DevelopmentOnly34 = true;
+export type Synthetic43 = true;
+export type DevelopmentOnly44 = true;
 export type IdempotencyKey8 = string;
-export type SchemaVersion34 = "1.0.0";
-export type Synthetic34 = true;
+export type SchemaVersion44 = "1.0.0";
+export type Synthetic44 = true;
 export type Attempts = number;
 export type CaseId11 = string;
 export type CorrelationId12 = string;
 export type CreatedAt5 = string;
-export type DevelopmentOnly35 = true;
+export type DevelopmentOnly45 = true;
 export type IdempotencyKey9 = string;
-export type SchemaVersion35 = "1.0.0";
-export type Synthetic35 = true;
+export type SchemaVersion45 = "1.0.0";
+export type Synthetic45 = true;
 export type UpdatedAt1 = string;
 export type ConsentId1 = string;
-export type DevelopmentOnly36 = true;
+export type DevelopmentOnly46 = true;
 export type FixtureId = "english" | "sinhala" | "romanized" | "mixed";
 export type IdempotencyKey10 = string;
-export type SchemaVersion36 = "1.0.0";
-export type Synthetic36 = true;
+export type SchemaVersion46 = "1.0.0";
+export type Synthetic46 = true;
 export type Text2 = string;
 
 export interface AccountResponse {
@@ -484,30 +584,60 @@ export interface AuditEvent {
   status: Status;
   synthetic?: Synthetic2;
 }
-/**
- * Ephemeral input; optional legacy hint never configures detection.
- */
-export interface C2CustomDemoRequest {
-  language_hint?: LanguageHint;
-  strategy?: Strategy;
-  text: Text;
+export interface C2AnnotationAnswer {
+  annotation?: C2AnnotationDetail | null;
+  blocking_reasons: BlockingReasons3;
+  development_only?: DevelopmentOnly15;
+  question_id: QuestionId;
+  question_text: QuestionText;
+  required: Required;
+  schema_version?: SchemaVersion15;
+  source_record_id: SourceRecordId;
+  state: State;
+  synthetic?: Synthetic15;
 }
-export interface C2CustomDemoResponse {
-  blocking_reasons: BlockingReasons;
+export interface C2AnnotationDetail {
+  adjudication_status?: AdjudicationStatus;
+  agreement_status?: AgreementStatus;
+  annotation_status: AnnotationStatus;
+  can_submit: CanSubmit;
   development_only?: DevelopmentOnly3;
+  finalized_count: FinalizedCount;
   human_release_required?: HumanReleaseRequired;
+  item: C2AnnotationItem;
+  own_history: OwnHistory;
+  peer_final?: C2AnnotationRevision | null;
+  schema_version?: SchemaVersion14;
+  synthetic?: Synthetic14;
+}
+export interface C2AnnotationItem {
+  annotation_schema_version: AnnotationSchemaVersion;
+  development_only?: DevelopmentOnly4;
+  pipeline_version: PipelineVersion;
+  preprocessing: Preprocessing;
+  record_id: RecordId1;
+  record_version: RecordVersion;
+  schema_version?: SchemaVersion11;
+  synthetic?: Synthetic11;
+  vocabulary_version: VocabularyVersion;
+}
+export interface C2DemoResponse {
+  blocking_reasons: BlockingReasons;
+  development_only?: DevelopmentOnly5;
+  human_release_required?: HumanReleaseRequired1;
   independent_research_validation?: IndependentResearchValidation;
-  language_hint: LanguageHint1;
   privacy_summary: C2DemoPrivacySummary;
   quality_summary: C2DemoQualitySummary;
   records: Records;
   release_ready: ReleaseReady;
-  schema_version?: SchemaVersion8;
-  strategy?: Strategy1;
-  synthetic?: Synthetic8;
+  release_ready_meaning?: ReleaseReadyMeaning1;
+  scenario: C2DemoScenario;
+  schema_version?: SchemaVersion9;
+  strategy: Strategy;
+  synthetic?: Synthetic9;
 }
 export interface C2DemoPrivacySummary {
-  development_only?: DevelopmentOnly4;
+  development_only?: DevelopmentOnly6;
   issue_counts: IssueCounts;
   issues: Issues;
   limitation: Limitation;
@@ -524,7 +654,7 @@ export interface IssueCounts {
 export interface C2DemoQualitySummary {
   blocking_reasons: BlockingReasons1;
   data_quality_gate: DataQualityGate;
-  development_only?: DevelopmentOnly5;
+  development_only?: DevelopmentOnly7;
   duplicate_text_meaning: DuplicateTextMeaning;
   issue_counts: IssueCounts1;
   policy: C2DemoQualityPolicy;
@@ -541,7 +671,7 @@ export interface IssueCounts1 {
 }
 export interface C2DemoQualityPolicy {
   comparison_case_insensitive: ComparisonCaseInsensitive;
-  development_only?: DevelopmentOnly6;
+  development_only?: DevelopmentOnly8;
   schema_version?: SchemaVersion4;
   short_text_review_below: ShortTextReviewBelow;
   synthetic?: Synthetic4;
@@ -551,7 +681,7 @@ export interface StatusCounts {
 }
 export interface C2DemoRecord {
   anonymized_text: AnonymizedText;
-  development_only?: DevelopmentOnly7;
+  development_only?: DevelopmentOnly9;
   language_identification?: C2DemoLanguageIdentification | null;
   normalization_method?: NormalizationMethod;
   normalized_text?: NormalizedText;
@@ -572,7 +702,7 @@ export interface C2DemoRecord {
  * Provisional deterministic evidence, not anonymizer configuration.
  */
 export interface C2DemoLanguageIdentification {
-  development_only?: DevelopmentOnly8;
+  development_only?: DevelopmentOnly10;
   language: Language;
   method?: Method;
   reason: Reason;
@@ -581,72 +711,161 @@ export interface C2DemoLanguageIdentification {
   synthetic?: Synthetic6;
   uncertain: Uncertain;
 }
-export interface C2DemoCatalogue {
-  default_strategy?: DefaultStrategy;
-  development_only?: DevelopmentOnly9;
-  language_labels_are_fixture_metadata?: LanguageLabelsAreFixtureMetadata;
-  scenarios: Scenarios;
-  schema_version?: SchemaVersion10;
-  strategies: Strategies;
-  synthetic?: Synthetic10;
-}
 export interface C2DemoScenario {
-  development_only?: DevelopmentOnly10;
+  development_only?: DevelopmentOnly11;
   label: Label;
   language_label: LanguageLabel;
   record_count: RecordCount;
   scenario_id: ScenarioId;
-  schema_version?: SchemaVersion9;
-  synthetic?: Synthetic9;
+  schema_version?: SchemaVersion8;
+  synthetic?: Synthetic8;
+}
+export interface C2CustomDemoResponse {
+  blocking_reasons: BlockingReasons2;
+  development_only?: DevelopmentOnly12;
+  human_release_required?: HumanReleaseRequired2;
+  independent_research_validation?: IndependentResearchValidation1;
+  language_hint: LanguageHint;
+  privacy_summary: C2DemoPrivacySummary;
+  quality_summary: C2DemoQualitySummary;
+  records: Records1;
+  release_ready: ReleaseReady1;
+  schema_version?: SchemaVersion10;
+  strategy?: Strategy1;
+  synthetic?: Synthetic10;
+}
+export interface C2AnnotationRevision {
+  development_only?: DevelopmentOnly13;
+  labels: C2AnnotationLabels;
+  revision: Revision;
+  saved_at: SavedAt;
+  schema_version?: SchemaVersion13;
+  status: Status3;
+  synthetic?: Synthetic13;
+}
+/**
+ * Single-label provisional demo dimensions; null means unfinished, never neutral.
+ */
+export interface C2AnnotationLabels {
+  code_mixing?: CodeMixing;
+  development_only?: DevelopmentOnly14;
+  emotion?: Emotion;
+  language?: Language1;
+  schema_version?: SchemaVersion12;
+  synthetic?: Synthetic12;
+  wellbeing?: Wellbeing;
+}
+/**
+ * Initialize only fixed server-owned examples; arbitrary input is forbidden.
+ */
+export interface C2AnnotationPrepareRequest {
+  development_only?: DevelopmentOnly16;
+  schema_version?: SchemaVersion16;
+  synthetic?: Synthetic16;
+}
+export interface C2AnnotationQueue {
+  development_only?: DevelopmentOnly17;
+  items: Items;
+  required_annotators?: RequiredAnnotators;
+  schema_version?: SchemaVersion17;
+  synthetic?: Synthetic17;
+  vocabulary: Vocabulary;
+  vocabulary_status?: VocabularyStatus;
+}
+export interface Vocabulary {
+  [k: string]: string[];
+}
+export interface C2AnnotationSaveRequest {
+  annotation_schema_version: AnnotationSchemaVersion1;
+  development_only?: DevelopmentOnly18;
+  expected_revision: ExpectedRevision;
+  labels: C2AnnotationLabels;
+  pipeline_version: PipelineVersion1;
+  record_version: RecordVersion1;
+  schema_version?: SchemaVersion18;
+  status: Status4;
+  synthetic?: Synthetic18;
+  vocabulary_version: VocabularyVersion1;
+}
+export interface C2AnnotationSubmission {
+  adjudication_status?: AdjudicationStatus1;
+  agreement_status?: AgreementStatus1;
+  answers: Answers;
+  available_answers: AvailableAnswers;
+  blocked_answers: BlockedAnswers;
+  complete: Complete;
+  development_only?: DevelopmentOnly19;
+  finalized_answers: FinalizedAnswers;
+  human_release_required?: HumanReleaseRequired3;
+  required_answers: RequiredAnswers;
+  schema_version?: SchemaVersion19;
+  source_dataset_id: SourceDatasetId;
+  source_file_sha256: SourceFileSha256;
+  submission_id: SubmissionId;
+  submission_version: SubmissionVersion;
+  synthetic?: Synthetic19;
+}
+export interface C2AnnotationSubmissionQueue {
+  development_only?: DevelopmentOnly20;
+  schema_version?: SchemaVersion20;
+  submissions: Submissions;
+  synthetic?: Synthetic20;
+  vocabulary: Vocabulary1;
+  vocabulary_status?: VocabularyStatus1;
+}
+export interface Vocabulary1 {
+  [k: string]: string[];
+}
+/**
+ * Ephemeral input; optional legacy hint never configures detection.
+ */
+export interface C2CustomDemoRequest {
+  language_hint?: LanguageHint1;
+  strategy?: Strategy2;
+  text: Text;
+}
+export interface C2DemoCatalogue {
+  default_strategy?: DefaultStrategy;
+  development_only?: DevelopmentOnly21;
+  language_labels_are_fixture_metadata?: LanguageLabelsAreFixtureMetadata;
+  scenarios: Scenarios;
+  schema_version?: SchemaVersion21;
+  strategies: Strategies;
+  synthetic?: Synthetic21;
 }
 /**
  * Browser input contains selectors only; no contract flags or text.
  */
 export interface C2DemoRequest {
   scenario_id: ScenarioId1;
-  strategy?: Strategy2;
-}
-export interface C2DemoResponse {
-  blocking_reasons: BlockingReasons2;
-  development_only?: DevelopmentOnly11;
-  human_release_required?: HumanReleaseRequired1;
-  independent_research_validation?: IndependentResearchValidation1;
-  privacy_summary: C2DemoPrivacySummary;
-  quality_summary: C2DemoQualitySummary;
-  records: Records1;
-  release_ready: ReleaseReady1;
-  release_ready_meaning?: ReleaseReadyMeaning1;
-  scenario: C2DemoScenario;
-  schema_version?: SchemaVersion11;
-  strategy: Strategy3;
-  synthetic?: Synthetic11;
+  strategy?: Strategy3;
 }
 export interface ConsentDecision {
   consent_status: ConsentStatus;
   consent_version?: ConsentVersion;
-  development_only?: DevelopmentOnly12;
+  development_only?: DevelopmentOnly22;
   purpose?: Purpose;
-  schema_version?: SchemaVersion12;
-  synthetic?: Synthetic12;
+  schema_version?: SchemaVersion22;
+  synthetic?: Synthetic22;
 }
 export interface ConsentLifecycle {
   case?: PseudonymousCase | null;
   consent: ConsentRecord;
-  development_only?: DevelopmentOnly15;
+  development_only?: DevelopmentOnly25;
   disposal_reason?: DisposalReason;
   explicitly_withdrawn_at?: ExplicitlyWithdrawnAt;
-  schema_version?: SchemaVersion15;
-  synthetic?: Synthetic15;
+  schema_version?: SchemaVersion25;
+  synthetic?: Synthetic25;
 }
 export interface PseudonymousCase {
   case_id: CaseId1;
   correlation_id: CorrelationId1;
   created_at: CreatedAt1;
-  development_only?: DevelopmentOnly13;
+  development_only?: DevelopmentOnly23;
   error_code?: ErrorCode | null;
   processing_status: WorkflowState;
-  schema_version?: SchemaVersion13;
-  synthetic?: Synthetic13;
+  schema_version?: SchemaVersion23;
+  synthetic?: Synthetic23;
   updated_at: UpdatedAt;
 }
 export interface ConsentRecord {
@@ -654,24 +873,24 @@ export interface ConsentRecord {
   consent_status: ConsentState;
   consent_version: ConsentVersion1;
   created_at: CreatedAt2;
-  development_only?: DevelopmentOnly14;
+  development_only?: DevelopmentOnly24;
   expires_at: ExpiresAt;
   purpose: Purpose1;
-  schema_version?: SchemaVersion14;
-  synthetic?: Synthetic14;
+  schema_version?: SchemaVersion24;
+  synthetic?: Synthetic24;
 }
 export interface ExplanationRequest {
   case_id: CaseId2;
   consent_status?: ConsentStatus1;
   consent_version?: ConsentVersion2;
   correlation_id: CorrelationId2;
-  development_only?: DevelopmentOnly16;
+  development_only?: DevelopmentOnly26;
   idempotency_key: IdempotencyKey;
   inference: InferenceResponse;
   preprocessing: PreprocessResponse;
   purpose?: Purpose4;
-  schema_version?: SchemaVersion18;
-  synthetic?: Synthetic18;
+  schema_version?: SchemaVersion28;
+  synthetic?: Synthetic28;
 }
 export interface InferenceResponse {
   calibrated?: Calibrated;
@@ -681,17 +900,17 @@ export interface InferenceResponse {
   consent_version?: ConsentVersion3;
   correlation_id: CorrelationId3;
   dataset_version?: DatasetVersion;
-  development_only?: DevelopmentOnly17;
+  development_only?: DevelopmentOnly27;
   emotional_tone?: EmotionalTone;
   idempotency_key: IdempotencyKey1;
   model_version?: ModelVersion;
   purpose?: Purpose2;
   review_priority?: ReviewPriority;
-  schema_version?: SchemaVersion16;
+  schema_version?: SchemaVersion26;
   service_name?: ServiceName1;
   service_version?: ServiceVersion1;
   stress_language_signals: StressLanguageSignals;
-  synthetic?: Synthetic16;
+  synthetic?: Synthetic26;
   wellbeing_indicator?: WellbeingIndicator;
 }
 export interface PreprocessResponse {
@@ -701,16 +920,16 @@ export interface PreprocessResponse {
   consent_version?: ConsentVersion4;
   correlation_id: CorrelationId4;
   dataset_version?: DatasetVersion1;
-  development_only?: DevelopmentOnly18;
+  development_only?: DevelopmentOnly28;
   idempotency_key: IdempotencyKey2;
-  language: Language1;
+  language: Language2;
   normalized_text: NormalizedText1;
-  pipeline_version?: PipelineVersion;
+  pipeline_version?: PipelineVersion2;
   purpose?: Purpose3;
-  schema_version?: SchemaVersion17;
+  schema_version?: SchemaVersion27;
   service_name?: ServiceName2;
   service_version?: ServiceVersion2;
-  synthetic?: Synthetic17;
+  synthetic?: Synthetic27;
   token_offsets: TokenOffsets1;
   tokens: Tokens1;
   transformations: Transformations1;
@@ -721,7 +940,7 @@ export interface ExplanationResponse {
   consent_version?: ConsentVersion5;
   correlation_id: CorrelationId5;
   counterfactual?: Counterfactual;
-  development_only?: DevelopmentOnly19;
+  development_only?: DevelopmentOnly29;
   evidence: Evidence;
   explainer_version?: ExplainerVersion;
   faithfulness?: Faithfulness;
@@ -729,67 +948,67 @@ export interface ExplanationResponse {
   method?: Method1;
   purpose?: Purpose5;
   reliability_status?: ReliabilityStatus;
-  schema_version?: SchemaVersion19;
+  schema_version?: SchemaVersion29;
   service_name?: ServiceName3;
   service_version?: ServiceVersion3;
   stability?: Stability;
-  synthetic?: Synthetic19;
+  synthetic?: Synthetic29;
 }
 export interface FixturesResponse {
-  development_only?: DevelopmentOnly20;
+  development_only?: DevelopmentOnly30;
   fixtures: Fixtures;
-  schema_version?: SchemaVersion20;
-  synthetic?: Synthetic20;
+  schema_version?: SchemaVersion30;
+  synthetic?: Synthetic30;
 }
 export interface Fixtures {
   [k: string]: string;
 }
 export interface HealthResponse {
-  development_only?: DevelopmentOnly21;
-  schema_version?: SchemaVersion21;
+  development_only?: DevelopmentOnly31;
+  schema_version?: SchemaVersion31;
   service_name: ServiceName4;
-  status: Status3;
-  synthetic?: Synthetic21;
+  status: Status5;
+  synthetic?: Synthetic31;
 }
 export interface HumanReviewAction {
   action: Action;
-  development_only?: DevelopmentOnly22;
+  development_only?: DevelopmentOnly32;
   idempotency_key: IdempotencyKey4;
-  schema_version?: SchemaVersion22;
-  synthetic?: Synthetic22;
+  schema_version?: SchemaVersion32;
+  synthetic?: Synthetic32;
 }
 export interface InferenceRequest {
   case_id: CaseId6;
   consent_status?: ConsentStatus5;
   consent_version?: ConsentVersion6;
   correlation_id: CorrelationId6;
-  development_only?: DevelopmentOnly23;
+  development_only?: DevelopmentOnly33;
   idempotency_key: IdempotencyKey5;
   preprocessing: PreprocessResponse;
   purpose?: Purpose6;
-  schema_version?: SchemaVersion23;
-  synthetic?: Synthetic23;
+  schema_version?: SchemaVersion33;
+  synthetic?: Synthetic33;
 }
 export interface LifecycleAuditEvent {
   case_id?: CaseId7;
   correlation_id: CorrelationId7;
   created_at?: CreatedAt3;
-  development_only?: DevelopmentOnly24;
+  development_only?: DevelopmentOnly34;
   event_id?: EventId1;
   event_type: EventType1;
   policy_expires_at?: PolicyExpiresAt;
-  schema_version?: SchemaVersion24;
+  schema_version?: SchemaVersion34;
   service_name?: ServiceName5;
   service_version?: ServiceVersion4;
-  status: Status4;
-  synthetic?: Synthetic24;
+  status: Status6;
+  synthetic?: Synthetic34;
   trace_id?: TraceId;
 }
 export interface LoginRequest {
-  development_only?: DevelopmentOnly25;
+  development_only?: DevelopmentOnly35;
   password: Password;
-  schema_version?: SchemaVersion25;
-  synthetic?: Synthetic25;
+  schema_version?: SchemaVersion35;
+  synthetic?: Synthetic35;
   username: Username;
 }
 export interface PreprocessRequest {
@@ -797,11 +1016,11 @@ export interface PreprocessRequest {
   consent_status?: ConsentStatus6;
   consent_version?: ConsentVersion7;
   correlation_id: CorrelationId8;
-  development_only?: DevelopmentOnly26;
+  development_only?: DevelopmentOnly36;
   idempotency_key: IdempotencyKey6;
   purpose?: Purpose7;
-  schema_version?: SchemaVersion26;
-  synthetic?: Synthetic26;
+  schema_version?: SchemaVersion36;
+  synthetic?: Synthetic36;
   text: Text1;
 }
 export interface RetentionAction {
@@ -809,19 +1028,19 @@ export interface RetentionAction {
   action_id: ActionId;
   case_id: CaseId9;
   created_at: CreatedAt4;
-  development_only?: DevelopmentOnly27;
-  schema_version?: SchemaVersion27;
-  status: Status5;
-  synthetic?: Synthetic27;
+  development_only?: DevelopmentOnly37;
+  schema_version?: SchemaVersion37;
+  status: Status7;
+  synthetic?: Synthetic37;
 }
 export interface ReviewTask {
   case: PseudonymousCase;
-  development_only?: DevelopmentOnly28;
+  development_only?: DevelopmentOnly38;
   explanation: ExplanationResponse;
   human_review_required?: HumanReviewRequired;
   inference: InferenceResponse;
-  schema_version?: SchemaVersion28;
-  synthetic?: Synthetic28;
+  schema_version?: SchemaVersion38;
+  synthetic?: Synthetic38;
   task_id: TaskId;
 }
 export interface ServiceContext {
@@ -829,75 +1048,75 @@ export interface ServiceContext {
   consent_status?: ConsentStatus7;
   consent_version?: ConsentVersion8;
   correlation_id: CorrelationId9;
-  development_only?: DevelopmentOnly29;
+  development_only?: DevelopmentOnly39;
   idempotency_key: IdempotencyKey7;
   purpose?: Purpose8;
-  schema_version?: SchemaVersion29;
-  synthetic?: Synthetic29;
+  schema_version?: SchemaVersion39;
+  synthetic?: Synthetic39;
 }
 export interface ServiceError {
   correlation_id: CorrelationId10;
-  development_only?: DevelopmentOnly30;
+  development_only?: DevelopmentOnly40;
   error_code: ErrorCode;
   message?: Message;
-  schema_version?: SchemaVersion30;
-  synthetic?: Synthetic30;
+  schema_version?: SchemaVersion40;
+  synthetic?: Synthetic40;
 }
 export interface ServiceProvenance {
   correlation_id: CorrelationId11;
-  development_only?: DevelopmentOnly31;
+  development_only?: DevelopmentOnly41;
   explainer_version: ExplainerVersion1;
   model_dataset_version: ModelDatasetVersion;
   model_version: ModelVersion1;
   nlp_service_version: NlpServiceVersion;
-  pipeline_version: PipelineVersion1;
+  pipeline_version: PipelineVersion3;
   preprocessing_dataset_version: PreprocessingDatasetVersion;
   preprocessing_service_version: PreprocessingServiceVersion;
-  schema_version?: SchemaVersion31;
-  synthetic?: Synthetic31;
+  schema_version?: SchemaVersion41;
+  synthetic?: Synthetic41;
   xai_service_version: XaiServiceVersion;
 }
 export interface SubmissionSession {
-  development_only?: DevelopmentOnly32;
+  development_only?: DevelopmentOnly42;
   expires_at: ExpiresAt1;
   role: Role;
-  schema_version?: SchemaVersion32;
+  schema_version?: SchemaVersion42;
   session_id: SessionId;
-  synthetic?: Synthetic32;
+  synthetic?: Synthetic42;
 }
 export interface VersionResponse {
-  development_only?: DevelopmentOnly33;
+  development_only?: DevelopmentOnly43;
   mode: Mode;
-  schema_version?: SchemaVersion33;
+  schema_version?: SchemaVersion43;
   service_name: ServiceName6;
   service_version?: ServiceVersion5;
-  synthetic?: Synthetic33;
+  synthetic?: Synthetic43;
 }
 export interface WithdrawalRequest {
-  development_only?: DevelopmentOnly34;
+  development_only?: DevelopmentOnly44;
   idempotency_key: IdempotencyKey8;
-  schema_version?: SchemaVersion34;
-  synthetic?: Synthetic34;
+  schema_version?: SchemaVersion44;
+  synthetic?: Synthetic44;
 }
 export interface WorkflowExecution {
   attempts?: Attempts;
   case_id: CaseId11;
   correlation_id: CorrelationId12;
   created_at: CreatedAt5;
-  development_only?: DevelopmentOnly35;
+  development_only?: DevelopmentOnly45;
   error_code?: ErrorCode | null;
   idempotency_key: IdempotencyKey9;
   processing_status: WorkflowState;
-  schema_version?: SchemaVersion35;
-  synthetic?: Synthetic35;
+  schema_version?: SchemaVersion45;
+  synthetic?: Synthetic45;
   updated_at: UpdatedAt1;
 }
 export interface WorkflowRequest {
   consent_id: ConsentId1;
-  development_only?: DevelopmentOnly36;
+  development_only?: DevelopmentOnly46;
   fixture_id: FixtureId;
   idempotency_key: IdempotencyKey10;
-  schema_version?: SchemaVersion36;
-  synthetic?: Synthetic36;
+  schema_version?: SchemaVersion46;
+  synthetic?: Synthetic46;
   text: Text2;
 }

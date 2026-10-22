@@ -31,3 +31,29 @@ boundary. NFR-04's all-critical/95%-required audit target is provisional too; th
 synthetic catalogue establishes only its own exercised denominator. Stable audit IDs,
 case-first locks, a lifecycle response and mock timing boundaries are implementation
 decisions, not completed stakeholder or ethics validation.
+
+## C2 dataset-annotation scope clarification — 2026-10-15
+
+The available local `Final taf.pdf` (11 pages, SHA-256
+`40cbf8a9429604bb60c58db65427f201a7f48ac652d62b0d91908316e2781c77`) and
+`Final taf (1).pdf` (12 pages, SHA-256
+`978570b95e2278557f2db703dfd19729c1776dc667da16217a0b9e1b462f2c8f`), both
+marked V2.2, were read at relevant scope sections. Earlier review above records
+a 15-page supplied TAF; the current files cannot establish that edition's
+identity or a newer approval. Source owners should confirm the governing edition;
+neither filename nor a proposal silently supersedes the finalized TAF.
+
+Both available TAFs assign C2 annotation of language/code-mixing, emotion and
+wellbeing indicators (pp8–9), and preserve C3 modelling/C4 dashboard ownership.
+PII gold-set annotation is only a supporting anonymization-evaluation task.
+C2 proposal `D:/rp/proposal/IT23165434.pdf` (47 pages, SHA-256
+`de0a104d1184a27889a8d4fde56d27adc4076ef9ed51308e438f333f327ec921`),
+pp16–17/22/30, and the corresponding proposal DOCX were inspected: their
+label examples and numerical agreement targets are provisional; expert review
+and two-annotator gold-subset evidence are planned, not approved/completed results.
+The shared inference contract's synthetic mock literals are not approved research
+labels. See [separate dataset annotation plan](../evidence/c2-dataset-annotation-plan.md).
+
+This resolves annotation-scope interpretation without transferring ownership,
+authorizing participant data, adopting a final taxonomy or changing runtime.
+Historical source review/results above remain unchanged.

@@ -825,3 +825,24 @@ visible blocking/review reasons and human approval requirement. Counts appear on
 for multiple records. Backend quality/privacy policy is unchanged.
 See [current Language ID evidence](c2-language-id-v1.md),
 [normalization](c2-normalization-v1.md) and [tokenization](c2-tokenization-v1.md).
+## Synthetic annotation increment — 2026-10-15
+
+The C2 demo links to **http://localhost:3001/c2-demo/annotation**. This separate
+workbench saves provisional language/code-mixing/emotion/non-diagnostic wellbeing
+decisions for four immutable server-owned, privacy-cleared samples. Draft/final
+history is durable in PostgreSQL; two existing authenticated account IDs are
+required. Peer labels remain hidden until both finalize. No agreement score,
+adjudication, expert label approval or dataset release is implemented.
+
+See [actual implementation/checks and PP1 walkthrough](c2-synthetic-dataset-annotation-v1.md).
+The original custom-text demo stays ephemeral; arbitrary custom runs cannot enter
+the annotation queue. PII gold-set evaluation remains a separate workflow.
+
+## Assigned survey submission pilot — 2026-10-22
+
+The same annotation URL now includes four explicitly paired synthetic survey
+submissions, grouped by preserved submission ID with Q4–Q10 in order. Q4–Q9
+are required; unanswered Q10 needs no label. See the
+[pilot implementation, counts, checks and walkthrough](c2-submission-annotation-pilot-v1.md).
+Existing standalone histories remain separately collapsed. Generator metadata
+never preselects human labels; agreement/adjudication/release remain pending.

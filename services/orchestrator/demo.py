@@ -17,6 +17,7 @@ from research_contracts import (
 )
 
 from orchestrator import auth
+from orchestrator.c2_annotation import router as annotation_router
 
 
 def development_demo():
@@ -24,7 +25,7 @@ def development_demo():
         raise SafeError(ErrorCode.NOT_FOUND, 404)
 
 
-router = APIRouter(
+demo_routes = APIRouter(
     prefix="/api/v1/c2-demo",
     dependencies=[Depends(development_demo), Depends(auth.require_role(Role.COUNSELLOR))],
 )
@@ -64,16 +65,22 @@ def forward(request, route, response_type, body=None):
         raise SafeError(ErrorCode.DOWNSTREAM_FAILED, 502) from None
 
 
-@router.get("/scenarios", response_model=C2DemoCatalogue)
+@demo_routes.get("/scenarios", response_model=C2DemoCatalogue)
 def scenarios(request: Request):
     return forward(request, "scenarios", C2DemoCatalogue)
 
 
-@router.post("/runs", response_model=C2DemoResponse)
+@demo_routes.post("/runs", response_model=C2DemoResponse)
 def run(body: C2DemoRequest, request: Request):
     return forward(request, "runs", C2DemoResponse, body)
 
 
-@router.post("/custom-runs", response_model=C2CustomDemoResponse)
+@demo_routes.post("/custom-runs", response_model=C2CustomDemoResponse)
 def custom_run(body: C2CustomDemoRequest, request: Request):
     return forward(request, "custom-runs", C2CustomDemoResponse, body)
+
+
+# Aggregate only C2 routes; preserve the existing demo's counsellor authorization.
+router = APIRouter()
+router.include_router(demo_routes)
+router.include_router(annotation_router)

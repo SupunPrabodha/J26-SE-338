@@ -379,7 +379,9 @@ class C2DemoLanguageIdentification(Contract):
         "explicit_romanized_name_introduction",
         "sinhala_language_with_romanized_mixed_script_evidence",
     ]
-    method: Literal["c2-rule-language-v1", "c2-rule-language-v1.1", "c2-rule-language-v1.2"] = "c2-rule-language-v1.1"
+    method: Literal["c2-rule-language-v1", "c2-rule-language-v1.1", "c2-rule-language-v1.2"] = (
+        "c2-rule-language-v1.1"
+    )
     uncertain: bool
 
 
@@ -467,3 +469,117 @@ class C2CustomDemoResponse(Contract):
     blocking_reasons: list[str]
     human_release_required: Literal[True] = True
     independent_research_validation: Literal[False] = False
+
+
+class C2AnnotationLabels(Contract):
+    """Single-label provisional demo dimensions; null means unfinished, never neutral."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    language: (
+        Literal["sinhala", "english", "romanized-si", "code-mixed", "other", "uncertain"] | None
+    ) = None
+    code_mixing: (
+        Literal["none", "insertion", "intra-sentential", "inter-sentential", "uncertain"] | None
+    ) = None
+    emotion: (
+        Literal["neutral", "sadness", "worry-or-fear", "anger", "joy", "mixed", "uncertain"] | None
+    ) = None
+    wellbeing: (
+        Literal[
+            "academic-pressure",
+            "sleep-or-energy",
+            "concentration-or-motivation",
+            "social-connection",
+            "coping-or-support",
+            "no-clear-indicator",
+            "uncertain",
+        ]
+        | None
+    ) = None
+
+
+class C2AnnotationSaveRequest(Contract):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    record_version: str
+    pipeline_version: str
+    annotation_schema_version: Literal["c2-dataset-annotation-v1"]
+    vocabulary_version: Literal["c2-provisional-vocabulary-v1"]
+    expected_revision: Annotated[int, Field(ge=0)]
+    status: Literal["DRAFT", "FINAL"]
+    labels: C2AnnotationLabels
+
+
+class C2AnnotationRevision(Contract):
+    revision: int
+    status: Literal["DRAFT", "FINAL"]
+    labels: C2AnnotationLabels
+    saved_at: AwareDatetime
+
+
+class C2AnnotationItem(Contract):
+    record_id: str
+    record_version: str
+    pipeline_version: str
+    annotation_schema_version: Literal["c2-dataset-annotation-v1"]
+    vocabulary_version: Literal["c2-provisional-vocabulary-v1"]
+    preprocessing: C2DemoResponse | C2CustomDemoResponse
+
+
+class C2AnnotationQueue(Contract):
+    items: list[C2AnnotationItem]
+    vocabulary: dict[str, list[str]]
+    vocabulary_status: Literal["PROVISIONAL_DEMO_ONLY_NOT_EXPERT_APPROVED"] = (
+        "PROVISIONAL_DEMO_ONLY_NOT_EXPERT_APPROVED"
+    )
+    required_annotators: Literal[2] = 2
+
+
+class C2AnnotationPrepareRequest(Contract):
+    """Initialize only fixed server-owned examples; arbitrary input is forbidden."""
+
+
+class C2AnnotationDetail(Contract):
+    item: C2AnnotationItem
+    own_history: list[C2AnnotationRevision]
+    finalized_count: Annotated[int, Field(ge=0, le=2)]
+    annotation_status: Literal["PENDING", "DRAFT", "SUBMITTED", "PAIR_FINALIZED"]
+    # No account IDs, usernames or peer drafts. Peer final labels are blind until both finish.
+    peer_final: C2AnnotationRevision | None = None
+    can_submit: bool
+    agreement_status: Literal["NOT_EVALUATED"] = "NOT_EVALUATED"
+    adjudication_status: Literal["PENDING"] = "PENDING"
+    human_release_required: Literal[True] = True
+
+
+class C2AnnotationAnswer(Contract):
+    question_id: str
+    question_text: str
+    source_record_id: str
+    required: bool
+    state: Literal["AVAILABLE", "WITHHELD", "OPTIONAL_UNANSWERED", "MISSING_REQUIRED"]
+    blocking_reasons: list[str]
+    annotation: C2AnnotationDetail | None = None
+
+
+class C2AnnotationSubmission(Contract):
+    submission_id: str
+    submission_version: str
+    source_dataset_id: str
+    source_file_sha256: str
+    required_answers: int
+    available_answers: int
+    finalized_answers: int
+    blocked_answers: int
+    complete: bool
+    answers: list[C2AnnotationAnswer]
+    agreement_status: Literal["NOT_EVALUATED"] = "NOT_EVALUATED"
+    adjudication_status: Literal["PENDING"] = "PENDING"
+    human_release_required: Literal[True] = True
+
+
+class C2AnnotationSubmissionQueue(Contract):
+    submissions: list[C2AnnotationSubmission]
+    vocabulary: dict[str, list[str]]
+    vocabulary_status: Literal["PROVISIONAL_DEMO_ONLY_NOT_EXPERT_APPROVED"] = (
+        "PROVISIONAL_DEMO_ONLY_NOT_EXPERT_APPROVED"
+    )

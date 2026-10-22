@@ -282,7 +282,7 @@ def test_existing_mock_contracts_unchanged():
 
     for path, value in artifacts().items():
         if "/json-schema/" in path and not path.rsplit("/", 1)[-1].startswith(
-            ("C2Demo", "C2CustomDemo")
+            ("C2Demo", "C2CustomDemo", "C2Annotation")
         ):
             previous = subprocess.check_output(["git", "show", "HEAD:" + path])
             assert json.loads(previous) == value, path

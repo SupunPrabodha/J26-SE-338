@@ -127,6 +127,7 @@ export default function C2Demo() {
     <DemoHeader title="C2 Dataset Pipeline Demo" subtitle="Explore actual anonymization and data-quality gates with fictional samples." component="Component 2" badge="Development only · Live pipeline" />
     <PipelineStepper result={result} busy={busy} />
     <nav className="actions" aria-label="Demo navigation"><a href="/">Back to dashboard</a>
+      <a href="/c2-demo/annotation">Synthetic dataset annotation</a>
       {catalogue && !denied && <button className="quiet" onClick={logout}>Sign out</button>}</nav>
     <aside className="notice c2-synthetic"><strong>Synthetic demonstration — not participant data</strong><p>Fictional test text only. Results stay in page memory; outputs are non-diagnostic and require human interpretation.</p></aside>
     {denied && <section className="card c2-sign-in" aria-labelledby="c2-sign-in-title">

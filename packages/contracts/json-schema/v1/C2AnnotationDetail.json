@@ -1,0 +1,1031 @@
+{
+  "$defs": {
+    "C2AnnotationItem": {
+      "additionalProperties": false,
+      "properties": {
+        "annotation_schema_version": {
+          "const": "c2-dataset-annotation-v1",
+          "title": "Annotation Schema Version",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "pipeline_version": {
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "preprocessing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/C2DemoResponse"
+            },
+            {
+              "$ref": "#/$defs/C2CustomDemoResponse"
+            }
+          ],
+          "title": "Preprocessing"
+        },
+        "record_id": {
+          "title": "Record Id",
+          "type": "string"
+        },
+        "record_version": {
+          "title": "Record Version",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "vocabulary_version": {
+          "const": "c2-provisional-vocabulary-v1",
+          "title": "Vocabulary Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_id",
+        "record_version",
+        "pipeline_version",
+        "annotation_schema_version",
+        "vocabulary_version",
+        "preprocessing"
+      ],
+      "title": "C2AnnotationItem",
+      "type": "object"
+    },
+    "C2AnnotationLabels": {
+      "additionalProperties": false,
+      "description": "Single-label provisional demo dimensions; null means unfinished, never neutral.",
+      "properties": {
+        "code_mixing": {
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "insertion",
+                "intra-sentential",
+                "inter-sentential",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code Mixing"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "emotion": {
+          "anyOf": [
+            {
+              "enum": [
+                "neutral",
+                "sadness",
+                "worry-or-fear",
+                "anger",
+                "joy",
+                "mixed",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Emotion"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "enum": [
+                "sinhala",
+                "english",
+                "romanized-si",
+                "code-mixed",
+                "other",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "wellbeing": {
+          "anyOf": [
+            {
+              "enum": [
+                "academic-pressure",
+                "sleep-or-energy",
+                "concentration-or-motivation",
+                "social-connection",
+                "coping-or-support",
+                "no-clear-indicator",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wellbeing"
+        }
+      },
+      "title": "C2AnnotationLabels",
+      "type": "object"
+    },
+    "C2AnnotationRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "labels": {
+          "$ref": "#/$defs/C2AnnotationLabels"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "saved_at": {
+          "format": "date-time",
+          "title": "Saved At",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "DRAFT",
+            "FINAL"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "revision",
+        "status",
+        "labels",
+        "saved_at"
+      ],
+      "title": "C2AnnotationRevision",
+      "type": "object"
+    },
+    "C2CustomDemoResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocking Reasons",
+          "type": "array"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "human_release_required": {
+          "const": true,
+          "default": true,
+          "title": "Human Release Required",
+          "type": "boolean"
+        },
+        "independent_research_validation": {
+          "const": false,
+          "default": false,
+          "title": "Independent Research Validation",
+          "type": "boolean"
+        },
+        "language_hint": {
+          "enum": [
+            "sinhala",
+            "english",
+            "romanized-si",
+            "code-mixed",
+            "unsure"
+          ],
+          "title": "Language Hint",
+          "type": "string"
+        },
+        "privacy_summary": {
+          "$ref": "#/$defs/C2DemoPrivacySummary"
+        },
+        "quality_summary": {
+          "$ref": "#/$defs/C2DemoQualitySummary"
+        },
+        "records": {
+          "items": {
+            "$ref": "#/$defs/C2DemoRecord"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "release_ready": {
+          "title": "Release Ready",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "strategy": {
+          "const": "presidio",
+          "default": "presidio",
+          "title": "Strategy",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "language_hint",
+        "records",
+        "quality_summary",
+        "privacy_summary",
+        "release_ready",
+        "blocking_reasons"
+      ],
+      "title": "C2CustomDemoResponse",
+      "type": "object"
+    },
+    "C2DemoLanguageIdentification": {
+      "additionalProperties": false,
+      "description": "Provisional deterministic evidence, not anonymizer configuration.",
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "language": {
+          "enum": [
+            "sinhala",
+            "english",
+            "romanized-si",
+            "code-mixed",
+            "uncertain",
+            "unknown"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "method": {
+          "default": "c2-rule-language-v1.1",
+          "enum": [
+            "c2-rule-language-v1",
+            "c2-rule-language-v1.1",
+            "c2-rule-language-v1.2"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "no_language_letters_after_masking",
+            "sinhala_script_evidence_only",
+            "unsupported_script_evidence",
+            "sinhala_script_and_english_markers",
+            "mixed_script_without_supported_lexical_evidence",
+            "english_and_romanized_markers",
+            "multiple_romanized_markers",
+            "multiple_english_markers",
+            "insufficient_or_ambiguous_latin_evidence",
+            "explicit_romanized_name_introduction",
+            "sinhala_language_with_romanized_mixed_script_evidence"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "provisional",
+            "uncertain",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "uncertain": {
+          "title": "Uncertain",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "language",
+        "status",
+        "reason",
+        "uncertain"
+      ],
+      "title": "C2DemoLanguageIdentification",
+      "type": "object"
+    },
+    "C2DemoPrivacySummary": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "issue_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Issue Counts",
+          "type": "object"
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "limitation": {
+          "title": "Limitation",
+          "type": "string"
+        },
+        "pipeline_stage": {
+          "const": "release_privacy_gate",
+          "title": "Pipeline Stage",
+          "type": "string"
+        },
+        "privacy_note": {
+          "title": "Privacy Note",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "PASSED",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "total_records": {
+          "minimum": 0,
+          "title": "Total Records",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pipeline_stage",
+        "total_records",
+        "status",
+        "issues",
+        "issue_counts",
+        "privacy_note",
+        "limitation"
+      ],
+      "title": "C2DemoPrivacySummary",
+      "type": "object"
+    },
+    "C2DemoQualityPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison_case_insensitive": {
+          "title": "Comparison Case Insensitive",
+          "type": "boolean"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "short_text_review_below": {
+          "minimum": 1,
+          "title": "Short Text Review Below",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "short_text_review_below",
+        "comparison_case_insensitive"
+      ],
+      "title": "C2DemoQualityPolicy",
+      "type": "object"
+    },
+    "C2DemoQualitySummary": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocking Reasons",
+          "type": "array"
+        },
+        "data_quality_gate": {
+          "enum": [
+            "PASSED",
+            "FAILED"
+          ],
+          "title": "Data Quality Gate",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "duplicate_text_meaning": {
+          "title": "Duplicate Text Meaning",
+          "type": "string"
+        },
+        "issue_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Issue Counts",
+          "type": "object"
+        },
+        "policy": {
+          "$ref": "#/$defs/C2DemoQualityPolicy"
+        },
+        "policy_status": {
+          "const": "development_only_not_research_approved",
+          "title": "Policy Status",
+          "type": "string"
+        },
+        "privacy_note": {
+          "title": "Privacy Note",
+          "type": "string"
+        },
+        "release_ready_meaning": {
+          "title": "Release Ready Meaning",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "propertyNames": {
+            "enum": [
+              "PASS",
+              "REVIEW",
+              "REJECT"
+            ]
+          },
+          "title": "Status Counts",
+          "type": "object"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "total_records": {
+          "minimum": 0,
+          "title": "Total Records",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_records",
+        "status_counts",
+        "issue_counts",
+        "data_quality_gate",
+        "blocking_reasons",
+        "policy",
+        "policy_status",
+        "release_ready_meaning",
+        "duplicate_text_meaning",
+        "privacy_note"
+      ],
+      "title": "C2DemoQualitySummary",
+      "type": "object"
+    },
+    "C2DemoRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "anonymized_text": {
+          "title": "Anonymized Text",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "language_identification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/C2DemoLanguageIdentification"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "normalization_method": {
+          "anyOf": [
+            {
+              "const": "c2-nfc-whitespace-v1",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalization Method"
+        },
+        "normalized_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalized Text"
+        },
+        "original_text": {
+          "title": "Original Text",
+          "type": "string"
+        },
+        "quality_issues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Quality Issues",
+          "type": "array"
+        },
+        "quality_status": {
+          "enum": [
+            "PASS",
+            "REVIEW",
+            "REJECT"
+          ],
+          "title": "Quality Status",
+          "type": "string"
+        },
+        "record_id": {
+          "title": "Record Id",
+          "type": "string"
+        },
+        "requires_privacy_review": {
+          "title": "Requires Privacy Review",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "token_offset_unit": {
+          "anyOf": [
+            {
+              "const": "unicode_code_points",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Token Offset Unit"
+        },
+        "token_offsets": {
+          "anyOf": [
+            {
+              "items": {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Zero-based [start, end) Unicode code points in normalized_text; not UTF-16 units.",
+          "title": "Token Offsets"
+        },
+        "tokenization_method": {
+          "anyOf": [
+            {
+              "const": "c2-grapheme-words-v1",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokenization Method"
+        },
+        "tokens": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens"
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "record_id",
+        "original_text",
+        "anonymized_text",
+        "transformations",
+        "quality_status",
+        "quality_issues",
+        "requires_privacy_review"
+      ],
+      "title": "C2DemoRecord",
+      "type": "object"
+    },
+    "C2DemoResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocking Reasons",
+          "type": "array"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "human_release_required": {
+          "const": true,
+          "default": true,
+          "title": "Human Release Required",
+          "type": "boolean"
+        },
+        "independent_research_validation": {
+          "const": false,
+          "default": false,
+          "title": "Independent Research Validation",
+          "type": "boolean"
+        },
+        "privacy_summary": {
+          "$ref": "#/$defs/C2DemoPrivacySummary"
+        },
+        "quality_summary": {
+          "$ref": "#/$defs/C2DemoQualitySummary"
+        },
+        "records": {
+          "items": {
+            "$ref": "#/$defs/C2DemoRecord"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "release_ready": {
+          "title": "Release Ready",
+          "type": "boolean"
+        },
+        "release_ready_meaning": {
+          "const": "Automated prerequisites only; human release approval remains required.",
+          "default": "Automated prerequisites only; human release approval remains required.",
+          "title": "Release Ready Meaning",
+          "type": "string"
+        },
+        "scenario": {
+          "$ref": "#/$defs/C2DemoScenario"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "strategy": {
+          "enum": [
+            "regex",
+            "presidio",
+            "hybrid"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "scenario",
+        "strategy",
+        "records",
+        "quality_summary",
+        "privacy_summary",
+        "release_ready",
+        "blocking_reasons"
+      ],
+      "title": "C2DemoResponse",
+      "type": "object"
+    },
+    "C2DemoScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "language_label": {
+          "enum": [
+            "english",
+            "sinhala",
+            "romanized-si",
+            "code-mixed",
+            "not-applicable"
+          ],
+          "title": "Language Label",
+          "type": "string"
+        },
+        "record_count": {
+          "minimum": 0,
+          "title": "Record Count",
+          "type": "integer"
+        },
+        "scenario_id": {
+          "enum": [
+            "english-person",
+            "sinhala-person",
+            "romanized-person",
+            "code-mixed-person",
+            "english-ordinary",
+            "english",
+            "sinhala",
+            "romanized",
+            "code-mixed",
+            "short",
+            "empty",
+            "placeholder-only",
+            "duplicate",
+            "masking-collision",
+            "empty-batch"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "label",
+        "language_label",
+        "record_count"
+      ],
+      "title": "C2DemoScenario",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C2AnnotationDetail.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adjudication_status": {
+      "const": "PENDING",
+      "default": "PENDING",
+      "title": "Adjudication Status",
+      "type": "string"
+    },
+    "agreement_status": {
+      "const": "NOT_EVALUATED",
+      "default": "NOT_EVALUATED",
+      "title": "Agreement Status",
+      "type": "string"
+    },
+    "annotation_status": {
+      "enum": [
+        "PENDING",
+        "DRAFT",
+        "SUBMITTED",
+        "PAIR_FINALIZED"
+      ],
+      "title": "Annotation Status",
+      "type": "string"
+    },
+    "can_submit": {
+      "title": "Can Submit",
+      "type": "boolean"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "finalized_count": {
+      "maximum": 2,
+      "minimum": 0,
+      "title": "Finalized Count",
+      "type": "integer"
+    },
+    "human_release_required": {
+      "const": true,
+      "default": true,
+      "title": "Human Release Required",
+      "type": "boolean"
+    },
+    "item": {
+      "$ref": "#/$defs/C2AnnotationItem"
+    },
+    "own_history": {
+      "items": {
+        "$ref": "#/$defs/C2AnnotationRevision"
+      },
+      "title": "Own History",
+      "type": "array"
+    },
+    "peer_final": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/C2AnnotationRevision"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "item",
+    "own_history",
+    "finalized_count",
+    "annotation_status",
+    "can_submit"
+  ],
+  "title": "C2AnnotationDetail",
+  "type": "object"
+}

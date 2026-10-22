@@ -1,0 +1,179 @@
+{
+  "$defs": {
+    "C2AnnotationLabels": {
+      "additionalProperties": false,
+      "description": "Single-label provisional demo dimensions; null means unfinished, never neutral.",
+      "properties": {
+        "code_mixing": {
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "insertion",
+                "intra-sentential",
+                "inter-sentential",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code Mixing"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "emotion": {
+          "anyOf": [
+            {
+              "enum": [
+                "neutral",
+                "sadness",
+                "worry-or-fear",
+                "anger",
+                "joy",
+                "mixed",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Emotion"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "enum": [
+                "sinhala",
+                "english",
+                "romanized-si",
+                "code-mixed",
+                "other",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "wellbeing": {
+          "anyOf": [
+            {
+              "enum": [
+                "academic-pressure",
+                "sleep-or-energy",
+                "concentration-or-motivation",
+                "social-connection",
+                "coping-or-support",
+                "no-clear-indicator",
+                "uncertain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wellbeing"
+        }
+      },
+      "title": "C2AnnotationLabels",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C2AnnotationSaveRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "annotation_schema_version": {
+      "const": "c2-dataset-annotation-v1",
+      "title": "Annotation Schema Version",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "expected_revision": {
+      "minimum": 0,
+      "title": "Expected Revision",
+      "type": "integer"
+    },
+    "labels": {
+      "$ref": "#/$defs/C2AnnotationLabels"
+    },
+    "pipeline_version": {
+      "title": "Pipeline Version",
+      "type": "string"
+    },
+    "record_version": {
+      "title": "Record Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "DRAFT",
+        "FINAL"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "vocabulary_version": {
+      "const": "c2-provisional-vocabulary-v1",
+      "title": "Vocabulary Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_version",
+    "pipeline_version",
+    "annotation_schema_version",
+    "vocabulary_version",
+    "expected_revision",
+    "status",
+    "labels"
+  ],
+  "title": "C2AnnotationSaveRequest",
+  "type": "object"
+}
