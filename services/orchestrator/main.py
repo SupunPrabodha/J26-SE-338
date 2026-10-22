@@ -1707,11 +1707,11 @@ def get_c4_faithfulness_by_explanation(
 
 def _call_xai_stability(body: C4InternalStabilityRequest) -> C4StabilityResponse:
     try:
-        with httpx.Client(timeout=35.0) as client:
+        with httpx.Client(timeout=60.0, trust_env=False) as client:
             res = client.post(
                 settings().xai_url + "/internal/v1/dev/stability",
                 json=body.model_dump(mode="json"),
-                headers={"Authorization": f"Bearer {service_token('orchestrator')}"},
+                headers={"Authorization": f"Bearer {service_token('xai')}"},
             )
             if res.status_code == 200:
                 return C4StabilityResponse.model_validate(res.json())
