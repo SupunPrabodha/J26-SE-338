@@ -37,6 +37,7 @@ interface ChartPoint {
   run1Weight: number;
   selectedRunWeight: number;
   delta: number;
+  otherCount?: number;
 }
 
 export default function StabilityPage() {
@@ -288,6 +289,8 @@ export default function StabilityPage() {
   };
 
   // Recharts Chart Data: Compare Run 1 Reference vs Currently Selected Run
+  // Limits to the top 7 words with the highest magnitude attribution and groups
+  // all other words into an "other" aggregate category showing their total attribution score.
   const chartData = useMemo<ChartPoint[]>(() => {
     if (!result || !result.runs || result.runs.length === 0) return [];
 
@@ -297,14 +300,9 @@ export default function StabilityPage() {
 
     if (!run1) return [];
 
-    const consistencyMap = new Map<string, C4StabilityWordConsistency>();
-    (result.word_consistency || []).forEach((wc) => {
-      consistencyMap.set(wc.occurrence_id, wc);
-    });
+    const occurrences: C4StabilityWordConsistency[] = result.word_consistency || [];
 
-    const occurrences = result.word_consistency || [];
-
-    return occurrences.map((wc) => {
+    const allPoints = occurrences.map((wc) => {
       const w1 = run1.weights?.[wc.occurrence_id] ?? 0.0;
       const wSel =
         selectedRunIndex === 1
@@ -319,8 +317,31 @@ export default function StabilityPage() {
         run1Weight: Number(w1.toFixed(4)),
         selectedRunWeight: Number(wSel.toFixed(4)),
         delta: Number((wSel - w1).toFixed(4)),
+        maxAbs: Math.max(Math.abs(w1), Math.abs(wSel)),
       };
     });
+
+    if (allPoints.length <= 7) {
+      return allPoints.sort((a, b) => b.maxAbs - a.maxAbs);
+    }
+
+    const sorted = [...allPoints].sort((a, b) => b.maxAbs - a.maxAbs);
+    const top7 = sorted.slice(0, 7);
+    const remaining = sorted.slice(7);
+
+    const otherRun1 = remaining.reduce((sum, p) => sum + p.run1Weight, 0);
+    const otherSel = remaining.reduce((sum, p) => sum + p.selectedRunWeight, 0);
+
+    const otherPoint: ChartPoint = {
+      occurrence_id: "other",
+      name: "other",
+      run1Weight: Number(otherRun1.toFixed(4)),
+      selectedRunWeight: Number(otherSel.toFixed(4)),
+      delta: Number((otherSel - otherRun1).toFixed(4)),
+      otherCount: remaining.length,
+    };
+
+    return [...top7, otherPoint];
   }, [result, selectedRunIndex]);
 
   // Export Metrics CSV: numerical evidence/settings/provenance, excluding raw text by default
@@ -861,21 +882,29 @@ export default function StabilityPage() {
                     : `Run ${selectedRunIndex}`}
                 </span>
               </div>
-              <div style={{ width: "100%", height: 320 }}>
+              <div style={{ width: "100%", height: 350 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={chartData}
-                    margin={{ top: 15, right: 20, left: 0, bottom: 35 }}
+                    layout="vertical"
+                    margin={{ top: 15, right: 25, left: 15, bottom: 20 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                     <XAxis
-                      dataKey="name"
-                      angle={-30}
-                      textAnchor="end"
-                      interval={0}
-                      tick={{ fontSize: 11, fill: "#475569" }}
+                      type="number"
+                      tick={{ fontSize: 11, fill: "#64748b" }}
                     />
-                    <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
+                    <YAxis
+                      type="category"
+                      dataKey="occurrence_id"
+                      tickFormatter={(id) => {
+                        const item = chartData.find((d) => d.occurrence_id === id);
+                        return item ? item.name : id;
+                      }}
+                      interval={0}
+                      tick={{ fontSize: 12, fill: "#334155" }}
+                      width={85}
+                    />
                     <RechartsTooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -892,7 +921,12 @@ export default function StabilityPage() {
                               }}
                             >
                               <div style={{ fontWeight: 700, marginBottom: "4px" }}>
-                                {data.name} ({data.occurrence_id})
+                                {data.name}
+                                {data.occurrence_id && data.occurrence_id !== "other"
+                                  ? ` (${data.occurrence_id})`
+                                  : data.otherCount
+                                  ? ` (${data.otherCount} words)`
+                                  : ""}
                               </div>
                               <div style={{ color: "#4f46e5" }}>
                                 Run 1 (Ref): {data.run1Weight.toFixed(4)}
@@ -911,18 +945,18 @@ export default function StabilityPage() {
                       }}
                     />
                     <Legend verticalAlign="top" height={32} />
-                    <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1.5} />
+                    <ReferenceLine x={0} stroke="#94a3b8" strokeWidth={1.5} />
                     <Bar
                       dataKey="run1Weight"
                       name="Run 1 (Reference)"
                       fill="#6366f1"
-                      radius={[3, 3, 0, 0]}
+                      radius={[2, 2, 2, 2]}
                     />
                     <Bar
                       dataKey="selectedRunWeight"
                       name={selectedRunIndex === 1 ? "Overall Mean" : `Run ${selectedRunIndex}`}
                       fill="#f59e0b"
-                      radius={[3, 3, 0, 0]}
+                      radius={[2, 2, 2, 2]}
                     />
                   </BarChart>
                 </ResponsiveContainer>
