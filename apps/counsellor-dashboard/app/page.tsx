@@ -5,6 +5,7 @@ import { api, ApiError } from "@j26/common/api";
 import { DemoHeader, ErrorMessage, SafetyNotice, processingLabel, reviewLabel } from "@j26/common/ui";
 import type { AccountResponse, ReviewTask } from "@j26/common/contracts";
 import { Sidebar } from "./components/Sidebar";
+import { useReviewCase } from "./context/CaseContext";
 
 export default function Dashboard() {
   const [authorized, setAuthorized] = useState(false);
@@ -13,6 +14,8 @@ export default function Dashboard() {
   const [selected, setSelected] = useState<ReviewTask | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const { selectTask, logout: contextLogout } = useReviewCase();
+
   useEffect(() => {
     let live = true;
     api<AccountResponse>("/auth/me").then(async account => {
@@ -26,7 +29,11 @@ export default function Dashboard() {
   async function load() {
     const values = await api<ReviewTask[]>("/review-tasks");
     setTasks(values);
-    setSelected(previous => previous ? values.find(task => task.task_id === previous.task_id) || null : null);
+    setSelected(previous => {
+      const match = previous ? values.find(task => task.task_id === previous.task_id) || null : null;
+      if (match) selectTask(match.task_id);
+      return match;
+    });
   }
   async function act(action: () => Promise<void>) {
     setBusy(true); setError("");
@@ -53,9 +60,9 @@ export default function Dashboard() {
   }
   return (
     <div className="lime-page-container">
-      <Sidebar isClassifierConnected={authorized} />
+      <Sidebar workspace="counsellor" isClassifierConnected={authorized} />
       <main className="lime-main" id="content">
-        <DemoHeader title="Counsellor review" subtitle="Assigned fictional cases, interpreted by an authorized human." />
+        <DemoHeader title="Case Queue" subtitle="Assigned fictional cases, interpreted by an authorized human." />
         <SafetyNotice /><ErrorMessage message={error} />
         {checking ? <p role="status" className="empty">Checking your session…</p> : !authorized ? <section className="card sign-in" aria-labelledby="sign-in-title">
           <p className="eyebrow">Restricted access</p><h2 id="sign-in-title">Development sign-in</h2>
@@ -78,12 +85,17 @@ export default function Dashboard() {
                   window.history.replaceState(null, "", url.pathname);
                 }
                 await api("/auth/logout", {});
+                await contextLogout();
               })}>Sign out</button></div></nav>
           <p role="status" className="feedback">{busy ? "Checking authorized evidence…" : `${tasks.length} authorized synthetic task(s)`}</p>
           <div className="review-grid"><section className="card task-list" aria-label="Assigned synthetic cases">
             {tasks.length === 0 ? <div className="empty"><h3>No assigned cases available</h3><p>Cases appear after successful processing with active consent. Withdrawn or inaccessible evidence is excluded.</p></div> :
               <ul>{tasks.map((task, index) => <li key={task.task_id}><button className={`task-button ${selected?.task_id === task.task_id ? "selected" : ""}`} disabled={busy} aria-pressed={selected?.task_id === task.task_id}
-                onClick={() => act(async () => setSelected(await api<ReviewTask>(`/review-tasks/${task.task_id}`)))}>
+                onClick={() => act(async () => {
+                  const detail = await api<ReviewTask>(`/review-tasks/${task.task_id}`);
+                  setSelected(detail);
+                  selectTask(task.task_id);
+                })}>
                 <strong>Open synthetic case {index + 1}</strong><span>{reviewLabel(task.case.processing_status)}</span>
               </button></li>)}</ul>}
           </section>

@@ -4,7 +4,7 @@ import { CaseProvider } from "./context/CaseContext";
 import "./globals.css";
 
 export const metadata = {
-  title: "J26-SE-338 | Counsellor Review & XAI",
+  title: "Counsellor Dashboard | J26-SE-338",
   description: "Non-diagnostic student wellbeing screening support prototype",
 };
 
@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <a className="skip" href="#content">
           Skip to content
         </a>
-        <div id="content">
+        <div className="app-shell-root">
           <ErrorBoundary>
             <CaseProvider>{children}</CaseProvider>
           </ErrorBoundary>

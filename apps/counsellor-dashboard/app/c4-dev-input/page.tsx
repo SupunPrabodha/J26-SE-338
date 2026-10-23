@@ -194,7 +194,7 @@ function C4DevInputContent() {
         const errJson = await response.json().catch(() => ({}));
         if (response.status === 401) {
           setErrorMessage(
-            "Authentication required (HTTP 401). Please sign in via the Overview page with your synthetic counsellor credentials."
+            "Authentication required (HTTP 401). Please sign in via the Case Queue page with your synthetic counsellor credentials."
           );
         } else {
           setErrorMessage(errJson.error || errJson.message || `Prediction failed with status ${response.status}`);
@@ -232,7 +232,7 @@ function C4DevInputContent() {
 
   return (
     <div className="lime-page-container">
-      <Sidebar isClassifierConnected={authorized} />
+      <Sidebar workspace="counsellor" isClassifierConnected={authorized} />
 
       <main className="lime-main" id="content">
         {/* Header Block */}
@@ -319,7 +319,7 @@ function C4DevInputContent() {
             <span>Fictional test text only. Do not enter personal or student information.</span>
           </div>
           <Link href="/" style={{ color: "#b45309", fontSize: "11.5px", textDecoration: "underline", fontWeight: 600 }}>
-            Return to Overview
+            Return to Case Queue
           </Link>
         </div>
 
@@ -373,7 +373,7 @@ function C4DevInputContent() {
                   textDecoration: "underline",
                 }}
               >
-                Go to Overview →
+                Go to Case Queue →
               </Link>
             </div>
 

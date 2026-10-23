@@ -135,6 +135,38 @@
   box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
 }
 
+.lime-nav-btn:focus-visible,
+.lime-brand:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+  border-radius: 7px;
+}
+
+.lime-nav-btn-back {
+  background: rgba(99, 102, 241, 0.12) !important;
+  color: #c7d2fe !important;
+  border: 1px solid rgba(99, 102, 241, 0.28) !important;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.lime-nav-btn-back:hover {
+  background: rgba(99, 102, 241, 0.24) !important;
+  color: #ffffff !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
+}
+
+.lime-nav-badge {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .lime-nav-icon {
   flex-shrink: 0;
   color: currentColor;
