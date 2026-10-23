@@ -179,15 +179,37 @@ export default function StabilityPage() {
   }, []);
 
   // Check source-match status between current text and explanation
-  const sourceMatchStatus = useMemo(() => {
+  const sourceMatchStatus = useMemo<"matched" | "mismatched" | "unknown">(() => {
     if (!selectedExplanation || !submissionText) return "unknown";
     const textTrimmed = submissionText.trim();
     if (!textTrimmed) return "unknown";
-    if (selectedExplanation.source_reference) {
-      return "matched";
-    }
-    return "matched";
+    const tokens = selectedExplanation.tokens || [];
+    if (tokens.length === 0) return "unknown";
+
+    const cleanTokens = tokens
+      .map((t) => t.trim())
+      .filter((t) => t.length > 1 && !t.startsWith("[") && !t.startsWith("<"));
+    if (cleanTokens.length === 0) return "unknown";
+
+    const matchedTokens = cleanTokens.filter((t) => textTrimmed.includes(t));
+    const ratio = matchedTokens.length / cleanTokens.length;
+
+    return ratio >= 0.3 ? "matched" : "mismatched";
   }, [selectedExplanation, submissionText]);
+
+  // Reset analysis results and clear URL evaluation parameter
+  const handleResetAnalysis = () => {
+    setResult(null);
+    setError("");
+    setStatusMessage("");
+    setSavedNotice("");
+    restoredEvalIdRef.current = null;
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("evaluation_id");
+      window.history.replaceState(null, "", url.toString());
+    }
+  };
 
   // Handle Run Analysis
   const handleRunAnalysis = async () => {
@@ -200,10 +222,24 @@ export default function StabilityPage() {
       return;
     }
 
+    if (sourceMatchStatus === "mismatched") {
+      setError("Source text mismatch: The selected explanation was generated from different text than the current case input. Please select an explanation matching this case or generate a new explanation first.");
+      setResult(null);
+      return;
+    }
+
     setIsBusy(true);
     setError("");
+    setResult(null);
     setStatusMessage("Running independent explainer computations across distinct seeds...");
     setSavedNotice("");
+
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("evaluation_id");
+      window.history.replaceState(null, "", url.toString());
+    }
+    restoredEvalIdRef.current = null;
 
     const reqId = ++activeRequestRef.current;
 
@@ -275,6 +311,7 @@ export default function StabilityPage() {
       setStatusMessage("");
     } catch (err: unknown) {
       if (activeRequestRef.current !== reqId) return;
+      setResult(null);
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
@@ -488,6 +525,16 @@ export default function StabilityPage() {
           </div>
         )}
 
+        {savedNotice && !error && (
+          <div className="stab-advisory-banner" style={{ background: "#f0fdf4", borderColor: "#86efac", color: "#166534" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <div>{savedNotice}</div>
+          </div>
+        )}
+
         {/* TOP ROW: 3 Cards Side by Side */}
         <section className="stab-top-grid" aria-label="Overview Cards">
           {/* Card 1: Input Text */}
@@ -589,10 +636,25 @@ export default function StabilityPage() {
               </span>
               <span
                 className={`stab-card-badge ${
-                  sourceMatchStatus === "matched" ? "stab-badge-match" : "stab-badge-neutral"
+                  sourceMatchStatus === "matched"
+                    ? "stab-badge-match"
+                    : sourceMatchStatus === "mismatched"
+                    ? "stab-badge-mismatch"
+                    : "stab-badge-neutral"
                 }`}
+                title={
+                  sourceMatchStatus === "matched"
+                    ? "Explanation tokens match current source text"
+                    : sourceMatchStatus === "mismatched"
+                    ? "Explanation was generated for different text"
+                    : "Pending verification"
+                }
               >
-                {sourceMatchStatus === "matched" ? "Source Verified" : "Pending Match"}
+                {sourceMatchStatus === "matched"
+                  ? "Source Verified"
+                  : sourceMatchStatus === "mismatched"
+                  ? "Text Mismatch"
+                  : "Pending Match"}
               </span>
             </div>
             <div className="stab-card-body">
@@ -600,7 +662,11 @@ export default function StabilityPage() {
                 id="select-explanation"
                 className="stab-select"
                 value={selectedExpId}
-                onChange={(e) => setSelectedExpId(e.target.value)}
+                onChange={(e) => {
+                  const newId = e.target.value;
+                  setSelectedExpId(newId);
+                  handleResetAnalysis();
+                }}
                 aria-label="Select saved explanation"
               >
                 <option value="">-- Choose saved LIME or SHAP explanation --</option>
@@ -688,6 +754,22 @@ export default function StabilityPage() {
                 </>
               )}
             </button>
+
+            {(result || selectedExpId) && (
+              <button
+                type="button"
+                className="stab-btn-secondary"
+                onClick={handleResetAnalysis}
+                disabled={isBusy}
+                title="Clear current stability results and reset analysis view"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                <span>Reset View</span>
+              </button>
+            )}
 
             <button
               type="button"

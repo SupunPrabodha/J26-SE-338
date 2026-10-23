@@ -2,6 +2,21 @@ export class ApiError extends Error {
   constructor(public readonly status: number, message: string) { super(message); }
 }
 
+let refreshPromise: Promise<void> | null = null;
+
+async function refreshAuth(): Promise<void> {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        await api<void>("/auth/refresh", {}, false);
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+  }
+  return refreshPromise;
+}
+
 export async function api<T>(path: string, body?: unknown, retry = true): Promise<T> {
   const response = await fetch(`/api/v1${path}`, {
     method: body === undefined ? "GET" : "POST",
@@ -11,8 +26,12 @@ export async function api<T>(path: string, body?: unknown, retry = true): Promis
     cache: "no-store",
   });
   if (response.status === 401 && retry && !path.startsWith("/auth/")) {
-    await api("/auth/refresh", {}, false);
-    return api<T>(path, body, false);
+    try {
+      await refreshAuth();
+      return api<T>(path, body, false);
+    } catch {
+      throw new ApiError(401, "Your session has ended. Please sign in again.");
+    }
   }
   if (!response.ok) {
     // Never display server bodies or submitted text in an error.
