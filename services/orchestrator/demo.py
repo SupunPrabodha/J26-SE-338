@@ -15,6 +15,7 @@ from research_common.database import (
     Retention,
     Review,
     ReviewAction,
+    ReviewRecord,
     Withdrawal,
     session,
 )
@@ -50,7 +51,7 @@ PAIRS = {
         "RETRY_EXHAUSTED",
         "CONTRACT_INVALID",
     },
-    "HUMAN_REVIEW": {"START_REVIEW", "COMPLETE_REVIEW"},
+    "HUMAN_REVIEW": {"START_REVIEW", "COMPLETE_REVIEW", "RECORD_SAVED"},
     "WITHDRAWAL": {"BEFORE_SUBMISSION", "WITHDRAWN"},
     "RETENTION": {"DERIVED_EVIDENCE_DELETED"},
 }
@@ -214,6 +215,7 @@ def evidence(run_id: UUID, account=Depends(student), db=Depends(session)):
         and case.explanation is None
         and case.provenance is None
         and not assigned
+        and not (task and db.scalar(select(ReviewRecord.id).where(ReviewRecord.task_id == task.id)))
         and (not job or job.status == "CANCELLED" and job.fixture_id is None)
     )
     return DemoEvidence(
@@ -235,6 +237,11 @@ def evidence(run_id: UUID, account=Depends(student), db=Depends(session)):
         ),
         review_started_at=actions.get("START_REVIEW"),
         review_completed_at=actions.get("COMPLETE_REVIEW"),
+        review_record_saved_at=db.scalar(
+            select(Audit.created_at)
+            .where(scope, Audit.event_type == "HUMAN_REVIEW", Audit.status == "RECORD_SAVED")
+            .limit(1)
+        ),
         withdrawn_at=withdrawal.created_at if withdrawal else None,
         disposal_confirmed=disposed,
         receipts=[DemoReceipt(event=e.event_type, occurred_at=e.created_at) for e in events[:50]],

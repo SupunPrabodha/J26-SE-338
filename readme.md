@@ -47,7 +47,7 @@ docker compose up --build
 
 Bootstrap creates gitignored `.env` with random development credentials and preserves existing files. Privately read `DEV_COUNSELLOR_USERNAME` and `DEV_COUNSELLOR_PASSWORD` for dashboard login. Application cookies are isolated; separate browser profiles remain recommended for clear student/counsellor demo roles. Sign in again after upgrading from the legacy shared-cookie proxy.
 
-Record synthetic consent, select a fixed fixture, submit and refresh its status. The worker runs C2 → C3 → C4 and creates an assigned review task only after all stages succeed. Sign in as the designated synthetic counsellor, refresh tasks, start review and record completion. Withdrawal cancels pending work, removes evidence/assignment and blocks further review.
+Record synthetic consent, select a fixed fixture, submit and refresh its status. The worker runs C2 → C3 → C4 and creates an assigned review task only after all stages succeed. Sign in as the designated synthetic counsellor, refresh tasks, start review, save a fictional interpretation and follow-up category, then record completion. Withdrawal cancels pending work, removes evidence/assignment and the saved review record, and blocks further review. See [FR09 verification and boundaries](docs/evidence/c1-fr09-review-record.md).
 
 ## Ports
 

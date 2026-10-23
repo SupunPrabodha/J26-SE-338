@@ -1,0 +1,58 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/CounsellorReviewRecord.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "follow_up": {
+      "enum": [
+        "NO_FOLLOW_UP_PLANNED",
+        "DISCUSSION_OFFERED",
+        "FOLLOW_UP_REQUESTED"
+      ],
+      "title": "Follow Up",
+      "type": "string"
+    },
+    "interpretation": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "saved_at": {
+      "format": "date-time",
+      "title": "Saved At",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "task_id": {
+      "format": "uuid",
+      "title": "Task Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "interpretation",
+    "follow_up",
+    "saved_at"
+  ],
+  "title": "CounsellorReviewRecord",
+  "type": "object"
+}

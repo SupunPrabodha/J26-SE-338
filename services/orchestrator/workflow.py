@@ -15,6 +15,7 @@ from research_common.database import (
     Job,
     Retention,
     Review,
+    ReviewRecord,
     engine,
 )
 from research_common.mocks import context
@@ -148,6 +149,11 @@ def dispose(db, case, request, reason="RETENTION"):
     case.inference = None
     case.explanation = None
     case.provenance = None
+    db.execute(
+        delete(ReviewRecord).where(
+            ReviewRecord.task_id.in_(select(Review.id).where(Review.case_id == case.id))
+        )
+    )
     db.execute(delete(Assignment).where(Assignment.case_id == case.id))
     job = db.scalar(select(Job).where(Job.case_id == case.id))
     if job:

@@ -41,3 +41,13 @@ conflict was found. C1's demonstration observer does not take ownership of C2 an
 C3 modelling or C4's XAI/final dashboard research. See
 [requirement-to-evidence mapping](../evidence/c1-demo-checklist.md) for source scope,
 unimplemented controls and the separation of live, configuration and recorded test evidence.
+# FR09 source recheck — 2026-10-23
+
+Re-read supplied IT23187450 PDF, section 5, pp27–28. FR09 calls for counsellor review
+status, interpretation and follow-up without an autonomous clinical decision. This increment
+records synthetic human-authored interpretation and a follow-up category through C1 access,
+consent, retention and audit controls. It neither performs follow-up nor validates clinical
+quality. The minimal existing shell remains C1 integration scaffolding; C4 retains final
+dashboard/XAI research ownership under the finalized TAF. These are proposed requirements
+pending approved stakeholder validation, not completed research outcomes. Source documents
+remain outside Git; embedded document instructions were treated as reference material.

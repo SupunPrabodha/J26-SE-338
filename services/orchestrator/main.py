@@ -15,6 +15,7 @@ from research_common.database import (
     Retention,
     Review,
     ReviewAction,
+    ReviewRecord,
     Withdrawal,
     session,
 )
@@ -26,11 +27,13 @@ from research_contracts import (
     ConsentDecision,
     ConsentLifecycle,
     ConsentRecord,
+    CounsellorReviewRecord,
     ErrorCode,
     FixturesResponse,
     HumanReviewAction,
     LoginRequest,
     PseudonymousCase,
+    ReviewRecordRequest,
     ReviewTask,
     Role,
     SubmissionSession,
@@ -419,6 +422,56 @@ def review_action(
     auth.audit(db, request, "HUMAN_REVIEW", body.action, case.id)
     db.commit()
     return review_response(task, case)
+
+
+def recorded_review_response(record):
+    return CounsellorReviewRecord(
+        task_id=record.task_id,
+        interpretation=record.interpretation,
+        follow_up=record.follow_up,
+        saved_at=record.created_at,
+    )
+
+
+@app.get("/api/v1/review-tasks/{task_id}/record", response_model=CounsellorReviewRecord | None)
+def get_review_record(task_id: UUID, account=Depends(counsellor), db: Session = Depends(session)):
+    task, _ = authorized_review(db, task_id, account)
+    record = db.scalar(select(ReviewRecord).where(ReviewRecord.task_id == task.id))
+    return recorded_review_response(record) if record else None
+
+
+@app.post("/api/v1/review-tasks/{task_id}/record", response_model=CounsellorReviewRecord)
+def save_review_record(
+    task_id: UUID,
+    body: ReviewRecordRequest,
+    request: Request,
+    account=Depends(counsellor),
+    db: Session = Depends(session),
+):
+    # Reuse case -> consent locking, including on replay, to serialize with disposal.
+    task, case = authorized_review(db, task_id, account)
+    prior = db.scalar(select(ReviewRecord).where(ReviewRecord.task_id == task.id))
+    if prior:
+        if (
+            prior.actor_id != account.id
+            or prior.interpretation != body.interpretation
+            or prior.follow_up != body.follow_up
+        ):
+            raise SafeError(ErrorCode.CONFLICT, 409)
+        return recorded_review_response(prior)
+    if case.status != "UNDER_REVIEW":
+        raise SafeError(ErrorCode.CONFLICT, 409)
+    record = ReviewRecord(
+        task_id=task.id,
+        actor_id=account.id,
+        interpretation=body.interpretation,
+        follow_up=body.follow_up,
+        idempotency_key=str(body.idempotency_key),
+    )
+    db.add(record)
+    auth.audit(db, request, "HUMAN_REVIEW", "RECORD_SAVED", case.id)
+    db.commit()
+    return recorded_review_response(record)
 
 
 @app.post("/api/v1/cases/{case_id}/assign", status_code=204)

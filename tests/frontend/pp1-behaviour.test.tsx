@@ -62,6 +62,7 @@ test.each([401, 403, 404])("counsellor denial %i clears cached evidence and acti
   vi.stubGlobal("fetch", vi.fn(async (url: string) => {
     if (url.endsWith("/me")) return ok({ role: "COUNSELLOR" });
     if (url.endsWith("/review-tasks")) return ok([task]);
+    if (url.endsWith("/record")) return ok(null);
     if (url.endsWith("/actions") || url.endsWith("/refresh")) return { ok: false, status };
     return ok(task);
   }));

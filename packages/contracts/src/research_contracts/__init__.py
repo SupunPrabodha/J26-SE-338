@@ -212,6 +212,27 @@ class HumanReviewAction(Contract):
     idempotency_key: UUID
 
 
+class ReviewRecordRequest(Contract):
+    interpretation: Annotated[str, Field(min_length=1, max_length=2000)]
+    follow_up: Literal["NO_FOLLOW_UP_PLANNED", "DISCUSSION_OFFERED", "FOLLOW_UP_REQUESTED"]
+    idempotency_key: UUID
+
+    @field_validator("interpretation")
+    @classmethod
+    def synthetic_interpretation(cls, value):
+        value = value.strip()
+        if not value.startswith("SYNTHETIC:") or not value[len("SYNTHETIC:") :].strip():
+            raise ValueError("A synthetic interpretation is required")
+        return value
+
+
+class CounsellorReviewRecord(Contract):
+    task_id: UUID
+    interpretation: Annotated[str, Field(min_length=1, max_length=2000)]
+    follow_up: Literal["NO_FOLLOW_UP_PLANNED", "DISCUSSION_OFFERED", "FOLLOW_UP_REQUESTED"]
+    saved_at: AwareDatetime
+
+
 class WithdrawalRequest(Contract):
     idempotency_key: UUID
 
@@ -361,6 +382,7 @@ class DemoEvidence(Contract):
     review_task_authorized: bool
     review_started_at: AwareDatetime | None = None
     review_completed_at: AwareDatetime | None = None
+    review_record_saved_at: AwareDatetime | None = None
     withdrawn_at: AwareDatetime | None = None
     disposal_confirmed: bool
     receipts: Annotated[list[DemoReceipt], Field(max_length=50)]

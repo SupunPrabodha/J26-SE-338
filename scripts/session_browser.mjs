@@ -45,7 +45,7 @@ async function click(page, label) {
 async function fill(page, selector, value) {
   await evaluate(page, ({ selector, value }) => {
     const e = document.querySelector(selector);
-    const prototype = e.tagName === "SELECT" ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
+    const prototype = e.tagName === "SELECT" ? HTMLSelectElement.prototype : e.tagName === "TEXTAREA" ? window.HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
     Object.getOwnPropertyDescriptor(prototype, "value").set.call(e, value);
     e.dispatchEvent(new Event("input", { bubbles: true })); e.dispatchEvent(new Event("change", { bubbles: true }));
   }, { selector, value });
@@ -196,9 +196,21 @@ try {
       document.querySelectorAll('.task-button')[index].click();
     },caseId);
     stage = 'review_actions';
-    await click(reviewer,'Start human review'); await click(reviewer,'Record review complete');
+    await click(reviewer,'Start human review');
+    stage = 'review_record_save';
+    await wait(reviewer, () => !!document.querySelector('#interpretation'));
+    await fill(reviewer, '#interpretation', 'SYNTHETIC: Fictional timetable context reviewed by a human.');
+    await fill(reviewer, '#follow-up', 'DISCUSSION_OFFERED');
+    await click(reviewer, 'Save review record');
+    await wait(reviewer, () => document.querySelector('.review-detail')?.textContent.includes('Review record saved'));
+    await click(reviewer, 'Refresh assigned tasks');
+    await wait(reviewer, () => document.querySelector('.review-detail')?.textContent.includes('Fictional timetable context reviewed by a human.'));
+    await click(reviewer,'Record review complete');
     await click(observer,'Refresh evidence');
     await wait(observer,()=>document.querySelector('[data-check="FR09.b"] [data-result]')?.textContent==='Verified for this run');
+    await wait(observer,()=>document.querySelector('[data-check="FR09.c"] [data-result]')?.textContent==='Verified for this run');
+    assert(await evaluate(observer, () => !document.body.textContent.includes('Fictional timetable context reviewed by a human.')), 'Private review text reached the student checklist');
+    checks.push({name:'fr09_record_save_read_and_safe_student_receipt',passed:true});
     await screenshot(observer,'session-after-refresh-review');
     stage = 'withdrawal_after_refresh';
     await withdraw(owner); await click(observer,'Refresh evidence');

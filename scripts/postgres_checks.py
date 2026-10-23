@@ -8,9 +8,26 @@ from threading import Barrier, Event
 from uuid import UUID, uuid4
 
 from orchestrator import demo, main, workflow
-from research_common.database import Audit, Case, Consent, Job, Review, Withdrawal, engine
+from research_common.database import (
+    Account,
+    Assignment,
+    Audit,
+    Case,
+    Consent,
+    Job,
+    Review,
+    ReviewRecord,
+    Withdrawal,
+    engine,
+)
 from research_common.web import SafeError
-from research_contracts import ErrorCode, WithdrawalRequest, now
+from research_contracts import (
+    ErrorCode,
+    HumanReviewAction,
+    ReviewRecordRequest,
+    WithdrawalRequest,
+    now,
+)
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 from synthetic_runtime import (
@@ -69,7 +86,7 @@ def wait_for_lock_wait():
 
 def run():
     results = []
-    with isolated_postgres():
+    with isolated_postgres() as disposable_schema:
         batch = [create_case() for _ in range(4)]
         gate = Barrier(4)
 
@@ -280,6 +297,90 @@ def run():
         final = observe()
         assert final.receipt_only and final.disposal_confirmed and not final.provenance_validated
         results.append("demo_observer_withdrawal_coherent_lock_order")
+
+        # Additive migration round trip on this isolated schema only, preserving existing cases.
+        from alembic import command
+        from alembic.config import Config
+
+        with Session(engine()) as db:
+            # Never downgrade unless the current connection still targets the new UUID schema.
+            assert disposable_schema.startswith("c1_eval_")
+            assert db.scalar(text("SELECT current_schema()")) == disposable_schema
+            before = db.scalar(select(func.count()).select_from(Case))
+        command.downgrade(Config("alembic.ini"), "f310c1000002")
+        command.upgrade(Config("alembic.ini"), "head")
+        with Session(engine()) as db:
+            assert db.scalar(select(func.count()).select_from(Case)) == before
+        results.append("review_record_migration_preserves_existing_cases")
+
+        owner, consent, case_id = create_case()
+        workflow.process_job(*workflow.claim_job(), adapter=synthetic_adapter)
+        with Session(engine(), expire_on_commit=False) as db, db.begin():
+            reviewer = Account(role="COUNSELLOR")
+            db.add(reviewer)
+            db.flush()
+            db.add(Assignment(case_id=case_id, counsellor_id=reviewer.id))
+            task = db.scalar(select(Review).where(Review.case_id == case_id))
+        with Session(engine(), expire_on_commit=False) as db:
+            main.review_action(
+                UUID(task.id),
+                HumanReviewAction(action="START_REVIEW", idempotency_key=uuid4()),
+                request(),
+                reviewer,
+                db,
+            )
+        record = ReviewRecordRequest(
+            interpretation="SYNTHETIC: Concurrent fictional review.",
+            follow_up="DISCUSSION_OFFERED",
+            idempotency_key=uuid4(),
+        )
+
+        def save_record():
+            with Session(engine(), expire_on_commit=False) as db:
+                return main.save_review_record(UUID(task.id), record, request(), reviewer, db)
+
+        with Session(engine()) as blocker:
+            blocker.scalar(select(Case).where(Case.id == case_id).with_for_update())
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                first, second = pool.submit(save_record), pool.submit(save_record)
+                try:
+                    wait_for_lock_wait()
+                finally:
+                    blocker.rollback()
+                assert first.result(timeout=15) == second.result(timeout=15)
+        with Session(engine()) as db:
+            assert db.scalar(select(func.count()).select_from(ReviewRecord)) == 1
+            assert (
+                db.scalar(
+                    select(func.count())
+                    .select_from(Audit)
+                    .where(Audit.case_id == case_id, Audit.status == "RECORD_SAVED")
+                )
+                == 1
+            )
+        results.append("concurrent_review_record_saves_single_row_and_receipt")
+
+        # Replay must acquire the same case -> consent locks and cannot resurrect disposed text.
+        with Session(engine()) as blocker:
+            blocker.scalar(select(Case).where(Case.id == case_id).with_for_update())
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                saving, withdrawing = (
+                    pool.submit(save_record),
+                    pool.submit(withdraw, owner, consent),
+                )
+                try:
+                    wait_for_lock_wait()
+                finally:
+                    blocker.rollback()
+                try:
+                    saving.result(timeout=15)
+                except SafeError as error:
+                    assert error.status in {403, 404}
+                withdrawing.result(timeout=15)
+        with Session(engine()) as db:
+            assert db.scalar(select(ReviewRecord)) is None
+        assert_disposed(case_id)
+        results.append("review_record_replay_withdrawal_serialization_and_deletion")
     return {
         "synthetic": True,
         "database": "PostgreSQL",

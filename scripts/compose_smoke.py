@@ -96,6 +96,20 @@ def main():
                     ).status_code
                     == 200
                 )
+                if action == "START_REVIEW":
+                    record_path = f"/api/v1/review-tasks/{task['task_id']}/record"
+                    record_body = {
+                        "interpretation": "SYNTHETIC: Smoke review privacy marker.",
+                        "follow_up": "DISCUSSION_OFFERED",
+                        "idempotency_key": str(uuid4()),
+                    }
+                    saved = reviewer.post(record_path, json=record_body)
+                    assert saved.status_code == 200
+                    assert reviewer.get(record_path).json() == saved.json()
+                    assert reviewer.post(record_path, json=record_body).json() == saved.json()
+                    evidence = student.get(f"/api/v1/demo/runs/{consent['consent_id']}")
+                    assert evidence.json()["review_record_saved_at"]
+                    assert record_body["interpretation"] not in evidence.text
             # Expire only this synthetic case while its owner session remains valid.
             # This tests retention-before-withdrawal without waiting for the default TTL.
             case = str(UUID(case))
@@ -117,6 +131,18 @@ enforce_retention()
                 == "WITHDRAWN"
             )
             assert reviewer.get(f"/api/v1/review-tasks/{task['task_id']}").status_code == 404
+            assert reviewer.get(record_path).status_code == 404
+            container_python(
+                "orchestrator",
+                f"""
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from research_common.database import Review, ReviewRecord, engine
+with Session(engine()) as db:
+    task = db.scalar(select(Review).where(Review.case_id == '{case}'))
+    assert db.scalar(select(ReviewRecord).where(ReviewRecord.task_id == task.id)) is None
+""",
+            )
             with ThreadPoolExecutor(max_workers=2) as executor:
                 withdrawals = list(
                     executor.map(
@@ -174,6 +200,7 @@ with Session(engine()) as db:
         check=True,
     ).stdout
     assert all(value not in logs for value in fixtures.values())
+    assert "SYNTHETIC: Smoke review privacy marker." not in logs
     assert all(
         value not in logs
         for key, value in environment.items()
@@ -192,6 +219,8 @@ with Session(engine()) as db:
                     "concurrent idempotency",
                     "assigned review",
                     "human action",
+                    "review record save/read/replay and safe receipt",
+                    "review content disposal and log exclusion",
                     "withdrawal access revocation",
                     "retention before concurrent owner withdrawals",
                     "single withdrawal receipt and audit event",

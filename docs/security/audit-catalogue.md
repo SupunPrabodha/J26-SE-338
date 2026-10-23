@@ -19,7 +19,7 @@ scenario execution is `tests/integration/test_audit_traces.py`.
 | JOB_CLAIM | Queued claim or expired lease recovered | Once per attempt, at most three | FR-06 |
 | JOB_RETRY / JOB_TERMINAL | A worker failure requeues or permanently fails; exhausted interrupted lease | At most two retries, one terminal receipt per terminalization | FR-06, NFR-06 |
 | ASSIGNMENT | Automatic designated assignment or new administrator grant | Once per inserted assignment | FR-07/08 |
-| HUMAN_REVIEW | Authorized START_REVIEW or COMPLETE_REVIEW | Existing action idempotency key | FR-09 |
+| HUMAN_REVIEW | Authorized START_REVIEW, COMPLETE_REVIEW, or RECORD_SAVED | Action key for transitions; one save receipt per task under case lock | FR-09 |
 | WITHDRAWAL | Explicit owner withdrawal before/after submission, including after retention | One receipt/event per consent or linked case; repeats are no-ops | FR-10 |
 | RETENTION | Derived evidence disposed by retention or withdrawal | One disposal receipt/event per case | FR-10/11 |
 
@@ -44,6 +44,12 @@ use INSERT-on-conflict-do-nothing; no existing receipt is edited. A database adm
 can change the schema/triggers. This is not administrator-proof or cryptographic tamper resistance.
 
 ## Evaluated denominator
+
+The dated 29-observation evaluation below predates the FR09 record addition. It does
+not include `HUMAN_REVIEW / RECORD_SAVED`. The new save receipt, repeat suppression and
+content exclusion are checked separately in `tests/integration/test_review_records.py`
+and the PostgreSQL harness; see [FR09 evidence](../evidence/c1-fr09-review-record.md).
+Do not reuse the historical ratio as coverage of the expanded implementation.
 
 Each `(scenario, event, status)` tuple in CATALOGUE is one required observation. Repetition
 does not increase the numerator. There are 29 observations, 27 marked critical:

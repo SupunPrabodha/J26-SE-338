@@ -3,13 +3,16 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, ApiError } from "@j26/common/api";
 import { DemoHeader, ErrorMessage, SafetyNotice, processingLabel, reviewLabel } from "@j26/common/ui";
-import type { AccountResponse, ReviewTask } from "@j26/common/contracts";
+import type { AccountResponse, ReviewTask, CounsellorReviewRecord, ReviewRecordRequest } from "@j26/common/contracts";
 
 export default function Dashboard() {
   const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
   const [tasks, setTasks] = useState<ReviewTask[]>([]);
   const [selected, setSelected] = useState<ReviewTask | null>(null);
+  const [record, setRecord] = useState<CounsellorReviewRecord | null>(null);
+  const [interpretation, setInterpretation] = useState("");
+  const [followUp, setFollowUp] = useState<ReviewRecordRequest["follow_up"]>("NO_FOLLOW_UP_PLANNED");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -26,11 +29,15 @@ export default function Dashboard() {
     const values = await api<ReviewTask[]>("/review-tasks");
     setTasks(values);
     setSelected(previous => previous ? values.find(task => task.task_id === previous.task_id) || null : null);
+    setRecord(null); setInterpretation("");
+    if (selected && values.some(task => task.task_id === selected.task_id)) {
+      setRecord(await api<CounsellorReviewRecord | null>(`/review-tasks/${selected.task_id}/record`));
+    }
   }
   async function act(action: () => Promise<void>) {
     setBusy(true); setError("");
     try { await action(); } catch (cause) {
-      setTasks([]); setSelected(null);
+      setTasks([]); setSelected(null); setRecord(null); setInterpretation("");
       if (cause instanceof ApiError && cause.status === 401) setAuthorized(false);
       setError(cause instanceof ApiError ? cause.message : cause instanceof Error && cause.message.includes("requires an authorized counsellor") ? cause.message : "The request could not be completed. Refresh assigned tasks or sign in again.");
     } finally { setBusy(false); }
@@ -64,12 +71,17 @@ export default function Dashboard() {
     </section> : <>
       <nav className="toolbar" aria-label="Review controls"><div><h2>Assigned tasks</h2><p className="hint">Refresh to recheck access and current consent.</p></div>
         <div className="actions"><button className="secondary" disabled={busy} onClick={() => act(load)}>Refresh assigned tasks</button>
-          <button className="quiet" disabled={busy} onClick={() => act(async () => { setAuthorized(false); setTasks([]); setSelected(null); await api("/auth/logout", {}); })}>Sign out</button></div></nav>
+          <button className="quiet" disabled={busy} onClick={() => act(async () => { setAuthorized(false); setTasks([]); setSelected(null); setRecord(null); setInterpretation(""); await api("/auth/logout", {}); })}>Sign out</button></div></nav>
       <p role="status" className="feedback">{busy ? "Checking authorized evidence…" : `${tasks.length} authorized synthetic task(s)`}</p>
       <div className="review-grid"><section className="card task-list" aria-label="Assigned synthetic cases">
         {tasks.length === 0 ? <div className="empty"><h3>No assigned cases available</h3><p>Cases appear after successful processing with active consent. Withdrawn or inaccessible evidence is excluded.</p></div> :
           <ul>{tasks.map((task, index) => <li key={task.task_id}><button className={`task-button ${selected?.task_id === task.task_id ? "selected" : ""}`} disabled={busy} aria-pressed={selected?.task_id === task.task_id}
-            onClick={() => act(async () => setSelected(await api<ReviewTask>(`/review-tasks/${task.task_id}`)))}>
+            onClick={() => act(async () => {
+              setSelected(null); setRecord(null); setInterpretation(""); setFollowUp("NO_FOLLOW_UP_PLANNED");
+              const current = await api<ReviewTask>(`/review-tasks/${task.task_id}`);
+              const saved = await api<CounsellorReviewRecord | null>(`/review-tasks/${task.task_id}/record`);
+              setSelected(current); setRecord(saved);
+            })}>
             <strong>Open synthetic case {index + 1}</strong><span>{reviewLabel(task.case.processing_status)}</span>
           </button></li>)}</ul>}
       </section>
@@ -87,6 +99,35 @@ export default function Dashboard() {
           <div className="mock-evidence"><h3>Mock explanation</h3>{selected.explanation.evidence.map((evidence, index) => <p key={index}>{evidence}</p>)}</div>
           <details><summary>Provider versions</summary><p>Model {selected.inference.model_version}; explainer {selected.explanation.explainer_version}; service {selected.inference.service_version}.</p></details>
           <p className="notice-inline">Processing completion is not human review completion. These fixed outputs are not research results or clinical recommendations.</p>
+          <section aria-labelledby="review-record-title">
+            <h3 id="review-record-title">Interpretation and follow-up</h3>
+            <p className="hint">Screening support only; this does not replace professional counselling. Record fictional observations, never identifiers or clinical advice. Follow-up categories record a human decision; they do not send messages or schedule care.</p>
+            {record ? <div role="status">
+              <p><strong>Review record saved</strong> · {new Date(record.saved_at).toLocaleString()}</p>
+              <p style={{ whiteSpace: "pre-wrap" }}>{record.interpretation}</p>
+              <p>Follow-up: {record.follow_up.replaceAll("_", " ").toLowerCase()}</p>
+              <p className="hint">Saved records are final in this development increment. Consent and assignment are checked again on each read.</p>
+            </div> : selected.case.processing_status === "UNDER_REVIEW" ? <form onSubmit={event => {
+              event.preventDefault();
+              void act(async () => {
+                setRecord(await api<CounsellorReviewRecord>(`/review-tasks/${selected.task_id}/record`, {
+                  interpretation, follow_up: followUp, idempotency_key: crypto.randomUUID(),
+                })); setInterpretation("");
+              });
+            }}>
+              <label htmlFor="interpretation">Synthetic interpretation</label>
+              <textarea id="interpretation" required maxLength={2000} value={interpretation} disabled={busy}
+                placeholder="SYNTHETIC: Fictional review observation." onChange={event => setInterpretation(event.target.value)} />
+              <p className="hint">Start with SYNTHETIC: and add an observation. Maximum 2,000 characters.</p>
+              <label htmlFor="follow-up">Follow-up category</label>
+              <select id="follow-up" value={followUp} disabled={busy} onChange={event => setFollowUp(event.target.value as ReviewRecordRequest["follow_up"])}>
+                <option value="NO_FOLLOW_UP_PLANNED">No follow-up planned</option>
+                <option value="DISCUSSION_OFFERED">Discussion offered</option>
+                <option value="FOLLOW_UP_REQUESTED">Follow-up requested</option>
+              </select>
+              <button disabled={busy || !interpretation.trim().startsWith("SYNTHETIC:") || !interpretation.trim().slice(10).trim()}>Save review record</button>
+            </form> : <p>No review record saved. New records can only be saved while human review is in progress.</p>}
+          </section>
           {(["READY_FOR_REVIEW", "UNDER_REVIEW"].includes(selected.case.processing_status)) && <button disabled={busy} onClick={() => act(async () => {
             await api(`/review-tasks/${selected.task_id}/actions`, { action: selected.case.processing_status === "READY_FOR_REVIEW" ? "START_REVIEW" : "COMPLETE_REVIEW", idempotency_key: crypto.randomUUID() }); await load();
           })}>{selected.case.processing_status === "READY_FOR_REVIEW" ? "Start human review" : "Record review complete"}</button>}

@@ -37,3 +37,25 @@ JSON Schema, orchestrator OpenAPI and TypeScript declarations are generated from
 C2–C4 owners need no mock request/response changes, but must review real provider versions,
 provenance retention and deletion propagation before replacing mocks. These development
 literal versions deliberately do not accept an unreviewed real model version.
+# FR09 additive review record (2026-10-23)
+
+`GET /api/v1/review-tasks/{task_id}/record` returns `CounsellorReviewRecord` or JSON null
+when the authorized task has no saved record. `POST` accepts `ReviewRecordRequest`.
+Both require a currently assigned counsellor, active matching consent and an undisposed,
+unexpired case. The student and admin roles cannot read or save records.
+
+The first save requires `UNDER_REVIEW`. Interpretation must start with `SYNTHETIC:`,
+contain a nonblank observation and be at most 2,000 characters. Follow-up is one of
+`NO_FOLLOW_UP_PLANNED`, `DISCUSSION_OFFERED`, `FOLLOW_UP_REQUESTED`; these record a
+human choice and do not perform outreach or clinical decisions. The request includes
+a UUID idempotency key. The record is immutable: the same actor/content returns the
+existing record even with a new key, including after completion; different actor/content
+returns 409. Keys are scoped to a task, not a global request ledger. Every replay rechecks
+authorization and consent. Creating a record after completion returns 409.
+
+Existing START_REVIEW/COMPLETE_REVIEW contracts remain unchanged. Legacy status-only
+completion remains supported and does not imply a review record exists. No record is
+backfilled for older completed tasks. The demo adds only optional `review_record_saved_at`,
+derived from a persisted safe audit receipt, never interpretation or follow-up contents.
+Existing clients can omit the new optional field; strict response validators must regenerate
+from the central contracts. Coordinate consumer review before merging. C2–C4 contracts are unchanged.
