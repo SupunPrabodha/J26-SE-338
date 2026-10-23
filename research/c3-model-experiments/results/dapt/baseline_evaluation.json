@@ -1,0 +1,264 @@
+{
+  "timestamp": "2026-10-22T17:05:55.361356",
+  "model_name_or_path": "xlm-roberta-base",
+  "validation_file": "data/adaptation/dapt_val.txt",
+  "validation_sentence_count": 6416,
+  "mlm_probability": 0.15,
+  "eval_loss": 4.9861,
+  "perplexity": 146.36,
+  "top1_accuracy": 33.3,
+  "top5_accuracy": 44.76,
+  "evaluation_duration_seconds": 123.38,
+  "qualitative_probe_predictions": [
+    {
+      "probe_sentence": "mata stress eka wadi wela night <mask> ganna ba, full depressed inne.",
+      "top5_candidates": [
+        {
+          "token": ",",
+          "probability": 0.1192
+        },
+        {
+          "token": "i",
+          "probability": 0.0482
+        },
+        {
+          "token": "s",
+          "probability": 0.0412
+        },
+        {
+          "token": ".",
+          "probability": 0.0412
+        },
+        {
+          "token": "ya",
+          "probability": 0.0375
+        }
+      ]
+    },
+    {
+      "probe_sentence": "oya mata help karanna <mask> puluwanda mee assignment eka karanna.",
+      "top5_candidates": [
+        {
+          "token": ".",
+          "probability": 0.4297
+        },
+        {
+          "token": ",",
+          "probability": 0.1121
+        },
+        {
+          "token": "</s>",
+          "probability": 0.0453
+        },
+        {
+          "token": "or",
+          "probability": 0.0172
+        },
+        {
+          "token": "and",
+          "probability": 0.0172
+        }
+      ]
+    },
+    {
+      "probe_sentence": "campus eke exam eka thiyena nisa mata <mask> wadi wela thiyenne.",
+      "top5_candidates": [
+        {
+          "token": "ya",
+          "probability": 0.0508
+        },
+        {
+          "token": "m",
+          "probability": 0.0462
+        },
+        {
+          "token": "na",
+          "probability": 0.0318
+        },
+        {
+          "token": "n",
+          "probability": 0.0232
+        },
+        {
+          "token": ".",
+          "probability": 0.0225
+        }
+      ]
+    },
+    {
+      "probe_sentence": "mage yaaluwa mata godak <mask> kara mama dukin inna welawata.",
+      "top5_candidates": [
+        {
+          "token": "wa",
+          "probability": 0.051
+        },
+        {
+          "token": "iyo",
+          "probability": 0.02
+        },
+        {
+          "token": "na",
+          "probability": 0.02
+        },
+        {
+          "token": "ayo",
+          "probability": 0.0176
+        },
+        {
+          "token": "na",
+          "probability": 0.0176
+        }
+      ]
+    },
+    {
+      "probe_sentence": "hithata hari na wage, kawuruth na mata <mask> karanna.",
+      "top5_candidates": [
+        {
+          "token": ",",
+          "probability": 0.2725
+        },
+        {
+          "token": "na",
+          "probability": 0.1101
+        },
+        {
+          "token": "n",
+          "probability": 0.0287
+        },
+        {
+          "token": "m",
+          "probability": 0.0246
+        },
+        {
+          "token": "ya",
+          "probability": 0.0169
+        }
+      ]
+    },
+    {
+      "probe_sentence": "doctor gen <mask> ekak ganna one mata thiyena depression ekata.",
+      "top5_candidates": [
+        {
+          "token": "u",
+          "probability": 0.027
+        },
+        {
+          "token": "na",
+          "probability": 0.0261
+        },
+        {
+          "token": "ar",
+          "probability": 0.0169
+        },
+        {
+          "token": "tha",
+          "probability": 0.0123
+        },
+        {
+          "token": "ra",
+          "probability": 0.0112
+        }
+      ]
+    },
+    {
+      "probe_sentence": "ada lecture eka cut karala gedara hitiya, kisi <mask> na.",
+      "top5_candidates": [
+        {
+          "token": "ki",
+          "probability": 0.0632
+        },
+        {
+          "token": "na",
+          "probability": 0.0448
+        },
+        {
+          "token": "ko",
+          "probability": 0.0434
+        },
+        {
+          "token": "ki",
+          "probability": 0.0165
+        },
+        {
+          "token": "ka",
+          "probability": 0.0132
+        }
+      ]
+    },
+    {
+      "probe_sentence": "api okkoma ekathu wela me prashneta <mask> ekak hoyamu.",
+      "top5_candidates": [
+        {
+          "token": ",",
+          "probability": 0.0659
+        },
+        {
+          "token": "na",
+          "probability": 0.0311
+        },
+        {
+          "token": ".",
+          "probability": 0.0266
+        },
+        {
+          "token": "a",
+          "probability": 0.0195
+        },
+        {
+          "token": "api",
+          "probability": 0.0111
+        }
+      ]
+    },
+    {
+      "probe_sentence": "මට හරිම <mask>, කිසිම දෙයක් කරගන්න හිතෙන්නෙ නෑ.",
+      "top5_candidates": [
+        {
+          "token": "අමාරු",
+          "probability": 0.121
+        },
+        {
+          "token": "කැමතියි",
+          "probability": 0.0781
+        },
+        {
+          "token": "දුක",
+          "probability": 0.0445
+        },
+        {
+          "token": "קשה",
+          "probability": 0.0336
+        },
+        {
+          "token": "දුක්",
+          "probability": 0.0316
+        }
+      ]
+    },
+    {
+      "probe_sentence": "campus eke friends la ekka katha karama <mask> adu wenawa.",
+      "top5_candidates": [
+        {
+          "token": "la",
+          "probability": 0.1084
+        },
+        {
+          "token": "ka",
+          "probability": 0.0399
+        },
+        {
+          "token": "na",
+          "probability": 0.0213
+        },
+        {
+          "token": "a",
+          "probability": 0.0188
+        },
+        {
+          "token": ".",
+          "probability": 0.0156
+        }
+      ]
+    }
+  ]
+}
