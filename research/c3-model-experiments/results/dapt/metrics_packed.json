@@ -16,41 +16,41 @@
     "seed": 42
   },
   "results": {
-    "final_eval_loss": 2.9388,
-    "final_perplexity": 18.89,
+    "final_eval_loss": 2.9381,
+    "final_perplexity": 18.88,
     "baseline_perplexity": 146.36,
-    "delta_perplexity": 127.47,
-    "percent_perplexity_reduction": 87.09,
-    "top1_accuracy": 49.11,
-    "top5_accuracy": 66.46,
+    "delta_perplexity": 127.48,
+    "percent_perplexity_reduction": 87.1,
+    "top1_accuracy": 49.1,
+    "top5_accuracy": 66.47,
     "global_steps": 1119,
     "total_epochs": 3.0,
-    "total_runtime_seconds": 3846.07,
-    "runtime_formatted": "1:04:06"
+    "total_runtime_seconds": 758.56,
+    "runtime_formatted": "0:12:38"
   },
   "qualitative_probe_predictions": [
     {
       "probe_sentence": "mata stress eka wadi wela night <mask> ganna ba, full depressed inne.",
       "top5_candidates": [
         {
-          "token": "shift",
-          "probability": 0.1131
+          "token": "s",
+          "probability": 0.1244
         },
         {
-          "token": "s",
-          "probability": 0.0938
+          "token": "shift",
+          "probability": 0.1031
         },
         {
           "token": "time",
-          "probability": 0.0472
+          "probability": 0.0417
         },
         {
           "token": "life",
-          "probability": 0.0391
+          "probability": 0.0356
         },
         {
-          "token": "out",
-          "probability": 0.0324
+          "token": "ly",
+          "probability": 0.0345
         }
       ]
     },
@@ -59,23 +59,23 @@
       "top5_candidates": [
         {
           "token": ".",
-          "probability": 0.1773
+          "probability": 0.2213
         },
         {
           "token": "th",
-          "probability": 0.0979
+          "probability": 0.0982
         },
         {
           "token": ",",
-          "probability": 0.0613
-        },
-        {
-          "token": "bari",
-          "probability": 0.0541
+          "probability": 0.0577
         },
         {
           "token": "ona",
-          "probability": 0.0541
+          "probability": 0.045
+        },
+        {
+          "token": "bari",
+          "probability": 0.0436
         }
       ]
     },
@@ -84,23 +84,23 @@
       "top5_candidates": [
         {
           "token": "th",
-          "probability": 0.4563
+          "probability": 0.4613
         },
         {
           "token": "ta",
-          "probability": 0.119
+          "probability": 0.113
         },
         {
           "token": "nam",
-          "probability": 0.0927
+          "probability": 0.0998
         },
         {
-          "token": "ma",
-          "probability": 0.0134
+          "token": "oka",
+          "probability": 0.0115
         },
         {
           "token": "ka",
-          "probability": 0.0125
+          "probability": 0.0115
         }
       ]
     },
@@ -109,23 +109,23 @@
       "top5_candidates": [
         {
           "token": "wada",
-          "probability": 0.0374
-        },
-        {
-          "token": "set",
-          "probability": 0.0249
-        },
-        {
-          "token": "job",
-          "probability": 0.0242
+          "probability": 0.0382
         },
         {
           "token": "call",
-          "probability": 0.0188
+          "probability": 0.0279
         },
         {
-          "token": "try",
-          "probability": 0.0161
+          "token": "set",
+          "probability": 0.0232
+        },
+        {
+          "token": "mata",
+          "probability": 0.015
+        },
+        {
+          "token": "use",
+          "probability": 0.0145
         }
       ]
     },
@@ -134,23 +134,23 @@
       "top5_candidates": [
         {
           "token": "th",
-          "probability": 0.0518
+          "probability": 0.0485
         },
         {
           "token": "wada",
-          "probability": 0.0269
+          "probability": 0.026
         },
         {
           "token": "hari",
-          "probability": 0.0237
+          "probability": 0.0209
         },
         {
           "token": "call",
-          "probability": 0.0163
+          "probability": 0.0202
         },
         {
-          "token": "use",
-          "probability": 0.0148
+          "token": "manage",
+          "probability": 0.0173
         }
       ]
     },
@@ -159,23 +159,23 @@
       "top5_candidates": [
         {
           "token": "advice",
-          "probability": 0.1885
+          "probability": 0.089
         },
         {
           "token": "na",
-          "probability": 0.0383
+          "probability": 0.0631
         },
         {
           "token": "appointment",
-          "probability": 0.0255
+          "probability": 0.0218
         },
         {
-          "token": "help",
-          "probability": 0.024
+          "token": "n",
+          "probability": 0.016
         },
         {
-          "token": "opinion",
-          "probability": 0.0175
+          "token": "ma",
+          "probability": 0.0136
         }
       ]
     },
@@ -184,23 +184,23 @@
       "top5_candidates": [
         {
           "token": "nam",
-          "probability": 0.0308
+          "probability": 0.0285
         },
         {
           "token": "liya",
-          "probability": 0.0248
-        },
-        {
-          "token": "kale",
-          "probability": 0.0193
+          "probability": 0.0285
         },
         {
           "token": "mata",
-          "probability": 0.0193
+          "probability": 0.0202
         },
         {
-          "token": "ne",
-          "probability": 0.0146
+          "token": "kale",
+          "probability": 0.0178
+        },
+        {
+          "token": "kisi",
+          "probability": 0.0153
         }
       ]
     },
@@ -209,23 +209,23 @@
       "top5_candidates": [
         {
           "token": "thread",
-          "probability": 0.035
-        },
-        {
-          "token": "set",
-          "probability": 0.0281
+          "probability": 0.0357
         },
         {
           "token": "video",
-          "probability": 0.0264
+          "probability": 0.0325
+        },
+        {
+          "token": "set",
+          "probability": 0.0245
         },
         {
           "token": "job",
-          "probability": 0.0199
+          "probability": 0.021
         },
         {
           "token": "post",
-          "probability": 0.0121
+          "probability": 0.0123
         }
       ]
     },
@@ -234,23 +234,23 @@
       "top5_candidates": [
         {
           "token": "අමාරු",
-          "probability": 0.2503
+          "probability": 0.2372
         },
         {
           "token": "දුක",
-          "probability": 0.0838
+          "probability": 0.0638
         },
         {
           "token": "බය",
-          "probability": 0.0409
-        },
-        {
-          "token": "එපා",
-          "probability": 0.0328
+          "probability": 0.0581
         },
         {
           "token": "මහන්සි",
-          "probability": 0.0318
+          "probability": 0.0353
+        },
+        {
+          "token": "එපා",
+          "probability": 0.0353
         }
       ]
     },
@@ -259,142 +259,142 @@
       "top5_candidates": [
         {
           "token": "wada",
-          "probability": 0.0664
+          "probability": 0.0437
         },
         {
           "token": "tika",
-          "probability": 0.039
-        },
-        {
-          "token": "gana",
-          "probability": 0.0286
-        },
-        {
-          "token": "hari",
-          "probability": 0.0237
+          "probability": 0.034
         },
         {
           "token": "nam",
-          "probability": 0.023
+          "probability": 0.0291
+        },
+        {
+          "token": "hari",
+          "probability": 0.0257
+        },
+        {
+          "token": ".",
+          "probability": 0.0257
         }
       ]
     }
   ],
   "training_loss_history": [
     {
-      "loss": 34.9848681640625,
-      "grad_norm": 48.28656768798828,
+      "loss": 35.0137255859375,
+      "grad_norm": 52.18036651611328,
       "learning_rate": 2.2297297297297298e-05,
       "epoch": 0.2684563758389262,
       "step": 100
     },
     {
-      "loss": 30.2922509765625,
-      "grad_norm": 40.474117279052734,
+      "loss": 30.31606689453125,
+      "grad_norm": 42.05815505981445,
       "learning_rate": 2.453280308687515e-05,
       "epoch": 0.5369127516778524,
       "step": 200
     },
     {
-      "loss": 27.89733642578125,
-      "grad_norm": 42.5272102355957,
+      "loss": 27.911240234375,
+      "grad_norm": 43.28402328491211,
       "learning_rate": 2.2914963680155614e-05,
       "epoch": 0.8053691275167785,
       "step": 300
     },
     {
-      "loss": 26.66761474609375,
-      "grad_norm": 40.707305908203125,
+      "loss": 26.68233154296875,
+      "grad_norm": 42.300594329833984,
       "learning_rate": 2.029362252323417e-05,
       "epoch": 1.07248322147651,
       "step": 400
     },
     {
-      "loss": 26.15138427734375,
-      "grad_norm": 41.076812744140625,
+      "loss": 26.1588427734375,
+      "grad_norm": 41.709716796875,
       "learning_rate": 1.6921350870282267e-05,
       "epoch": 1.3409395973154363,
       "step": 500
     },
     {
-      "eval_loss": 3.08549165725708,
-      "eval_top1_accuracy": 47.66,
-      "eval_top5_accuracy": 64.73,
-      "eval_runtime": 38.1502,
-      "eval_samples_per_second": 35.019,
-      "eval_steps_per_second": 4.377,
+      "eval_loss": 3.0853540897369385,
+      "eval_top1_accuracy": 47.67,
+      "eval_top5_accuracy": 64.79,
+      "eval_runtime": 7.2113,
+      "eval_samples_per_second": 185.265,
+      "eval_steps_per_second": 23.158,
       "epoch": 1.3409395973154363,
       "step": 500
     },
     {
-      "loss": 25.5265966796875,
-      "grad_norm": 41.489501953125,
+      "loss": 25.52819580078125,
+      "grad_norm": 43.114627838134766,
       "learning_rate": 1.3123073570758716e-05,
       "epoch": 1.6093959731543626,
       "step": 600
     },
     {
-      "loss": 25.34235595703125,
-      "grad_norm": 43.25637435913086,
+      "loss": 25.33539306640625,
+      "grad_norm": 41.80263900756836,
       "learning_rate": 9.26476193621849e-06,
       "epoch": 1.8778523489932886,
       "step": 700
     },
     {
-      "loss": 24.72100341796875,
-      "grad_norm": 39.26796340942383,
+      "loss": 24.7196240234375,
+      "grad_norm": 39.26197052001953,
       "learning_rate": 5.718171701678009e-06,
       "epoch": 2.14496644295302,
       "step": 800
     },
     {
-      "loss": 25.0161962890625,
-      "grad_norm": 40.54493713378906,
+      "loss": 25.0078271484375,
+      "grad_norm": 41.149208068847656,
       "learning_rate": 2.8250236466721576e-06,
       "epoch": 2.4134228187919464,
       "step": 900
     },
     {
-      "loss": 24.6419140625,
-      "grad_norm": 41.38813781738281,
+      "loss": 24.68192626953125,
+      "grad_norm": 41.811851501464844,
       "learning_rate": 8.640781419474483e-07,
       "epoch": 2.6818791946308727,
       "step": 1000
     },
     {
-      "eval_loss": 2.9631710052490234,
-      "eval_top1_accuracy": 48.89,
-      "eval_top5_accuracy": 66.12,
-      "eval_runtime": 37.7918,
-      "eval_samples_per_second": 35.352,
-      "eval_steps_per_second": 4.419,
+      "eval_loss": 2.9620704650878906,
+      "eval_top1_accuracy": 48.95,
+      "eval_top5_accuracy": 66.17,
+      "eval_runtime": 7.2353,
+      "eval_samples_per_second": 184.651,
+      "eval_steps_per_second": 23.081,
       "epoch": 2.6818791946308727,
       "step": 1000
     },
     {
-      "loss": 24.68961669921875,
-      "grad_norm": 41.41519546508789,
+      "loss": 24.70099609375,
+      "grad_norm": 40.51237106323242,
       "learning_rate": 2.4276052443351906e-08,
       "epoch": 2.9503355704697984,
       "step": 1100
     },
     {
-      "eval_loss": 2.9382729530334473,
-      "eval_top1_accuracy": 49.34,
-      "eval_top5_accuracy": 66.47,
-      "eval_runtime": 38.0869,
-      "eval_samples_per_second": 35.078,
-      "eval_steps_per_second": 4.385,
+      "eval_loss": 2.9381418228149414,
+      "eval_top1_accuracy": 49.36,
+      "eval_top5_accuracy": 66.38,
+      "eval_runtime": 7.2232,
+      "eval_samples_per_second": 184.959,
+      "eval_steps_per_second": 23.12,
       "epoch": 3.0,
       "step": 1119
     },
     {
-      "eval_loss": 2.938812017440796,
-      "eval_top1_accuracy": 49.11,
-      "eval_top5_accuracy": 66.46,
-      "eval_runtime": 40.5335,
-      "eval_samples_per_second": 32.96,
-      "eval_steps_per_second": 4.12,
+      "eval_loss": 2.9380953311920166,
+      "eval_top1_accuracy": 49.1,
+      "eval_top5_accuracy": 66.47,
+      "eval_runtime": 7.2183,
+      "eval_samples_per_second": 185.086,
+      "eval_steps_per_second": 23.136,
       "epoch": 3.0,
       "step": 1119
     }
