@@ -336,7 +336,7 @@ DemoScenarioId = Literal[
     "masking-collision",
     "empty-batch",
 ]
-DemoStrategy = Literal["regex", "presidio", "hybrid"]
+DemoStrategy = Literal["regex", "presidio", "hybrid", "gliner"]
 
 
 class C2DemoRequest(BaseModel):
@@ -435,12 +435,66 @@ class C2DemoPrivacySummary(Contract):
     limitation: str
 
 
+ValidationStage = Literal[
+    "anonymization", "quality", "language_id", "normalization", "tokenization"
+]
+
+
+class C2DemoValidationRule(Contract):
+    rule_id: str
+    description: str
+    source_path: Literal["services/preprocessing/validation.py"]
+    source_function: Literal[
+        "check_privacy",
+        "check_quality",
+        "check_language",
+        "check_normalization",
+        "check_tokens",
+        "check_residual_output",
+    ]
+
+
+class C2DemoValidationCheck(Contract):
+    rule_id: str
+    status: Literal["PASS", "FAIL", "REVIEW", "NOT_EVALUATED"]
+    reasons: list[str]
+
+
+class C2DemoRecordValidation(Contract):
+    record_index: int = Field(ge=1)
+    checks: list[C2DemoValidationCheck]
+
+
+class C2DemoStageValidation(Contract):
+    stage: ValidationStage
+    checked_records: int = Field(ge=0)
+    passed_records: int = Field(ge=0)
+    failed_records: int = Field(ge=0)
+    review_records: int = Field(ge=0)
+    not_evaluated_records: int = Field(ge=0)
+    pass_rate_percent: float | None = Field(default=None, ge=0, le=100)
+
+
+class C2DemoValidationSummary(Contract):
+    method: Literal["c2-output-validation-v1", "c2-output-validation-v1.1+residual-output-v1"]
+    anonymization_strategy: DemoStrategy
+    records_processed: int = Field(ge=0)
+    measurement: Literal["policy_and_integrity_checks_not_accuracy"]
+    accuracy_status: Literal["NOT_MEASURED"]
+    release_policy_unchanged: bool
+    rules: list[C2DemoValidationRule]
+    records: list[C2DemoRecordValidation]
+    stages: list[C2DemoStageValidation]
+
+
 class C2DemoResponse(Contract):
+    anonymization_configuration: str | None = None
     scenario: C2DemoScenario
     strategy: DemoStrategy
     records: list[C2DemoRecord]
     quality_summary: C2DemoQualitySummary
     privacy_summary: C2DemoPrivacySummary
+    validation_summary: C2DemoValidationSummary | None = None
     release_ready: bool
     blocking_reasons: list[str]
     human_release_required: Literal[True] = True
@@ -456,15 +510,17 @@ class C2CustomDemoRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     text: Annotated[str, Field(max_length=1000)]
     language_hint: Literal["sinhala", "english", "romanized-si", "code-mixed", "unsure"] = "unsure"
-    strategy: Literal["presidio"] = "presidio"
+    strategy: Literal["presidio", "gliner"] = "gliner"
 
 
 class C2CustomDemoResponse(Contract):
+    anonymization_configuration: str | None = None
     language_hint: Literal["sinhala", "english", "romanized-si", "code-mixed", "unsure"]
-    strategy: Literal["presidio"] = "presidio"
+    strategy: Literal["presidio", "gliner"] = "gliner"
     records: list[C2DemoRecord]
     quality_summary: C2DemoQualitySummary
     privacy_summary: C2DemoPrivacySummary
+    validation_summary: C2DemoValidationSummary | None = None
     release_ready: bool
     blocking_reasons: list[str]
     human_release_required: Literal[True] = True

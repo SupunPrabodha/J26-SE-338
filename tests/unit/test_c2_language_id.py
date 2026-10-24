@@ -18,7 +18,7 @@ def test_category_policy_development_cases(case_id, expected, text):
 def test_mixed_script_evidence_round_trips_actual_demo_contract():
     from preprocessing.demo import execute_custom
 
-    result = execute_custom(C2CustomDemoRequest(text="විභාග නිසා mata බයයි"))
+    result = execute_custom(C2CustomDemoRequest(strategy="presidio", text="විභාග නිසා mata බයයි"))
     language = result.records[0].language_identification
     assert language.language == "sinhala"
     assert language.reason == "sinhala_language_with_romanized_mixed_script_evidence"
@@ -137,7 +137,7 @@ def test_language_result_never_changes_existing_policy_or_masks(monkeypatch, tex
 def test_legacy_hint_optional_and_not_analyzer_configuration():
     from preprocessing.demo import execute_custom
 
-    body = C2CustomDemoRequest(text="My name is Jane Miller. I feel tired.")
+    body = C2CustomDemoRequest(strategy="presidio", text="My name is Jane Miller. I feel tired.")
     assert body.language_hint == "unsure"
     outputs = [
         execute_custom(body.model_copy(update={"language_hint": hint})).records[0]
@@ -168,7 +168,7 @@ def test_actual_reported_phrase_and_introduced_name_keep_other_stage_fields():
     from preprocessing.demo import execute_custom
 
     for text in ("Mge nama [PERSON]", "mge nama neluni"):
-        result = execute_custom(C2CustomDemoRequest(text=text))
+        result = execute_custom(C2CustomDemoRequest(strategy="presidio", text=text))
         record = result.records[0]
         assert record.anonymized_text == text.replace("neluni", "[PERSON]")
         assert record.language_identification.language == "romanized-si"

@@ -1,0 +1,278 @@
+[
+  {
+    "id": "eval-english-0",
+    "language": "english",
+    "text": "I feel anxious today. My friend Daria Moss lives in Tallinn. Contact pilot.en@example.com; phone 0772345678; ID IT23456789.",
+    "gold": [
+      {
+        "start": 32,
+        "end": 42,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 52,
+        "end": 59,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 69,
+        "end": 89,
+        "entity_type": "EMAIL"
+      },
+      {
+        "start": 97,
+        "end": 107,
+        "entity_type": "PHONE"
+      },
+      {
+        "start": 112,
+        "end": 122,
+        "entity_type": "STUDENT_ID"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-english-1",
+    "language": "english",
+    "text": "The deadline is near. CORIN VALE moved to MOSSEL BAY. Talking helps.",
+    "gold": [
+      {
+        "start": 22,
+        "end": 32,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 42,
+        "end": 52,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-english-2",
+    "language": "english",
+    "text": "Assignments make me worried. She lives in harmony with her family.",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-english-3",
+    "language": "english",
+    "text": "Our supervisor is kind. The meeting is in good order. 🙂",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-sinhala-0",
+    "language": "sinhala",
+    "text": "අද මට නින්ද යන්නේ නැහැ. මගේ නම සවින්දි වික්‍රමසූරිය. ඇය මොනරාගල ප්‍රදේශයේ ජීවත් වෙනවා. Contact pilot.si@example.com; phone 0772345678; ID IT23456789.",
+    "gold": [
+      {
+        "start": 31,
+        "end": 51,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 56,
+        "end": 63,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 95,
+        "end": 115,
+        "entity_type": "EMAIL"
+      },
+      {
+        "start": 123,
+        "end": 133,
+        "entity_type": "PHONE"
+      },
+      {
+        "start": 138,
+        "end": 148,
+        "entity_type": "STUDENT_ID"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-sinhala-1",
+    "language": "sinhala",
+    "text": "විභාග ළඟයි. මගේ මිතුරා දිලංක සුමනසේකර වැලිමඩ ප්‍රදේශයේ ජීවත් වෙනවා.",
+    "gold": [
+      {
+        "start": 23,
+        "end": 37,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 38,
+        "end": 44,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-sinhala-2",
+    "language": "sinhala",
+    "text": "අද මට පීඩනයක් තියෙනවා. ඇය නිහඬ ප්‍රදේශයේ ජීවත් වෙනවා.",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-sinhala-3",
+    "language": "sinhala",
+    "text": "මම අද මහන්සියි. මගේ මිතුරිය සමඟ කතා කළා. 🙂",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-romanized-si-0",
+    "language": "romanized-si",
+    "text": "Mata heta exams thiyenawa. Mage yaluwa Vihanga Udawatta Ambalangoda wala inne. Contact pilot.ro@example.com; phone 0772345678; ID IT23456789.",
+    "gold": [
+      {
+        "start": 39,
+        "end": 55,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 56,
+        "end": 67,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 87,
+        "end": 107,
+        "entity_type": "EMAIL"
+      },
+      {
+        "start": 115,
+        "end": 125,
+        "entity_type": "PHONE"
+      },
+      {
+        "start": 130,
+        "end": 140,
+        "entity_type": "STUDENT_ID"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-romanized-si-1",
+    "language": "romanized-si",
+    "text": "Raata mata ninda yanne naha. Mage nama nawmini jayawardhana. Mama Tangalle wala inne.",
+    "gold": [
+      {
+        "start": 39,
+        "end": 59,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 66,
+        "end": 74,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-romanized-si-2",
+    "language": "romanized-si",
+    "text": "Mata loku pressure ekak danenawa. Mage yaluwa mata udaw karanawa.",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-romanized-si-3",
+    "language": "romanized-si",
+    "text": "Mata assignments gana bayai. Eyge girlfriend is helpful. 🙂",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-code-mixed-0",
+    "language": "code-mixed",
+    "text": "විභාග නිසා බයයි. My friend නදීශ් රත්නායක lives in Launceston. Contact pilot.mx@example.com; phone 0772345678; ID IT23456789.",
+    "gold": [
+      {
+        "start": 27,
+        "end": 40,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 50,
+        "end": 60,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 70,
+        "end": 90,
+        "entity_type": "EMAIL"
+      },
+      {
+        "start": 98,
+        "end": 108,
+        "entity_type": "PHONE"
+      },
+      {
+        "start": 113,
+        "end": 123,
+        "entity_type": "STUDENT_ID"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-code-mixed-1",
+    "language": "code-mixed",
+    "text": "I am worried today. මගේ නම Nivetha Arun. ඇය පොළොන්නරුව ප්‍රදේශයේ ජීවත් වෙනවා.",
+    "gold": [
+      {
+        "start": 27,
+        "end": 39,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 44,
+        "end": 54,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-code-mixed-2",
+    "language": "code-mixed",
+    "text": "I could not sleep. ඇය නිහඬ ප්‍රදේශයේ ජීවත් වෙනවා.",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  },
+  {
+    "id": "eval-code-mixed-3",
+    "language": "code-mixed",
+    "text": "Mata loku pressure ekak danenawa. Our supervisor is helpful. මට දුකයි.",
+    "gold": [],
+    "negative": true,
+    "provenance": "Fresh frozen AI-authored synthetic proposed references; no independent review"
+  }
+]

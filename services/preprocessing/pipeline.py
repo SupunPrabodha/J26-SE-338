@@ -20,6 +20,7 @@ from preprocessing.privacy_gate import (
     assess_release,
     build_release_summary,
 )
+from preprocessing.residual_privacy import assess_output
 from preprocessing.text_processing import (
     NORMALIZATION_METHOD,
     OFFSET_UNIT,
@@ -27,6 +28,7 @@ from preprocessing.text_processing import (
     normalize_text,
     tokenize_text,
 )
+from preprocessing.validation import build_validation_summary
 
 
 @dataclass(frozen=True)
@@ -59,6 +61,7 @@ class PipelineResult:
     privacy_summary: dict[str, object]
     release_ready: bool
     blocking_reasons: tuple[str, ...]
+    validation_summary: dict[str, object] | None = None
 
 
 def run_preprocessing_pipeline(
@@ -66,11 +69,18 @@ def run_preprocessing_pipeline(
     *,
     strategy: str = "regex",
     quality_policy: QualityPolicy = DEFAULT_QUALITY_POLICY,
+    experimental_demo: bool = False,
 ) -> PipelineResult:
     """Run automated prerequisites; release_ready never authorizes human release."""
-    if strategy not in {"regex", "presidio", "hybrid"}:
+    if strategy not in {"regex", "presidio", "hybrid", "gliner"}:
         raise ValueError("Unknown anonymization strategy")
+    if strategy == "gliner" and not experimental_demo:
+        raise ValueError("Experimental strategy requires the development demo boundary")
     anonymizer = anonymize_text
+    if strategy == "gliner":
+        from preprocessing.gliner_demo import anonymize_gliner_demo
+
+        anonymizer = anonymize_gliner_demo
     if strategy == "presidio":
         from preprocessing.presidio_anonymization import anonymize_with_presidio
 
@@ -125,7 +135,8 @@ def run_preprocessing_pipeline(
                 transformations=anonymized.transformations,
                 quality_status=quality.status,
                 quality_issues=quality.issues,
-                requires_privacy_review=anonymized.requires_privacy_review,
+                requires_privacy_review=anonymized.requires_privacy_review
+                or bool(assess_output(masked_text)),
                 language_identification=language,
                 normalized_text=normalized,
                 tokens=tokens,
@@ -155,6 +166,8 @@ def run_preprocessing_pipeline(
     privacy_summary = build_release_summary(privacy_result)
 
     blocking_reasons = list(quality_blocking_reasons(quality_results))
+    if strategy == "gliner":
+        blocking_reasons.append("experimental_anonymizer_not_release_validated")
 
     if any(output.requires_privacy_review for output in outputs):
         blocking_reasons.append("privacy_review_required")
@@ -168,6 +181,7 @@ def run_preprocessing_pipeline(
         privacy_summary=privacy_summary,
         release_ready=not blocking_reasons,
         blocking_reasons=tuple(blocking_reasons),
+        validation_summary=build_validation_summary(outputs, strategy=strategy),
     )
 
 
@@ -191,5 +205,6 @@ def build_pipeline_summary(
         "transformation_counts": dict(sorted(transformation_counts.items())),
         "quality_summary": result.quality_summary,
         "privacy_summary": result.privacy_summary,
+        "validation_summary": result.validation_summary,
         "privacy_note": ("Aggregate pipeline evidence only; submitted text is excluded."),
     }

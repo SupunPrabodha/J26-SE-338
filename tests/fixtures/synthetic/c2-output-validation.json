@@ -1,0 +1,325 @@
+{
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "development_only": true,
+  "method": "c2-output-validation-v1",
+  "anonymization_strategy": "regex",
+  "records_processed": 1,
+  "measurement": "policy_and_integrity_checks_not_accuracy",
+  "accuracy_status": "NOT_MEASURED",
+  "release_policy_unchanged": true,
+  "rules": [
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "anonymization.residual_email",
+      "description": "No supported email pattern remains.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_privacy"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "anonymization.residual_phone",
+      "description": "No supported Sri Lankan mobile pattern remains.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_privacy"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "anonymization.residual_student_id",
+      "description": "No supported student-ID pattern remains.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_privacy"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "anonymization.review_flag",
+      "description": "No existing automated privacy-review flag is set.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_privacy"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "quality.policy",
+      "description": "Use the actual PASS/REVIEW/REJECT policy result.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_quality"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "language_id.evidence",
+      "description": "Report provisional evidence or abstention; this does not establish label accuracy.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_language"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "normalization.nfc",
+      "description": "Derived text is in Unicode NFC.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_normalization"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "normalization.whitespace",
+      "description": "No leading/trailing/repeated Unicode whitespace remains.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_normalization"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "normalization.content",
+      "description": "NFC non-whitespace chunks match the anonymized source in order and case.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_normalization"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "normalization.placeholders",
+      "description": "Placeholder sequence/count is unchanged.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_normalization"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "tokenization.offsets",
+      "description": "Offsets are ordered non-empty code-point spans matching tokens.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_tokens"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "tokenization.graphemes",
+      "description": "No token boundary splits a Unicode grapheme.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_tokens"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "tokenization.coverage",
+      "description": "Every non-whitespace code point is covered exactly once.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_tokens"
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "rule_id": "tokenization.placeholders",
+      "description": "Each placeholder occupies one token, including attached marks.",
+      "source_path": "services/preprocessing/validation.py",
+      "source_function": "check_tokens"
+    }
+  ],
+  "records": [
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "record_index": 1,
+      "checks": [
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "anonymization.residual_email",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "anonymization.residual_phone",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "anonymization.residual_student_id",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "anonymization.review_flag",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "quality.policy",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "language_id.evidence",
+          "status": "PASS",
+          "reasons": [
+            "label_accuracy_not_measured"
+          ]
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "normalization.nfc",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "normalization.whitespace",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "normalization.content",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "normalization.placeholders",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "tokenization.offsets",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "tokenization.graphemes",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "tokenization.coverage",
+          "status": "PASS",
+          "reasons": []
+        },
+        {
+          "schema_version": "1.0.0",
+          "synthetic": true,
+          "development_only": true,
+          "rule_id": "tokenization.placeholders",
+          "status": "PASS",
+          "reasons": []
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "stage": "anonymization",
+      "checked_records": 1,
+      "passed_records": 1,
+      "failed_records": 0,
+      "review_records": 0,
+      "not_evaluated_records": 0,
+      "pass_rate_percent": 100.0
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "stage": "quality",
+      "checked_records": 1,
+      "passed_records": 1,
+      "failed_records": 0,
+      "review_records": 0,
+      "not_evaluated_records": 0,
+      "pass_rate_percent": 100.0
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "stage": "language_id",
+      "checked_records": 1,
+      "passed_records": 1,
+      "failed_records": 0,
+      "review_records": 0,
+      "not_evaluated_records": 0,
+      "pass_rate_percent": 100.0
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "stage": "normalization",
+      "checked_records": 1,
+      "passed_records": 1,
+      "failed_records": 0,
+      "review_records": 0,
+      "not_evaluated_records": 0,
+      "pass_rate_percent": 100.0
+    },
+    {
+      "schema_version": "1.0.0",
+      "synthetic": true,
+      "development_only": true,
+      "stage": "tokenization",
+      "checked_records": 1,
+      "passed_records": 1,
+      "failed_records": 0,
+      "review_records": 0,
+      "not_evaluated_records": 0,
+      "pass_rate_percent": 100.0
+    }
+  ]
+}

@@ -30,7 +30,8 @@
       "enum": [
         "regex",
         "presidio",
-        "hybrid"
+        "hybrid",
+        "gliner"
       ],
       "title": "Strategy",
       "type": "string"

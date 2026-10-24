@@ -1,0 +1,11 @@
+{
+  "reference_status": "unreviewed",
+  "cases": [
+    {"text": "My name is Nimal.", "gold_pii": [{"start": 11, "end": 16, "entity_type": "PERSON"}], "gold_language": "english"},
+    {"text": "I feel tired.", "gold_pii": [], "gold_language": "english"},
+    {"text": "මම අද මහන්සියි.", "gold_pii": [], "gold_language": "sinhala"},
+    {"text": "mama kavindu", "gold_pii": [{"start": 5, "end": 12, "entity_type": "PERSON"}], "gold_language": "romanized-si"},
+    {"text": "මට අද බයයි, but I will try again tomorrow.", "gold_pii": [], "gold_language": "code-mixed"},
+    {"text": "I have exams today."}
+  ]
+}

@@ -14,6 +14,12 @@
 .c2-tokens { display: flex; flex-wrap: wrap; list-style: none; gap: 8px; padding: 0; margin: 12px 0; }
 .c2-tokens li { max-width: 100%; overflow-wrap: anywhere; background: #edf4f8; border: 1px solid #d6e2eb; border-radius: 8px; padding: 5px 10px; font-size: .9rem; }
 .c2-table-scroll { overflow-x: auto; }
+.c2-validation-rules { padding-left: 1.25rem; }
+.c2-validation-rules li { margin: 14px 0; }
+.c2-validation-rules p { margin: 4px 0; }
+.c2-validation-rules code { overflow-wrap: anywhere; }
+.c2-validation { min-width: 0; }
+.c2-validation-counts { min-width: 680px; }
 .c2-demo table { border-collapse: collapse; width: 100%; font-size: .85rem; }
 .c2-demo th, .c2-demo td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
 .c2-demo summary { padding: 8px 0; }

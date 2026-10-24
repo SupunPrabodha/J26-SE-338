@@ -38,12 +38,13 @@ test("keeps actual-runtime and Sinhala/Romanized limitations visible", async () 
   expect(screen.getByText(/Sinhala and Romanized Sinhala can miss names or mask ordinary words/)).toBeVisible();
   expect(screen.getByText(/Quality PASS does not certify anonymization correctness/)).toBeVisible();
   fireEvent.click(screen.getByText("Anonymizer configuration", { selector: "summary" }));
-  expect(screen.getByText(/trained candidates remain offline/)).toBeVisible();
+  expect(screen.getByText(/Trained candidates remain offline/)).toBeVisible();
 });
 
 test("submits text without asking for its language; examples never populate input", async () => {
   setup(); render(<C2Demo />); await ready();
-  expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Manual language hint")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Demo anonymizer")).not.toBeInTheDocument();
   expect(screen.queryByLabelText("Manual language hint")).not.toBeInTheDocument();
   const input = screen.getByLabelText("Fictional test text only");
   expect(input).toHaveValue("");
@@ -62,7 +63,8 @@ test("renders backend Language ID read-only, with uncertainty and reset protecti
   fireEvent.click(screen.getByRole("button", { name: "Run demonstration" }));
   await screen.findByRole("heading", { name: /Language ID.*after quality assessment/ });
   expect(screen.getByText("uncertain", { selector: "strong" })).toBeVisible();
-  expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Manual language hint")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Demo anonymizer")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Reset" }));
   expect(screen.queryByText("uncertain", { selector: "strong" })).not.toBeInTheDocument();
 });
@@ -134,7 +136,8 @@ test.each(["sinhala", "english", "romanized-si", "code-mixed", "unknown", "uncer
   await screen.findByText(language.replaceAll(/[-_:]/g, " "), { selector: "strong" });
   expect(document.querySelectorAll(".c2-step-complete")).toHaveLength(3);
   expect(screen.getAllByText("Pending")).toHaveLength(5);
-  expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Manual language hint")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Demo anonymizer")).not.toBeInTheDocument();
 });
 
 test("overall loading never fabricates successful intermediate stages", async () => {
@@ -198,7 +201,7 @@ test("custom mode sends the bounded contract and renders returned output", async
   fireEvent.click(screen.getByRole("button", { name: "Run demonstration" }));
   await screen.findByText(fixtures.results.english.records[0].anonymized_text);
   const calls = fetch.mock.calls as unknown as [string, RequestInit][];
-  expect(JSON.parse(calls.find(([url]) => url.endsWith("/custom-runs"))![1].body as string)).toEqual({ text: fixtures.results.english.records[0].original_text, strategy: "presidio" });
+  expect(JSON.parse(calls.find(([url]) => url.endsWith("/custom-runs"))![1].body as string)).toEqual({ text: fixtures.results.english.records[0].original_text, strategy: "gliner" });
   fireEvent.click(screen.getByRole("button", { name: "Reset" }));
   expect(input).toHaveValue("");
   expect(screen.queryByText(fixtures.results.english.records[0].anonymized_text)).not.toBeInTheDocument();
@@ -221,11 +224,12 @@ function setup(run: () => Promise<unknown> = async () => ok(fixtures.results.eng
 }
 async function ready() { await screen.findByLabelText("Fictional test text only"); }
 
-test("renders actual backend response and sends only selectors", async () => {
+test("renders actual backend response and sends only text and the fixed strategy", async () => {
   const fetch = setup(); render(<C2Demo />); await ready();
-  expect(screen.getByText("Anonymizer: Presidio")).toBeVisible();
+  expect(screen.getByText("Anonymizer: GLiNER v4 (experimental)")).toBeVisible();
   expect(screen.queryByLabelText("Anonymization strategy")).not.toBeInTheDocument();
-  expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Manual language hint")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Demo anonymizer")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Run demonstration" }));
   await screen.findByText(fixtures.results.english.records[0].original_text);
   expect(screen.getByText(fixtures.results.english.records[0].anonymized_text)).toBeVisible();
@@ -236,10 +240,10 @@ test("renders actual backend response and sends only selectors", async () => {
   const options = fetch.mock.calls.find(([url]) => url.endsWith("/custom-runs"));
   expect(options).toBeDefined();
   const calls = (fetch.mock.calls as unknown as [string, RequestInit][]);
-  expect(JSON.parse(calls.find(([url]) => url.endsWith("/custom-runs"))![1].body as string)).toEqual({ text: "", strategy: "presidio" });
+  expect(JSON.parse(calls.find(([url]) => url.endsWith("/custom-runs"))![1].body as string)).toEqual({ text: "", strategy: "gliner" });
 });
 
-test("Presidio failure is safe and never falls back, including after Reset", async () => {
+test("GLiNER failure is safe and never falls back, including after Reset", async () => {
   const fetch = setup(async () => ({ ok: false, status: 503, json: async () => ({ detail: "PRIVATE-SENTINEL" }) }));
   render(<C2Demo />); await ready();
   fireEvent.click(screen.getByRole("button", { name: "Run demonstration" }));
@@ -253,7 +257,7 @@ test("Presidio failure is safe and never falls back, including after Reset", asy
   await screen.findByRole("alert");
   const runs = calls.filter(([url]) => url.endsWith("/custom-runs"));
   expect(runs).toHaveLength(2);
-  expect(runs.every(([, options]) => JSON.parse(options.body as string).strategy === "presidio")).toBe(true);
+  expect(runs.every(([, options]) => JSON.parse(options.body as string).strategy === "gliner")).toBe(true);
 });
 
 test.each(["short", "empty", "empty-batch"] as const)("shows actual blocked %s result", async scenario => {
@@ -420,4 +424,29 @@ test("expired session clears earlier results and can sign in again on C2", async
   expect(screen.getByText("Actual pipeline output will appear here.")).toBeVisible();
   fillLogin(); await ready();
   expect(screen.getByRole("button", { name: "Run demonstration" })).toBeEnabled();
+});
+
+test("fixed GLiNER default sends the backend and shows executed configuration", async () => {
+  const response = { ...fixtures.results.english, strategy: "gliner", anonymization_configuration: "gliner-name-labels-v4-context-demo-v1", release_ready: false, blocking_reasons: ["experimental_anonymizer_not_release_validated"] };
+  const fetch = setup(async () => ok(response)); render(<C2Demo />); await ready();
+  fireEvent.click(screen.getByRole("button", { name: "Run demonstration" }));
+  await screen.findByText("gliner-name-labels-v4-context-demo-v1");
+  fireEvent.click(screen.getByText("Executed configuration", { selector: "summary" }));
+  expect(screen.getByText("gliner-name-labels-v4-context-demo-v1")).toBeVisible();
+  expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  const call = fetch.mock.calls.find(([url]) => url.endsWith("/custom-runs"));
+  expect(JSON.parse(call![1]!.body as string).strategy).toBe("gliner");
+  expect(screen.getByText("Automated gate: Blocked")).toBeVisible();
+  fireEvent.change(screen.getByLabelText("Fictional test text only"), { target: { value: "Changed fictional text" } });
+  expect(screen.queryByText("gliner-name-labels-v4-context-demo-v1")).not.toBeInTheDocument();
+});
+
+test("GLiNER unavailable never silently submits a baseline request", async () => {
+  const fetch = setup(async () => ({ ok: false, status: 503 })); render(<C2Demo />); await ready();
+  fireEvent.click(screen.getByRole("button", { name: "Run demonstration" }));
+  await screen.findByRole("alert");
+  const calls = fetch.mock.calls.filter(([url]) => url.endsWith("/custom-runs"));
+  expect(calls).toHaveLength(1);
+  expect(JSON.parse(calls[0][1]!.body as string).strategy).toBe("gliner");
+  expect(screen.getByText("Automated gate: Not run")).toBeVisible();
 });

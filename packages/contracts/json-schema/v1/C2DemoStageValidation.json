@@ -1,0 +1,85 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoStageValidation.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "checked_records": {
+      "minimum": 0,
+      "title": "Checked Records",
+      "type": "integer"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "failed_records": {
+      "minimum": 0,
+      "title": "Failed Records",
+      "type": "integer"
+    },
+    "not_evaluated_records": {
+      "minimum": 0,
+      "title": "Not Evaluated Records",
+      "type": "integer"
+    },
+    "pass_rate_percent": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pass Rate Percent"
+    },
+    "passed_records": {
+      "minimum": 0,
+      "title": "Passed Records",
+      "type": "integer"
+    },
+    "review_records": {
+      "minimum": 0,
+      "title": "Review Records",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "stage": {
+      "enum": [
+        "anonymization",
+        "quality",
+        "language_id",
+        "normalization",
+        "tokenization"
+      ],
+      "title": "Stage",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "stage",
+    "checked_records",
+    "passed_records",
+    "failed_records",
+    "review_records",
+    "not_evaluated_records"
+  ],
+  "title": "C2DemoStageValidation",
+  "type": "object"
+}

@@ -1,6 +1,7 @@
 """Real synthetic pipeline and C1 authentication across both demo boundaries."""
 
 import json
+from copy import deepcopy
 from types import SimpleNamespace
 
 import httpx
@@ -21,7 +22,11 @@ INTERNAL = "/internal/v1/c2-demo"
 def test_custom_actual_execution(reviewer, hint, caplog):
     from research_contracts import C2CustomDemoRequest
 
-    body = {"text": "Fictional support: practice@example.com. 🙂", "language_hint": hint}
+    body = {
+        "text": "Fictional support: practice@example.com. 🙂",
+        "language_hint": hint,
+        "strategy": "presidio",
+    }
     with caplog.at_level("INFO", logger="research.safe"):
         response = reviewer.post(ROOT + "/custom-runs", json=body)
     assert response.status_code == 200
@@ -53,7 +58,9 @@ def test_custom_safe_validation(reviewer, change):
 
 
 def test_custom_empty_quality(reviewer):
-    response = reviewer.post(ROOT + "/custom-runs", json={"text": "", "language_hint": "unsure"})
+    response = reviewer.post(
+        ROOT + "/custom-runs", json={"text": "", "language_hint": "unsure", "strategy": "presidio"}
+    )
     assert response.status_code == 200
     assert response.json()["records"][0]["quality_status"] == "REJECT"
     assert not response.json()["release_ready"]
@@ -79,7 +86,8 @@ def test_custom_development_only(reviewer, monkeypatch):
     monkeypatch.setattr(gateway, "settings", lambda: SimpleNamespace(environment="production"))
     assert (
         reviewer.post(
-            ROOT + "/custom-runs", json={"text": "", "language_hint": "unsure"}
+            ROOT + "/custom-runs",
+            json={"text": "", "language_hint": "unsure", "strategy": "presidio"},
         ).status_code
         == 404
     )
@@ -291,7 +299,59 @@ def test_existing_mock_contracts_unchanged():
             for route, definition in previous["paths"].items():
                 assert value["paths"][route] == definition, (path, route)
             for name, definition in previous["components"]["schemas"].items():
-                assert value["components"]["schemas"][name] == definition, (path, name)
+                current = deepcopy(value["components"]["schemas"][name])
+                # Explicit opt-in C2 strategy extension; keep every unrelated
+                # component/property byte-equivalent to the committed contract.
+                if name in {"C2CustomDemoRequest", "C2CustomDemoResponse"}:
+                    assert current["properties"]["strategy"]["default"] == "gliner"
+                    current["properties"]["strategy"]["default"] = definition["properties"][
+                        "strategy"
+                    ]["default"]
+                if name.startswith(("C2Demo", "C2CustomDemo")):
+                    for key in ("anonymization_configuration",):
+                        if key in current.get("properties", {}) and key not in definition.get(
+                            "properties", {}
+                        ):
+                            assert key not in current.get("required", [])
+                            added = current["properties"].pop(key)
+                            assert added.pop("default", None) is None
+                            assert added == {
+                                "anyOf": [{"type": "string"}, {"type": "null"}],
+                                "title": "Anonymization Configuration",
+                            }
+                    for key, prop in current.get("properties", {}).items():
+                        old_prop = definition.get("properties", {}).get(key, {})
+                        target = prop.get("items", prop)
+                        old_target = old_prop.get("items", old_prop)
+                        if "gliner" in target.get("enum", []) and "gliner" not in old_target.get(
+                            "enum", []
+                        ):
+                            target["enum"].remove("gliner")
+                            if "const" in old_target:
+                                assert target.pop("enum") == [old_target["const"]]
+                                target["const"] = old_target["const"]
+                if (
+                    name in {"C2DemoResponse", "C2CustomDemoResponse"}
+                    and "validation_summary" not in definition["properties"]
+                ):
+                    # Only this optional C2 addition is authorized. Preserve every
+                    # prior property, required field, route and unrelated schema.
+                    assert current["properties"]["validation_summary"] == {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/C2DemoValidationSummary"},
+                            {"type": "null"},
+                        ]
+                    }
+                    assert "validation_summary" not in current["required"]
+                    current = {
+                        **current,
+                        "properties": {
+                            key: item
+                            for key, item in current["properties"].items()
+                            if key != "validation_summary"
+                        },
+                    }
+                assert current == definition, (path, name)
 
 
 def test_demo_does_not_persist(reviewer):
@@ -310,7 +370,11 @@ def test_demo_does_not_persist(reviewer):
     assert (
         reviewer.post(
             ROOT + "/custom-runs",
-            json={"text": "Fictional practice@example.com", "language_hint": "unsure"},
+            json={
+                "text": "Fictional practice@example.com",
+                "language_hint": "unsure",
+                "strategy": "presidio",
+            },
         ).status_code
         == 200
     )
@@ -325,3 +389,54 @@ def test_non_development_configuration_rejected(monkeypatch, platform):
     with pytest.raises(ValidationError, match="development-only"):
         Settings()
     assert settings().environment == "development"
+
+
+def test_default_gliner_authenticated_route_and_error_no_fallback(reviewer, monkeypatch):
+    from preprocessing import gliner_demo
+
+    def broken():
+        raise RuntimeError("PRIVATE-MODEL-PATH-SENTINEL")
+
+    monkeypatch.setattr(gliner_demo, "load_candidate", broken)
+    response = reviewer.post(ROOT + "/custom-runs", json={"text": "Fictional text"})
+    assert response.status_code == 502
+    assert "PRIVATE-MODEL-PATH-SENTINEL" not in response.text
+    assert "records" not in response.json()
+    assert response.headers["cache-control"] == "no-store"
+
+
+def test_opt_in_gliner_keeps_auth_required(platform):
+    client, _ = platform
+    assert (
+        client.post(
+            ROOT + "/custom-runs", json={"text": "Fictional text", "strategy": "gliner"}
+        ).status_code
+        == 401
+    )
+
+
+def test_cold_load_budget_is_scoped_to_gliner(reviewer, monkeypatch):
+    from preprocessing import gliner_demo
+
+    budgets = []
+    original = gateway.httpx.Client
+
+    class TimedTransport(original):
+        def __init__(self, **kwargs):
+            budgets.append(kwargs["timeout"])
+            super().__init__(**kwargs)
+
+    def broken():
+        raise RuntimeError("Synthetic model unavailable")
+
+    monkeypatch.setattr(gateway.httpx, "Client", TimedTransport)
+    monkeypatch.setattr(gliner_demo, "load_candidate", broken)
+    assert reviewer.post(ROOT + "/custom-runs", json={"text": "fictional"}).status_code == 502
+    assert budgets[-1] == 300
+    assert (
+        reviewer.post(
+            ROOT + "/custom-runs", json={"text": "I feel tired.", "strategy": "presidio"}
+        ).status_code
+        == 200
+    )
+    assert budgets[-1] == settings().service_timeout_seconds

@@ -1,5 +1,6 @@
 """Disposable fictional scenarios owned exclusively by preprocessing."""
 
+from contextlib import contextmanager
 from dataclasses import asdict
 
 from research_common.config import settings
@@ -92,25 +93,32 @@ def metadata(row):
 
 def catalogue():
     return C2DemoCatalogue(
-        scenarios=[metadata(row) for row in SCENARIOS], strategies=["regex", "presidio", "hybrid"]
+        scenarios=[metadata(row) for row in SCENARIOS],
+        strategies=["regex", "presidio", "hybrid", "gliner"],
     )
 
 
 def execute(body: C2DemoRequest):
     row = next(row for row in SCENARIOS if row[0] == body.scenario_id)
     inputs = tuple(PipelineInput(f"synthetic-{i + 1}", text) for i, text in enumerate(row[3]))
-    result = run_preprocessing_pipeline(
-        inputs, strategy=body.strategy, quality_policy=DEFAULT_QUALITY_POLICY
-    )
+    with safe_demo_execution():
+        result = run_preprocessing_pipeline(
+            inputs,
+            strategy=body.strategy,
+            quality_policy=DEFAULT_QUALITY_POLICY,
+            experimental_demo=body.strategy == "gliner",
+        )
     return C2DemoResponse(
         scenario=metadata(row),
         strategy=body.strategy,
+        anonymization_configuration=configuration(body.strategy),
         records=[
             C2DemoRecord(original_text=source.text, **asdict(output))
             for source, output in zip(inputs, result.records, strict=True)
         ],
         quality_summary=result.quality_summary,
         privacy_summary=result.privacy_summary,
+        validation_summary=result.validation_summary,
         release_ready=result.release_ready,
         blocking_reasons=result.blocking_reasons,
     )
@@ -119,14 +127,40 @@ def execute(body: C2DemoRequest):
 def execute_custom(body: C2CustomDemoRequest):
     # The manual hint never routes detection or changes existing quality policy.
     inputs = (PipelineInput("synthetic-custom", body.text),)
-    result = run_preprocessing_pipeline(
-        inputs, strategy=body.strategy, quality_policy=DEFAULT_QUALITY_POLICY
-    )
+    with safe_demo_execution():
+        result = run_preprocessing_pipeline(
+            inputs,
+            strategy=body.strategy,
+            quality_policy=DEFAULT_QUALITY_POLICY,
+            experimental_demo=body.strategy == "gliner",
+        )
     return C2CustomDemoResponse(
         language_hint=body.language_hint,
+        strategy=body.strategy,
+        anonymization_configuration=configuration(body.strategy),
         records=[C2DemoRecord(original_text=body.text, **asdict(result.records[0]))],
         quality_summary=result.quality_summary,
         privacy_summary=result.privacy_summary,
+        validation_summary=result.validation_summary,
         release_ready=result.release_ready,
         blocking_reasons=result.blocking_reasons,
     )
+
+
+def configuration(strategy):
+    if strategy == "gliner":
+        from preprocessing.gliner_demo import VERSION
+
+        return VERSION
+    from preprocessing.span_evaluation import SELECTION_VERSION
+
+    return strategy + ":" + SELECTION_VERSION
+
+
+@contextmanager
+def safe_demo_execution():
+    try:
+        yield
+    except (RuntimeError, ImportError, OSError, ValueError):
+        # SafeError contains no model path, request text or upstream exception.
+        raise SafeError(ErrorCode.DEPENDENCY_UNAVAILABLE, 503) from None

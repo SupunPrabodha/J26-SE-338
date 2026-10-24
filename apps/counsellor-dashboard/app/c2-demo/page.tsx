@@ -5,6 +5,7 @@ import { api, ApiError } from "@j26/common/api";
 import { DemoHeader, ErrorMessage } from "@j26/common/ui";
 import type { AccountResponse, LoginRequest, C2DemoCatalogue, C2CustomDemoRequest, C2CustomDemoResponse } from "@j26/common/contracts";
 import { PipelineStepper } from "./PipelineStepper";
+import RunValidation from "./RunValidation";
 import "./demo.css";
 
 const readable = (value: string) => value.replaceAll(/[-_:]/g, " ");
@@ -31,6 +32,7 @@ export default function C2Demo() {
   const [catalogue, setCatalogue] = useState<C2DemoCatalogue | null>(null);
   const [result, setResult] = useState<C2CustomDemoResponse | null>(null);
   const [text, setText] = useState("");
+  const strategy = "gliner" as const;
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -101,13 +103,13 @@ export default function C2Demo() {
     const id = sequence.current;
     const pending = new AbortController(); controller.current = pending;
     submitting.current = true; setBusy(true);
-    const body: C2CustomDemoRequest = { text, strategy: "presidio" };
+    const body: C2CustomDemoRequest = { text, strategy };
     try {
       const response = await api<C2CustomDemoResponse>("/c2-demo/custom-runs", body, true, pending.signal);
       if (sequence.current === id) setResult(response);
     } catch (cause) {
       if (sequence.current !== id) return;
-      setError(safeMessage(cause));
+      setError(strategy === "gliner" && !(cause instanceof ApiError && [401, 403].includes(cause.status)) ? `Experimental GLiNER unavailable or failed. ${safeMessage(cause)} No fallback was run.` : safeMessage(cause));
       setDenied(cause instanceof ApiError && [401, 403].includes(cause.status));
       if (cause instanceof ApiError && [401, 403].includes(cause.status)) { setCatalogue(null); setText(""); }
     } finally {
@@ -149,8 +151,9 @@ export default function C2Demo() {
           <p className="hint c2-example"><strong>Illustrative examples (not inserted):</strong> I feel worried about exams. / <span lang="si">විභාග නිසා මට බයයි.</span> / Mata exams gana dukai.</p>
           <p className="hint">Up to 1,000 characters. No participant records or uploads. Empty text demonstrates the actual rejection policy.</p>
         </div>
-          <div><p><strong>Anonymizer: Presidio</strong></p><p className="hint c2-description">Multilingual detection remains limited. Sinhala and Romanized Sinhala can miss names or mask ordinary words. Quality PASS does not certify anonymization correctness.</p>
-          <details><summary>Anonymizer configuration</summary><p>Current runtime: English spaCy NER within Presidio plus bounded C2 introduction, title and role rules; experimental GLiNER and trained candidates remain offline. Presidio runs in the preprocessing service; failures are reported without switching anonymizers.</p></details></div>
+          <div><p><strong>Anonymizer: GLiNER v4 (experimental)</strong></p><p className="hint c2-description">Multilingual detection remains limited. Sinhala and Romanized Sinhala can miss names or mask ordinary words. Quality PASS does not certify anonymization correctness.</p>
+          <p className="notice-inline">Experimental demonstration only; not release-validated. Automated release stays blocked. Unavailable models produce an error; there is no fallback.</p>
+          <details><summary>Anonymizer configuration</summary><p>Pinned urchade/gliner_multi-v2.1, revision <code>443d26d654e0324125a96bebd8e796c14ff2efe6</code>. Unicode-safe v4, person name/location name labels, threshold 0.7 and existing bounded contextual grammar. Whole-text detection is supplemented only by non-overlapping sentence-context LOCATION evidence; PERSON detection is unchanged. Structured email, phone and student-ID recognizers remain active. Failures are reported without switching anonymizers. Trained candidates remain offline.</p></details></div>
         <div className="actions"><button disabled={busy || denied} onClick={run}>{busy ? "Running demonstration…" : "Run demonstration"}</button>
           <button className="secondary" onClick={() => { invalidate(); setText(""); }}>Reset</button></div>
       </>}
@@ -158,6 +161,7 @@ export default function C2Demo() {
     </section>}
     <section className="stack" aria-label="Live demonstration results">
       <section className="card"><h2>Anonymization results</h2>
+      {result && <><p>Executed backend: <strong>{result.strategy === "gliner" ? "GLiNER v4 — experimental" : "Presidio — baseline"}</strong></p><details><summary>Executed configuration</summary><code>{result.anonymization_configuration ?? "Configuration metadata unavailable"}</code></details></>}
       {!result?.records.length && <section><h3>Actual anonymized output</h3><p className="c2-text">{result ? "No anonymized records returned." : "Actual pipeline output will appear here."}</p></section>}
       {result && !result.records.length && <p><strong>Empty batch</strong> — no records returned; automated release is blocked.</p>}
       {result?.records.map((record, index) => <article className="c2-record" key={record.record_id}><div className="detail-heading"><h3>Fictional record {index + 1}</h3><span className="status-badge">Quality: {record.quality_status}</span></div>
@@ -208,6 +212,7 @@ export default function C2Demo() {
       </>}
       <p className="notice-inline"><strong>Human release approval required.</strong> Automated checks do not certify complete anonymization.</p>
     </section>
+    <RunValidation summary={result?.validation_summary} />
     <footer>C2 pipeline demonstration · Authorized human release remains required · DEVELOPMENT ONLY</footer>
   </main>;
 }

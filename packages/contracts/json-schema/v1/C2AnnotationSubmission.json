@@ -395,6 +395,18 @@
     "C2CustomDemoResponse": {
       "additionalProperties": false,
       "properties": {
+        "anonymization_configuration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anonymization Configuration"
+        },
         "blocking_reasons": {
           "items": {
             "type": "string"
@@ -455,8 +467,11 @@
           "type": "string"
         },
         "strategy": {
-          "const": "presidio",
-          "default": "presidio",
+          "default": "gliner",
+          "enum": [
+            "presidio",
+            "gliner"
+          ],
           "title": "Strategy",
           "type": "string"
         },
@@ -465,6 +480,17 @@
           "default": true,
           "title": "Synthetic",
           "type": "boolean"
+        },
+        "validation_summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/C2DemoValidationSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -944,9 +970,62 @@
       "title": "C2DemoRecord",
       "type": "object"
     },
+    "C2DemoRecordValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/C2DemoValidationCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "record_index": {
+          "minimum": 1,
+          "title": "Record Index",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "record_index",
+        "checks"
+      ],
+      "title": "C2DemoRecordValidation",
+      "type": "object"
+    },
     "C2DemoResponse": {
       "additionalProperties": false,
       "properties": {
+        "anonymization_configuration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anonymization Configuration"
+        },
         "blocking_reasons": {
           "items": {
             "type": "string"
@@ -1008,7 +1087,8 @@
           "enum": [
             "regex",
             "presidio",
-            "hybrid"
+            "hybrid",
+            "gliner"
           ],
           "title": "Strategy",
           "type": "string"
@@ -1018,6 +1098,17 @@
           "default": true,
           "title": "Synthetic",
           "type": "boolean"
+        },
+        "validation_summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/C2DemoValidationSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -1102,6 +1193,290 @@
         "record_count"
       ],
       "title": "C2DemoScenario",
+      "type": "object"
+    },
+    "C2DemoStageValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "checked_records": {
+          "minimum": 0,
+          "title": "Checked Records",
+          "type": "integer"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "failed_records": {
+          "minimum": 0,
+          "title": "Failed Records",
+          "type": "integer"
+        },
+        "not_evaluated_records": {
+          "minimum": 0,
+          "title": "Not Evaluated Records",
+          "type": "integer"
+        },
+        "pass_rate_percent": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pass Rate Percent"
+        },
+        "passed_records": {
+          "minimum": 0,
+          "title": "Passed Records",
+          "type": "integer"
+        },
+        "review_records": {
+          "minimum": 0,
+          "title": "Review Records",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "stage": {
+          "enum": [
+            "anonymization",
+            "quality",
+            "language_id",
+            "normalization",
+            "tokenization"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "stage",
+        "checked_records",
+        "passed_records",
+        "failed_records",
+        "review_records",
+        "not_evaluated_records"
+      ],
+      "title": "C2DemoStageValidation",
+      "type": "object"
+    },
+    "C2DemoValidationCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "REVIEW",
+            "NOT_EVALUATED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_id",
+        "status",
+        "reasons"
+      ],
+      "title": "C2DemoValidationCheck",
+      "type": "object"
+    },
+    "C2DemoValidationRule": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_function": {
+          "enum": [
+            "check_privacy",
+            "check_quality",
+            "check_language",
+            "check_normalization",
+            "check_tokens",
+            "check_residual_output"
+          ],
+          "title": "Source Function",
+          "type": "string"
+        },
+        "source_path": {
+          "const": "services/preprocessing/validation.py",
+          "title": "Source Path",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_id",
+        "description",
+        "source_path",
+        "source_function"
+      ],
+      "title": "C2DemoValidationRule",
+      "type": "object"
+    },
+    "C2DemoValidationSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "accuracy_status": {
+          "const": "NOT_MEASURED",
+          "title": "Accuracy Status",
+          "type": "string"
+        },
+        "anonymization_strategy": {
+          "enum": [
+            "regex",
+            "presidio",
+            "hybrid",
+            "gliner"
+          ],
+          "title": "Anonymization Strategy",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "measurement": {
+          "const": "policy_and_integrity_checks_not_accuracy",
+          "title": "Measurement",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "c2-output-validation-v1",
+            "c2-output-validation-v1.1+residual-output-v1"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "records": {
+          "items": {
+            "$ref": "#/$defs/C2DemoRecordValidation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "records_processed": {
+          "minimum": 0,
+          "title": "Records Processed",
+          "type": "integer"
+        },
+        "release_policy_unchanged": {
+          "title": "Release Policy Unchanged",
+          "type": "boolean"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/C2DemoValidationRule"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "stages": {
+          "items": {
+            "$ref": "#/$defs/C2DemoStageValidation"
+          },
+          "title": "Stages",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "method",
+        "anonymization_strategy",
+        "records_processed",
+        "measurement",
+        "accuracy_status",
+        "release_policy_unchanged",
+        "rules",
+        "records",
+        "stages"
+      ],
+      "title": "C2DemoValidationSummary",
       "type": "object"
     }
   },

@@ -1,0 +1,507 @@
+[
+  {
+    "id": "dev-english-0",
+    "language": "english",
+    "text": "I feel overwhelmed by exams. My friend Celina Westbrook lives in Dunedin. Talking helps.",
+    "gold": [
+      {
+        "start": 39,
+        "end": 55,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 65,
+        "end": 72,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-english-1",
+    "language": "english",
+    "text": "Assignments are difficult. I met arlan beckett near Brighton. I could not sleep.",
+    "gold": [
+      {
+        "start": 33,
+        "end": 46,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 52,
+        "end": 60,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-english-2",
+    "language": "english",
+    "text": "I need help planning. My colleague MAREN SOLBERG moved to OSLO. I feel worried.",
+    "gold": [
+      {
+        "start": 35,
+        "end": 48,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 58,
+        "end": 62,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-english-3",
+    "language": "english",
+    "text": "I am tired today. Inez Calder and Leora Hayes travelled to Port Elizabeth.",
+    "gold": [
+      {
+        "start": 18,
+        "end": 29,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 34,
+        "end": 45,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 59,
+        "end": 73,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-english-4",
+    "language": "english",
+    "text": "Our supervisor is helpful. I feel worried about exams.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-english-5",
+    "language": "english",
+    "text": "My friend feels overwhelmed. She stays in good health.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-english-6",
+    "language": "english",
+    "text": "I live in a quiet neighbourhood. My girlfriend is kind.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-english-7",
+    "language": "english",
+    "text": "Dr. [PERSON] helped me. Email [EMAIL]; ID [STUDENT_ID]. 🙂",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-0",
+    "language": "sinhala",
+    "text": "අද විභාග නිසා බයයි. ඇය නුවරඑළිය ප්‍රදේශයේ ජීවත් වෙනවා. මට උදව් කරනවා.",
+    "gold": [
+      {
+        "start": 23,
+        "end": 31,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-1",
+    "language": "sinhala",
+    "text": "වැඩ ගොඩක් තියෙනවා. මම අනුරාධපුරය ප්‍රදේශයේ ජීවත් වෙනවා. මට දුකයි.",
+    "gold": [
+      {
+        "start": 22,
+        "end": 32,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-2",
+    "language": "sinhala",
+    "text": "මට නින්ද යන්නේ නැහැ. මගේ මිතුරා සචින්ද කුලරත්න ගම්පහ ඉන්නවා.",
+    "gold": [
+      {
+        "start": 32,
+        "end": 46,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 47,
+        "end": 52,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-3",
+    "language": "sinhala",
+    "text": "අද මට මහන්සියි. මගේ නම හසාරා විමලසේන. ඇය කළුතර ජීවත් වෙනවා.",
+    "gold": [
+      {
+        "start": 23,
+        "end": 36,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 41,
+        "end": 46,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-4",
+    "language": "sinhala",
+    "text": "මම අද මහන්සියි. මට විභාග ගැන බයයි.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-5",
+    "language": "sinhala",
+    "text": "මගේ මිතුරිය හොඳයි. ඇය සමඟ කතා කළාම සහනයක් දැනෙනවා.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-6",
+    "language": "sinhala",
+    "text": "මම නිහඬ ප්‍රදේශයේ ජීවත් වෙනවා. අද ගෙදර වැඩ කරනවා.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-sinhala-7",
+    "language": "sinhala",
+    "text": "මගේ නම [PERSON]. මම [LOCATION] ජීවත් වෙමි. 🙂",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-0",
+    "language": "romanized-si",
+    "text": "Ada mata dukai. Mage yaluwa Ruwashi Amarasekara Galle wala inne. Eya mata udaw karanawa.",
+    "gold": [
+      {
+        "start": 28,
+        "end": 47,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 48,
+        "end": 53,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-1",
+    "language": "romanized-si",
+    "text": "Assignments nisa mata mahansiyi. Mge yaluwa chathula ranasinghe Negombo wala inne.",
+    "gold": [
+      {
+        "start": 44,
+        "end": 63,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 64,
+        "end": 71,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-2",
+    "language": "romanized-si",
+    "text": "Heta exam ekak thiyenawa. Mage girlfriend VINURI WEERAKKODY mata katha kala.",
+    "gold": [
+      {
+        "start": 42,
+        "end": 59,
+        "entity_type": "PERSON"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-3",
+    "language": "romanized-si",
+    "text": "Raata ninda yanne naha. Mage nama Devinda Samarawickrama. Mama Panadura wala inne.",
+    "gold": [
+      {
+        "start": 34,
+        "end": 56,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 63,
+        "end": 71,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-4",
+    "language": "romanized-si",
+    "text": "Mata exams gana dukai. Mama ada gedara innawa.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-5",
+    "language": "romanized-si",
+    "text": "Mage yaluwa hondai. Eya mata udaw karanawa.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-6",
+    "language": "romanized-si",
+    "text": "Mage girlfriend is helpful. Mata hitha nidahas karaganna oni.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-romanized-si-7",
+    "language": "romanized-si",
+    "text": "Mge nama [PERSON]. Mama [LOCATION] wala inne. 🙂",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-0",
+    "language": "code-mixed",
+    "text": "I feel worried about exams. මගේ මිතුරිය Minara Dissanayake කුරුණෑගල ඉන්නවා.",
+    "gold": [
+      {
+        "start": 40,
+        "end": 58,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 59,
+        "end": 67,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-1",
+    "language": "code-mixed",
+    "text": "අද මට මහන්සියි. My friend රශිනි අලහකෝන් lives in Bendigo.",
+    "gold": [
+      {
+        "start": 26,
+        "end": 39,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 49,
+        "end": 56,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-2",
+    "language": "code-mixed",
+    "text": "Mata pressure ekak danenawa. Our group leader Kelvin Ashford lives in Hobart. මට බයයි.",
+    "gold": [
+      {
+        "start": 46,
+        "end": 60,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 70,
+        "end": 76,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-3",
+    "language": "code-mixed",
+    "text": "I could not sleep. Mage yaluwa NETHIKA WIJESURIYA JAFFNA wala inne. මට දුකයි.",
+    "gold": [
+      {
+        "start": 31,
+        "end": 49,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 50,
+        "end": 56,
+        "entity_type": "LOCATION"
+      }
+    ],
+    "negative": false,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-4",
+    "language": "code-mixed",
+    "text": "I feel worried. මට විභාග ගැන බයයි.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-5",
+    "language": "code-mixed",
+    "text": "Mage yaluwa is helpful. ඇය සමඟ කතා කරනවා.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-6",
+    "language": "code-mixed",
+    "text": "මම නිහඬ ප්‍රදේශයේ ජීවත් වෙනවා. I feel calm today.",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "dev-code-mixed-7",
+    "language": "code-mixed",
+    "text": "My name is [PERSON]. මම [LOCATION] ජීවත් වෙමි. 🙂",
+    "gold": [],
+    "negative": true,
+    "provenance": "AI-authored synthetic proposed reference; not independently reviewed"
+  },
+  {
+    "id": "reported-romanized",
+    "language": "romanized-si",
+    "text": "Mage nama Kavindu Jayasinghe. Mama Matara wala jeewath wenawa. Me dawaswala assignments saha exams ekama sathiye thiyena nisa mata loku pressure ekak danenawa. Mage yaluwa Tharushi Senewiratne Kandy wala inne. Eya mata wada tika plan karaganna udaw karanawa. Eth exam ekakata kalin raata mata ninda yanne naha. Samahara dawaswala yaluwoth ekka kathakarannath hithenne naha. Mage student ID eka IT12345678 saha email eka [kavindu.demo@example.com](mailto:kavindu.demo@example.com). Mama uthsahaya atharinne naha. Mata mage wada tika piliwelakata karaganna saha hitha nidahas karaganna udawwak oni.",
+    "gold": [
+      {
+        "start": 10,
+        "end": 28,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 35,
+        "end": 41,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 172,
+        "end": 192,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 193,
+        "end": 198,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 394,
+        "end": 404,
+        "entity_type": "STUDENT_ID"
+      },
+      {
+        "start": 421,
+        "end": 445,
+        "entity_type": "EMAIL"
+      },
+      {
+        "start": 454,
+        "end": 478,
+        "entity_type": "EMAIL"
+      }
+    ],
+    "negative": false,
+    "provenance": "User supplied fictional development paragraph; typed spans proposed from explicit mentions, not independent review"
+  },
+  {
+    "id": "reported-sinhala",
+    "language": "sinhala",
+    "text": "මගේ නම කවිඳු ජයසිංහ. මම මාතර ප්‍රදේශයේ ජීවත් වෙනවා. මේ දිනවල විභාග සහ පැවරුම් එකවර තිබෙන නිසා මට ලොකු පීඩනයක් දැනෙනවා. මගේ මිතුරියගේ නම තරුෂි සෙනෙවිරත්න. ඇය මහනුවර ප්‍රදේශයේ ජීවත් වෙනවා. ඇය සමඟ කතා කළාම මගේ හිතට යම් සහනයක් දැනුණත් විභාගයට පෙර රාත්‍රියේ නිදාගන්න තවමත් අමාරුයි. සමහර දවස්වල මිතුරන් හමුවෙන්නත් කැමැත්තක් නැහැ. මගේ ඊමේල් ලිපිනය [kavindu.demo@example.com](mailto:kavindu.demo@example.com). මම උත්සාහය අත්හරින්නේ නැහැ. වැඩ සැලසුම් කරගන්න සහ මගේ ගැටලු ගැන කතා කරන්න සහායක් ලැබුණොත් හොඳයි.",
+    "gold": [
+      {
+        "start": 7,
+        "end": 19,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 24,
+        "end": 28,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 136,
+        "end": 152,
+        "entity_type": "PERSON"
+      },
+      {
+        "start": 157,
+        "end": 163,
+        "entity_type": "LOCATION"
+      },
+      {
+        "start": 342,
+        "end": 366,
+        "entity_type": "EMAIL"
+      },
+      {
+        "start": 375,
+        "end": 399,
+        "entity_type": "EMAIL"
+      }
+    ],
+    "negative": false,
+    "provenance": "User supplied fictional development paragraph; typed spans proposed from explicit mentions, not independent review"
+  }
+]

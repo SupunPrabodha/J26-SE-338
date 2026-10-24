@@ -113,7 +113,8 @@
         "enum": [
           "regex",
           "presidio",
-          "hybrid"
+          "hybrid",
+          "gliner"
         ],
         "type": "string"
       },

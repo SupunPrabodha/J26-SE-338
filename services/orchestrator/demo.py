@@ -34,7 +34,12 @@ demo_routes = APIRouter(
 def forward(request, route, response_type, body=None):
     try:
         config = settings()
-        with httpx.Client(timeout=config.service_timeout_seconds, follow_redirects=False) as client:
+        # Only the opt-in C2 model needs a bounded cold-load budget; shared C1
+        # service defaults and baseline request timeouts remain unchanged.
+        timeout = (
+            300 if getattr(body, "strategy", None) == "gliner" else config.service_timeout_seconds
+        )
+        with httpx.Client(timeout=timeout, follow_redirects=False) as client:
             response = client.request(
                 "POST" if body is not None else "GET",
                 config.preprocessing_url + "/internal/v1/c2-demo/" + route,

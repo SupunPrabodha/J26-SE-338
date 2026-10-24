@@ -17,8 +17,11 @@
       "type": "string"
     },
     "strategy": {
-      "const": "presidio",
-      "default": "presidio",
+      "default": "gliner",
+      "enum": [
+        "presidio",
+        "gliner"
+      ],
       "title": "Strategy",
       "type": "string"
     },

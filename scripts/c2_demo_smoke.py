@@ -11,7 +11,9 @@ def main():
     environment = dotenv_values(Path(__file__).resolve().parents[1] / ".env")
     headers = {"Origin": "http://localhost:3001", "X-Requested-With": "j26-browser"}
     root = "http://localhost:3001/api/v1"
-    with httpx.Client(headers=headers, timeout=30, trust_env=False) as client:
+    # Explicit experimental deployments can cold-load the local model for almost
+    # three minutes. This smoke client must outlive the C2-only 310 s proxy budget.
+    with httpx.Client(headers=headers, timeout=320, trust_env=False) as client:
         assert client.get(root + "/c2-demo/scenarios").status_code == 401
         response = client.post(
             root + "/auth/login",

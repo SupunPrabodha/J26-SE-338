@@ -1,0 +1,14 @@
+# Explicit local experimental overlay. No model weights are copied into images.
+services:
+  preprocessing:
+    image: j26-c2-gliner-demo:0.1.0-dev
+    build:
+      context: .
+      dockerfile: infrastructure/docker/c2-gliner.Dockerfile
+    environment:
+      C2_GLINER_DEMO_ENABLED: "true"
+      C2_GLINER_MODEL_PATH: /models/gliner
+    volumes:
+      - ./.local/c2-gliner-linux-env:/opt/c2-gliner:ro
+      - ./.local/c2-gliner-docker:/models/gliner:ro
+      - ./.local/c2-gliner-backbone:/models/backbone:ro

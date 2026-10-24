@@ -1,0 +1,9 @@
+# Opt-in preprocessing image only; runtime baseline lock remains unchanged.
+gliner==0.2.24
+transformers==4.57.3
+huggingface-hub==0.36.0
+tokenizers==0.22.1
+sentencepiece==0.2.1
+onnxruntime==1.23.2
+numpy==2.2.6
+safetensors==0.8.0

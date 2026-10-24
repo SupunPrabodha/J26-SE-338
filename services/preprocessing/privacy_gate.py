@@ -105,6 +105,13 @@ def assess_release(
         counts["residual_email"] += len(EMAIL_PATTERN.findall(anonymized_text))
         counts["residual_phone"] += len(PHONE_PATTERN.findall(anonymized_text))
         counts["residual_student_id"] += len(STUDENT_ID_PATTERN.findall(anonymized_text))
+        # Complementary output audit: never trust selected masking spans or a
+        # false review flag as evidence that identifiers were removed.
+        from preprocessing.residual_privacy import assess_output
+
+        for signal in assess_output(anonymized_text):
+            if signal.rule_id not in {"email", "phone", "student_id"}:
+                counts["output_" + signal.rule_id] += 1
 
     issues: list[str] = []
 
@@ -130,6 +137,11 @@ def assess_release(
         "residual_student_id": "residual_student_id",
         "invalid_privacy_review_flag": "invalid_privacy_review_flag",
         "privacy_review_required": "privacy_review_required",
+        "output_person_field": "residual_person_field",
+        "output_location_field": "residual_location_field",
+        "output_person_context": "unresolved_person_context",
+        "output_location_context": "unresolved_location_context",
+        "output_placeholder_type": "placeholder_type_review",
     }
 
     for count_name, issue_name in issue_mapping.items():
@@ -157,6 +169,8 @@ def build_release_summary(result: ReleaseGateResult) -> dict[str, object]:
         "privacy_note": ("Aggregate metadata only; submitted and detected text is excluded."),
         "limitation": (
             "Automated checks cover supported structured identifiers and bounded name-context signals. "
+            "Complementary output checks cover explicit identifying fields and bounded contexts. "
+            "No signal does not verify anonymity; arbitrary names/places may remain. "
             "Indirect identifiers still require controlled human review."
         ),
     }
