@@ -1,0 +1,814 @@
+{
+  "variant": "DAPT-Dynamic",
+  "strategy": "dynamic",
+  "base_model": "xlm-roberta-base",
+  "output_dir": "models/xlm-roberta-dapt-dynamic",
+  "hyperparameters": {
+    "max_seq_length": 256,
+    "per_device_train_batch_size": 8,
+    "gradient_accumulation_steps": 8,
+    "effective_batch_size": 64,
+    "learning_rate": 2.5e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "num_train_epochs": 3.0,
+    "fp16": true,
+    "seed": 42
+  },
+  "results": {
+    "final_eval_loss": 2.9644,
+    "final_perplexity": 19.38,
+    "baseline_perplexity": 146.36,
+    "delta_perplexity": 126.98,
+    "percent_perplexity_reduction": 86.76,
+    "top1_accuracy": 51.27,
+    "top5_accuracy": 68.49,
+    "global_steps": 5715,
+    "total_epochs": 3.0,
+    "total_runtime_seconds": 3018.8,
+    "runtime_formatted": "0:50:18"
+  },
+  "qualitative_probe_predictions": [
+    {
+      "probe_sentence": "mata stress eka wadi wela night <mask> ganna ba, full depressed inne.",
+      "top5_candidates": [
+        {
+          "token": "shift",
+          "probability": 0.2732
+        },
+        {
+          "token": "s",
+          "probability": 0.0505
+        },
+        {
+          "token": "out",
+          "probability": 0.0271
+        },
+        {
+          "token": "ly",
+          "probability": 0.0246
+        },
+        {
+          "token": "sleep",
+          "probability": 0.0198
+        }
+      ]
+    },
+    {
+      "probe_sentence": "oya mata help karanna <mask> puluwanda mee assignment eka karanna.",
+      "top5_candidates": [
+        {
+          "token": "th",
+          "probability": 0.3288
+        },
+        {
+          "token": ".",
+          "probability": 0.0885
+        },
+        {
+          "token": "ba",
+          "probability": 0.0734
+        },
+        {
+          "token": "bari",
+          "probability": 0.0647
+        },
+        {
+          "token": "ona",
+          "probability": 0.0647
+        }
+      ]
+    },
+    {
+      "probe_sentence": "campus eke exam eka thiyena nisa mata <mask> wadi wela thiyenne.",
+      "top5_candidates": [
+        {
+          "token": "th",
+          "probability": 0.6336
+        },
+        {
+          "token": "nam",
+          "probability": 0.0806
+        },
+        {
+          "token": "ta",
+          "probability": 0.0306
+        },
+        {
+          "token": "gana",
+          "probability": 0.021
+        },
+        {
+          "token": "oka",
+          "probability": 0.0144
+        }
+      ]
+    },
+    {
+      "probe_sentence": "mage yaaluwa mata godak <mask> kara mama dukin inna welawata.",
+      "top5_candidates": [
+        {
+          "token": "wada",
+          "probability": 0.0524
+        },
+        {
+          "token": "try",
+          "probability": 0.0339
+        },
+        {
+          "token": "set",
+          "probability": 0.0256
+        },
+        {
+          "token": "reply",
+          "probability": 0.0205
+        },
+        {
+          "token": "ban",
+          "probability": 0.0181
+        }
+      ]
+    },
+    {
+      "probe_sentence": "hithata hari na wage, kawuruth na mata <mask> karanna.",
+      "top5_candidates": [
+        {
+          "token": "try",
+          "probability": 0.0548
+        },
+        {
+          "token": "th",
+          "probability": 0.0414
+        },
+        {
+          "token": "call",
+          "probability": 0.0251
+        },
+        {
+          "token": "wada",
+          "probability": 0.0243
+        },
+        {
+          "token": "manage",
+          "probability": 0.0236
+        }
+      ]
+    },
+    {
+      "probe_sentence": "doctor gen <mask> ekak ganna one mata thiyena depression ekata.",
+      "top5_candidates": [
+        {
+          "token": "advice",
+          "probability": 0.2232
+        },
+        {
+          "token": "help",
+          "probability": 0.0902
+        },
+        {
+          "token": "opinion",
+          "probability": 0.04
+        },
+        {
+          "token": "video",
+          "probability": 0.0376
+        },
+        {
+          "token": "seen",
+          "probability": 0.0302
+        }
+      ]
+    },
+    {
+      "probe_sentence": "ada lecture eka cut karala gedara hitiya, kisi <mask> na.",
+      "top5_candidates": [
+        {
+          "token": "yak",
+          "probability": 0.0598
+        },
+        {
+          "token": "nam",
+          "probability": 0.0466
+        },
+        {
+          "token": "enne",
+          "probability": 0.0234
+        },
+        {
+          "token": "kale",
+          "probability": 0.02
+        },
+        {
+          "token": "mak",
+          "probability": 0.02
+        }
+      ]
+    },
+    {
+      "probe_sentence": "api okkoma ekathu wela me prashneta <mask> ekak hoyamu.",
+      "top5_candidates": [
+        {
+          "token": "thread",
+          "probability": 0.0816
+        },
+        {
+          "token": "seen",
+          "probability": 0.0385
+        },
+        {
+          "token": "video",
+          "probability": 0.0351
+        },
+        {
+          "token": "comment",
+          "probability": 0.0291
+        },
+        {
+          "token": "reply",
+          "probability": 0.0213
+        }
+      ]
+    },
+    {
+      "probe_sentence": "මට හරිම <mask>, කිසිම දෙයක් කරගන්න හිතෙන්නෙ නෑ.",
+      "top5_candidates": [
+        {
+          "token": "දුක",
+          "probability": 0.1549
+        },
+        {
+          "token": "අමාරු",
+          "probability": 0.0856
+        },
+        {
+          "token": "දුක්",
+          "probability": 0.0473
+        },
+        {
+          "token": "stress",
+          "probability": 0.0458
+        },
+        {
+          "token": "පිස්සු",
+          "probability": 0.0417
+        }
+      ]
+    },
+    {
+      "probe_sentence": "campus eke friends la ekka katha karama <mask> adu wenawa.",
+      "top5_candidates": [
+        {
+          "token": "gana",
+          "probability": 0.1562
+        },
+        {
+          "token": "stress",
+          "probability": 0.0672
+        },
+        {
+          "token": "nam",
+          "probability": 0.0348
+        },
+        {
+          "token": "time",
+          "probability": 0.0232
+        },
+        {
+          "token": "income",
+          "probability": 0.0211
+        }
+      ]
+    }
+  ],
+  "training_loss_history": [
+    {
+      "loss": 43.8787744140625,
+      "grad_norm": 535.1036987304688,
+      "learning_rate": 4.334500875656742e-06,
+      "epoch": 0.05249343832020997,
+      "step": 100
+    },
+    {
+      "loss": 40.44276123046875,
+      "grad_norm": 500.6479187011719,
+      "learning_rate": 8.712784588441332e-06,
+      "epoch": 0.10498687664041995,
+      "step": 200
+    },
+    {
+      "loss": 37.76750244140625,
+      "grad_norm": 405.6097412109375,
+      "learning_rate": 1.309106830122592e-05,
+      "epoch": 0.15748031496062992,
+      "step": 300
+    },
+    {
+      "loss": 35.1987646484375,
+      "grad_norm": 622.3840942382812,
+      "learning_rate": 1.746935201401051e-05,
+      "epoch": 0.2099737532808399,
+      "step": 400
+    },
+    {
+      "loss": 34.26464599609375,
+      "grad_norm": 503.5004577636719,
+      "learning_rate": 2.18476357267951e-05,
+      "epoch": 0.26246719160104987,
+      "step": 500
+    },
+    {
+      "eval_loss": 3.998103380203247,
+      "eval_top1_accuracy": 42.59,
+      "eval_top5_accuracy": 58.24,
+      "eval_runtime": 15.209,
+      "eval_samples_per_second": 421.855,
+      "eval_steps_per_second": 52.732,
+      "epoch": 0.26246719160104987,
+      "step": 500
+    },
+    {
+      "loss": 32.57972900390625,
+      "grad_norm": 339.57513427734375,
+      "learning_rate": 2.499817239085565e-05,
+      "epoch": 0.31496062992125984,
+      "step": 600
+    },
+    {
+      "loss": 31.7221484375,
+      "grad_norm": 308.3681335449219,
+      "learning_rate": 2.496182521465876e-05,
+      "epoch": 0.3674540682414698,
+      "step": 700
+    },
+    {
+      "loss": 30.81337890625,
+      "grad_norm": 874.6267700195312,
+      "learning_rate": 2.4879011054212802e-05,
+      "epoch": 0.4199475065616798,
+      "step": 800
+    },
+    {
+      "loss": 30.71001220703125,
+      "grad_norm": 352.9495544433594,
+      "learning_rate": 2.4750038702509403e-05,
+      "epoch": 0.47244094488188976,
+      "step": 900
+    },
+    {
+      "loss": 30.33033203125,
+      "grad_norm": 359.77447509765625,
+      "learning_rate": 2.4575389064723514e-05,
+      "epoch": 0.5249343832020997,
+      "step": 1000
+    },
+    {
+      "eval_loss": 3.613168954849243,
+      "eval_top1_accuracy": 45.4,
+      "eval_top5_accuracy": 61.97,
+      "eval_runtime": 15.238,
+      "eval_samples_per_second": 421.054,
+      "eval_steps_per_second": 52.632,
+      "epoch": 0.5249343832020997,
+      "step": 1000
+    },
+    {
+      "loss": 29.86490234375,
+      "grad_norm": 287.03082275390625,
+      "learning_rate": 2.435571336504006e-05,
+      "epoch": 0.5774278215223098,
+      "step": 1100
+    },
+    {
+      "loss": 29.29587890625,
+      "grad_norm": 392.94451904296875,
+      "learning_rate": 2.4091830718404188e-05,
+      "epoch": 0.6299212598425197,
+      "step": 1200
+    },
+    {
+      "loss": 29.1243017578125,
+      "grad_norm": 396.1243896484375,
+      "learning_rate": 2.3784725076249463e-05,
+      "epoch": 0.6824146981627297,
+      "step": 1300
+    },
+    {
+      "loss": 28.37597900390625,
+      "grad_norm": 315.337890625,
+      "learning_rate": 2.3435541557592643e-05,
+      "epoch": 0.7349081364829396,
+      "step": 1400
+    },
+    {
+      "loss": 28.30277587890625,
+      "grad_norm": 267.82470703125,
+      "learning_rate": 2.3045582179175416e-05,
+      "epoch": 0.7874015748031497,
+      "step": 1500
+    },
+    {
+      "eval_loss": 3.385211229324341,
+      "eval_top1_accuracy": 47.38,
+      "eval_top5_accuracy": 64.42,
+      "eval_runtime": 15.2167,
+      "eval_samples_per_second": 421.642,
+      "eval_steps_per_second": 52.705,
+      "epoch": 0.7874015748031497,
+      "step": 1500
+    },
+    {
+      "loss": 28.1592333984375,
+      "grad_norm": 267.5706787109375,
+      "learning_rate": 2.2616301000574334e-05,
+      "epoch": 0.8398950131233596,
+      "step": 1600
+    },
+    {
+      "loss": 27.8148193359375,
+      "grad_norm": 330.37384033203125,
+      "learning_rate": 2.2149298702381593e-05,
+      "epoch": 0.8923884514435696,
+      "step": 1700
+    },
+    {
+      "loss": 27.4464306640625,
+      "grad_norm": 270.3538513183594,
+      "learning_rate": 2.1646316617673258e-05,
+      "epoch": 0.9448818897637795,
+      "step": 1800
+    },
+    {
+      "loss": 27.72433837890625,
+      "grad_norm": 312.321044921875,
+      "learning_rate": 2.1109230239020046e-05,
+      "epoch": 0.9973753280839895,
+      "step": 1900
+    },
+    {
+      "loss": 27.19984375,
+      "grad_norm": 195.92335510253906,
+      "learning_rate": 2.054004222525141e-05,
+      "epoch": 1.0498687664041995,
+      "step": 2000
+    },
+    {
+      "eval_loss": 3.3021082878112793,
+      "eval_top1_accuracy": 48.9,
+      "eval_top5_accuracy": 65.99,
+      "eval_runtime": 15.2175,
+      "eval_samples_per_second": 421.619,
+      "eval_steps_per_second": 52.702,
+      "epoch": 1.0498687664041995,
+      "step": 2000
+    },
+    {
+      "loss": 27.0457275390625,
+      "grad_norm": 193.28262329101562,
+      "learning_rate": 1.9940874934048916e-05,
+      "epoch": 1.1023622047244095,
+      "step": 2100
+    },
+    {
+      "loss": 27.01596435546875,
+      "grad_norm": 183.11700439453125,
+      "learning_rate": 1.9313962508212936e-05,
+      "epoch": 1.1548556430446195,
+      "step": 2200
+    },
+    {
+      "loss": 26.75069091796875,
+      "grad_norm": 157.66282653808594,
+      "learning_rate": 1.8661642545111027e-05,
+      "epoch": 1.2073490813648293,
+      "step": 2300
+    },
+    {
+      "loss": 26.3942138671875,
+      "grad_norm": 175.1077880859375,
+      "learning_rate": 1.7986347380370502e-05,
+      "epoch": 1.2598425196850394,
+      "step": 2400
+    },
+    {
+      "loss": 26.44882568359375,
+      "grad_norm": 170.47987365722656,
+      "learning_rate": 1.7290595018315996e-05,
+      "epoch": 1.3123359580052494,
+      "step": 2500
+    },
+    {
+      "eval_loss": 3.207627534866333,
+      "eval_top1_accuracy": 48.98,
+      "eval_top5_accuracy": 66.44,
+      "eval_runtime": 15.247,
+      "eval_samples_per_second": 420.803,
+      "eval_steps_per_second": 52.6,
+      "epoch": 1.3123359580052494,
+      "step": 2500
+    },
+    {
+      "loss": 26.6179833984375,
+      "grad_norm": 171.56004333496094,
+      "learning_rate": 1.6576979742970277e-05,
+      "epoch": 1.3648293963254594,
+      "step": 2600
+    },
+    {
+      "loss": 26.17427490234375,
+      "grad_norm": 218.94053649902344,
+      "learning_rate": 1.5848162444627358e-05,
+      "epoch": 1.4173228346456692,
+      "step": 2700
+    },
+    {
+      "loss": 26.27598388671875,
+      "grad_norm": 254.8927764892578,
+      "learning_rate": 1.5106860698067748e-05,
+      "epoch": 1.4698162729658792,
+      "step": 2800
+    },
+    {
+      "loss": 26.2151953125,
+      "grad_norm": 214.40040588378906,
+      "learning_rate": 1.4355838629411653e-05,
+      "epoch": 1.5223097112860893,
+      "step": 2900
+    },
+    {
+      "loss": 25.9325,
+      "grad_norm": 179.68124389648438,
+      "learning_rate": 1.3597896609393998e-05,
+      "epoch": 1.574803149606299,
+      "step": 3000
+    },
+    {
+      "eval_loss": 3.109001874923706,
+      "eval_top1_accuracy": 49.98,
+      "eval_top5_accuracy": 67.47,
+      "eval_runtime": 15.1711,
+      "eval_samples_per_second": 422.91,
+      "eval_steps_per_second": 52.864,
+      "epoch": 1.574803149606299,
+      "step": 3000
+    },
+    {
+      "loss": 26.564208984375,
+      "grad_norm": 227.21759033203125,
+      "learning_rate": 1.2835860811492523e-05,
+      "epoch": 1.627296587926509,
+      "step": 3100
+    },
+    {
+      "loss": 25.908818359375,
+      "grad_norm": 171.1607208251953,
+      "learning_rate": 1.2072572673843965e-05,
+      "epoch": 1.6797900262467191,
+      "step": 3200
+    },
+    {
+      "loss": 26.08450927734375,
+      "grad_norm": 204.12440490722656,
+      "learning_rate": 1.1310878304242222e-05,
+      "epoch": 1.7322834645669292,
+      "step": 3300
+    },
+    {
+      "loss": 25.797275390625,
+      "grad_norm": 172.4683074951172,
+      "learning_rate": 1.0553617867724537e-05,
+      "epoch": 1.7847769028871392,
+      "step": 3400
+    },
+    {
+      "loss": 25.7477783203125,
+      "grad_norm": 209.98797607421875,
+      "learning_rate": 9.80361499631671e-06,
+      "epoch": 1.8372703412073492,
+      "step": 3500
+    },
+    {
+      "eval_loss": 3.0806643962860107,
+      "eval_top1_accuracy": 50.72,
+      "eval_top5_accuracy": 68.34,
+      "eval_runtime": 15.1804,
+      "eval_samples_per_second": 422.65,
+      "eval_steps_per_second": 52.831,
+      "epoch": 1.8372703412073492,
+      "step": 3500
+    },
+    {
+      "loss": 25.5668408203125,
+      "grad_norm": 178.81419372558594,
+      "learning_rate": 9.063666260425743e-06,
+      "epoch": 1.889763779527559,
+      "step": 3600
+    },
+    {
+      "loss": 25.3610400390625,
+      "grad_norm": 206.57110595703125,
+      "learning_rate": 8.336530741138351e-06,
+      "epoch": 1.942257217847769,
+      "step": 3700
+    },
+    {
+      "loss": 25.18737060546875,
+      "grad_norm": 165.6094512939453,
+      "learning_rate": 7.6249197423076765e-06,
+      "epoch": 1.9947506561679789,
+      "step": 3800
+    },
+    {
+      "loss": 25.394755859375,
+      "grad_norm": 156.16525268554688,
+      "learning_rate": 6.9314866807891565e-06,
+      "epoch": 2.047244094488189,
+      "step": 3900
+    },
+    {
+      "loss": 25.24212158203125,
+      "grad_norm": 167.4624786376953,
+      "learning_rate": 6.258817192522339e-06,
+      "epoch": 2.099737532808399,
+      "step": 4000
+    },
+    {
+      "eval_loss": 3.0440714359283447,
+      "eval_top1_accuracy": 51.42,
+      "eval_top5_accuracy": 68.71,
+      "eval_runtime": 15.3399,
+      "eval_samples_per_second": 418.256,
+      "eval_steps_per_second": 52.282,
+      "epoch": 2.099737532808399,
+      "step": 4000
+    },
+    {
+      "loss": 25.35667724609375,
+      "grad_norm": 152.20050048828125,
+      "learning_rate": 5.609419491350518e-06,
+      "epoch": 2.152230971128609,
+      "step": 4100
+    },
+    {
+      "loss": 25.55771240234375,
+      "grad_norm": 158.42930603027344,
+      "learning_rate": 4.98571501652773e-06,
+      "epoch": 2.204724409448819,
+      "step": 4200
+    },
+    {
+      "loss": 25.19972900390625,
+      "grad_norm": 140.80667114257812,
+      "learning_rate": 4.390029403786179e-06,
+      "epoch": 2.257217847769029,
+      "step": 4300
+    },
+    {
+      "loss": 24.92523681640625,
+      "grad_norm": 155.515869140625,
+      "learning_rate": 3.824583813630674e-06,
+      "epoch": 2.309711286089239,
+      "step": 4400
+    },
+    {
+      "loss": 24.9709716796875,
+      "grad_norm": 149.71371459960938,
+      "learning_rate": 3.291486649194693e-06,
+      "epoch": 2.362204724409449,
+      "step": 4500
+    },
+    {
+      "eval_loss": 3.0031487941741943,
+      "eval_top1_accuracy": 51.2,
+      "eval_top5_accuracy": 68.5,
+      "eval_runtime": 15.2257,
+      "eval_samples_per_second": 421.393,
+      "eval_steps_per_second": 52.674,
+      "epoch": 2.362204724409449,
+      "step": 4500
+    },
+    {
+      "loss": 25.3441943359375,
+      "grad_norm": 168.8410186767578,
+      "learning_rate": 2.7927256945400743e-06,
+      "epoch": 2.4146981627296586,
+      "step": 4600
+    },
+    {
+      "loss": 25.247421875,
+      "grad_norm": 172.27557373046875,
+      "learning_rate": 2.3301607027146054e-06,
+      "epoch": 2.4671916010498687,
+      "step": 4700
+    },
+    {
+      "loss": 25.17008056640625,
+      "grad_norm": 141.82666015625,
+      "learning_rate": 1.9055164612047968e-06,
+      "epoch": 2.5196850393700787,
+      "step": 4800
+    },
+    {
+      "loss": 24.8298681640625,
+      "grad_norm": 165.42393493652344,
+      "learning_rate": 1.5203763606409779e-06,
+      "epoch": 2.5721784776902887,
+      "step": 4900
+    },
+    {
+      "loss": 25.05998046875,
+      "grad_norm": 184.5076446533203,
+      "learning_rate": 1.1761764907353937e-06,
+      "epoch": 2.6246719160104988,
+      "step": 5000
+    },
+    {
+      "eval_loss": 3.018977165222168,
+      "eval_top1_accuracy": 51.41,
+      "eval_top5_accuracy": 68.71,
+      "eval_runtime": 15.1795,
+      "eval_samples_per_second": 422.677,
+      "eval_steps_per_second": 52.835,
+      "epoch": 2.6246719160104988,
+      "step": 5000
+    },
+    {
+      "loss": 24.85245361328125,
+      "grad_norm": 150.49501037597656,
+      "learning_rate": 8.742002854680561e-07,
+      "epoch": 2.677165354330709,
+      "step": 5100
+    },
+    {
+      "loss": 24.97181640625,
+      "grad_norm": 151.67764282226562,
+      "learning_rate": 6.155737374870754e-07,
+      "epoch": 2.729658792650919,
+      "step": 5200
+    },
+    {
+      "loss": 24.6397265625,
+      "grad_norm": 137.1669464111328,
+      "learning_rate": 4.0126119956778036e-07,
+      "epoch": 2.7821522309711284,
+      "step": 5300
+    },
+    {
+      "loss": 25.0582568359375,
+      "grad_norm": 179.40611267089844,
+      "learning_rate": 2.3206178878590613e-07,
+      "epoch": 2.8346456692913384,
+      "step": 5400
+    },
+    {
+      "loss": 24.6133349609375,
+      "grad_norm": 182.87783813476562,
+      "learning_rate": 1.0860640681278345e-07,
+      "epoch": 2.8871391076115485,
+      "step": 5500
+    },
+    {
+      "eval_loss": 3.010206937789917,
+      "eval_top1_accuracy": 51.22,
+      "eval_top5_accuracy": 68.59,
+      "eval_runtime": 15.2659,
+      "eval_samples_per_second": 420.284,
+      "eval_steps_per_second": 52.535,
+      "epoch": 2.8871391076115485,
+      "step": 5500
+    },
+    {
+      "loss": 24.8916455078125,
+      "grad_norm": 175.06399536132812,
+      "learning_rate": 3.135538744308553e-08,
+      "epoch": 2.9396325459317585,
+      "step": 5600
+    },
+    {
+      "loss": 25.01121337890625,
+      "grad_norm": 170.66217041015625,
+      "learning_rate": 5.96780126907448e-10,
+      "epoch": 2.9921259842519685,
+      "step": 5700
+    },
+    {
+      "eval_loss": 3.0284464359283447,
+      "eval_top1_accuracy": 51.18,
+      "eval_top5_accuracy": 68.3,
+      "eval_runtime": 15.1973,
+      "eval_samples_per_second": 422.179,
+      "eval_steps_per_second": 52.772,
+      "epoch": 3.0,
+      "step": 5715
+    },
+    {
+      "eval_loss": 2.964447498321533,
+      "eval_top1_accuracy": 51.27,
+      "eval_top5_accuracy": 68.49,
+      "eval_runtime": 15.2993,
+      "eval_samples_per_second": 419.366,
+      "eval_steps_per_second": 52.421,
+      "epoch": 3.0,
+      "step": 5715
+    }
+  ]
+}
