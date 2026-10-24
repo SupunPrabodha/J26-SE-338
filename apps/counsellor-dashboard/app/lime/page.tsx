@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
+import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
 import { api } from "@j26/common/api";
@@ -376,8 +377,9 @@ export default function LimePage() {
   ];
 
   return (
-    <div className="lime-page-container">
-      <Sidebar isClassifierConnected={isClassifierConnected} />
+    <RequireAuth workspace="research">
+      <div className="lime-page-container">
+        <Sidebar isClassifierConnected={isClassifierConnected} />
 
       <main className="lime-main" id="content">
         {/* Top Header */}
@@ -1151,6 +1153,7 @@ export default function LimePage() {
         </div>
       </main>
     </div>
+    </RequireAuth>
   );
 }
 

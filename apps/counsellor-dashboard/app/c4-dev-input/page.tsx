@@ -4,6 +4,7 @@ import React, { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "../components/Sidebar";
+import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase, type DevelopmentInputData } from "../context/CaseContext";
 import type { C4PredictionResponse } from "@j26/common/contracts";
 
@@ -36,12 +37,10 @@ function C4DevInputContent() {
   const router = useRouter();
   const {
     authorized,
-    checking,
     devInput,
     setDevInput,
     selectedSentimentClass,
     setSelectedSentimentClass,
-    login,
   } = useReviewCase();
 
   const [text, setText] = useState(devInput?.text || "");
@@ -52,31 +51,6 @@ function C4DevInputContent() {
   const [isAnalysing, setIsAnalysing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
-
-  // Inline development login state
-  const [loginUsername, setLoginUsername] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [loginError, setLoginError] = useState("");
-
-  async function handleInlineLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!loginUsername.trim() || !loginPassword.trim()) {
-      setLoginError("Please enter both username and password.");
-      return;
-    }
-    setIsLoggingIn(true);
-    setLoginError("");
-    try {
-      await login(loginUsername.trim(), loginPassword.trim());
-      setErrorMessage("");
-      setStatusMessage("Authenticated successfully as counsellor. You can now analyze reflections.");
-    } catch (err) {
-      setLoginError(err instanceof Error ? err.message : "Sign-in failed. Please check credentials.");
-    } finally {
-      setIsLoggingIn(false);
-    }
-  }
 
   // Retrieve incoming student-portal handoff (?handoff=...)
   useEffect(() => {
@@ -339,117 +313,7 @@ function C4DevInputContent() {
           <strong>Screening Support Notice:</strong> This system supports wellbeing screening and counsellor-assisted review. It does not provide a diagnosis or replace professional counselling.
         </div>
 
-        {/* Sign-In Card when Unauthenticated */}
-        {!checking && !authorized && (
-          <div
-            style={{
-              background: "#fff1f2",
-              border: "1px solid #fecdd3",
-              borderRadius: "10px",
-              padding: "16px 20px",
-              marginBottom: "16px",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontWeight: 700, background: "#fecdd3", color: "#9f1239", padding: "2px 8px", borderRadius: "4px", fontSize: "11px" }}>
-                    Sign-in Required
-                  </span>
-                  <strong style={{ fontSize: "14px", color: "#9f1239" }}>
-                    Counsellor Authentication Required
-                  </strong>
-                </div>
-                <p style={{ margin: "6px 0 0", fontSize: "12.5px", color: "#881337" }}>
-                  Prediction and XAI explanations require an authorized counsellor session. Sign in below using your local development credentials from <code>.env</code>.
-                </p>
-              </div>
-              <Link
-                href="/"
-                style={{
-                  color: "#e11d48",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  textDecoration: "underline",
-                }}
-              >
-                Go to Case Queue →
-              </Link>
-            </div>
 
-            <form onSubmit={handleInlineLogin} style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-end" }}>
-              <div style={{ flex: "1 1 240px" }}>
-                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#475569", marginBottom: "4px" }}>
-                  Username (DEV_COUNSELLOR_USERNAME)
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={loginUsername}
-                  onChange={(e) => setLoginUsername(e.target.value)}
-                  placeholder="Paste dev counsellor username"
-                  style={{
-                    width: "100%",
-                    padding: "7px 10px",
-                    borderRadius: "6px",
-                    border: "1px solid #cbd5e1",
-                    fontSize: "12px",
-                    fontFamily: "monospace",
-                    background: "#ffffff",
-                    color: "#0f172a",
-                  }}
-                />
-              </div>
-
-              <div style={{ flex: "1 1 240px" }}>
-                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#475569", marginBottom: "4px" }}>
-                  Password (DEV_COUNSELLOR_PASSWORD)
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="Paste dev counsellor password"
-                  style={{
-                    width: "100%",
-                    padding: "7px 10px",
-                    borderRadius: "6px",
-                    border: "1px solid #cbd5e1",
-                    fontSize: "12px",
-                    background: "#ffffff",
-                    color: "#0f172a",
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoggingIn}
-                style={{
-                  padding: "7px 18px",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: isLoggingIn ? "#94a3b8" : "#e11d48",
-                  color: "#ffffff",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  cursor: isLoggingIn ? "not-allowed" : "pointer",
-                  height: "33px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {isLoggingIn ? "Signing In…" : "Sign In & Authorize"}
-              </button>
-            </form>
-
-            {loginError && (
-              <div style={{ marginTop: "10px", color: "#b91c1c", fontSize: "12px", fontWeight: 500 }}>
-                ⚠️ {loginError}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Errors / Status Alerts */}
         {errorMessage && (
@@ -884,7 +748,9 @@ function C4DevInputContent() {
 export default function C4DevInputPage() {
   return (
     <React.Suspense fallback={<div className="lime-page-container" style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading C4 Development Input...</div>}>
-      <C4DevInputContent />
+      <RequireAuth workspace="counsellor">
+        <C4DevInputContent />
+      </RequireAuth>
     </React.Suspense>
   );
 }

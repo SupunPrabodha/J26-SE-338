@@ -13,6 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { Sidebar } from "../components/Sidebar";
+import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
@@ -458,8 +459,9 @@ export default function StabilityPage() {
 
 
   return (
-    <div className="stab-page-container">
-      <Sidebar isClassifierConnected={authorized} />
+    <RequireAuth workspace="research">
+      <div className="stab-page-container">
+        <Sidebar isClassifierConnected={authorized} />
 
       <main className="stab-main">
         {/* Header */}
@@ -1195,5 +1197,6 @@ export default function StabilityPage() {
         )}
       </main>
     </div>
+    </RequireAuth>
   );
 }

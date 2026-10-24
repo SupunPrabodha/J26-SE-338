@@ -12,6 +12,7 @@ import {
   Legend,
 } from "recharts";
 import { Sidebar } from "../components/Sidebar";
+import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
@@ -621,8 +622,9 @@ export default function CounterfactualsPage() {
   }
 
   return (
-    <div className="cf-page-container">
-      <Sidebar isClassifierConnected={isClassifierConnected} />
+    <RequireAuth workspace="research">
+      <div className="cf-page-container">
+        <Sidebar isClassifierConnected={isClassifierConnected} />
 
       <main className="cf-main" id="content">
         {/* Top Header */}
@@ -1525,5 +1527,6 @@ export default function CounterfactualsPage() {
         )}
       </main>
     </div>
+    </RequireAuth>
   );
 }

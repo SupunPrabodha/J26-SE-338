@@ -8,38 +8,58 @@ import { Sidebar } from "./components/Sidebar";
 import { useReviewCase } from "./context/CaseContext";
 
 export default function Dashboard() {
-  const [authorized, setAuthorized] = useState(false);
-  const [checking, setChecking] = useState(true);
-  const [tasks, setTasks] = useState<ReviewTask[]>([]);
+  const context = useReviewCase();
+  const { selectTask } = context;
+  const [localAuthorized, setLocalAuthorized] = useState(false);
+  const [localChecking, setLocalChecking] = useState(true);
+  const [localTasks, setLocalTasks] = useState<ReviewTask[]>([]);
   const [selected, setSelected] = useState<ReviewTask | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const { selectTask, logout: contextLogout } = useReviewCase();
+
+  const authorized = context.authorized || localAuthorized;
+  const checking = context.checking && localChecking;
+  const tasks = localTasks.length > 0 ? localTasks : context.tasks;
 
   useEffect(() => {
     let live = true;
     api<AccountResponse>("/auth/me").then(async account => {
       if (account.role !== "COUNSELLOR") return;
       const values = await api<ReviewTask[]>("/review-tasks");
-      if (live) { setAuthorized(true); setTasks(values); }
-    }).catch(() => { if (live) setAuthorized(false); }).finally(() => { if (live) setChecking(false); });
+      if (live) {
+        setLocalAuthorized(true);
+        context.setAuthorized(true);
+        setLocalTasks(values);
+      }
+    }).catch(() => {
+      if (live) {
+        setLocalAuthorized(false);
+        context.setAuthorized(false);
+      }
+    }).finally(() => {
+      if (live) setLocalChecking(false);
+    });
     return () => { live = false; };
-  }, []);
+  }, [context]);
 
   async function load() {
     const values = await api<ReviewTask[]>("/review-tasks");
-    setTasks(values);
+    setLocalTasks(values);
+    context.loadTasks();
     setSelected(previous => {
       const match = previous ? values.find(task => task.task_id === previous.task_id) || null : null;
-      if (match) selectTask(match.task_id);
+      if (match) context.selectTask(match.task_id);
       return match;
     });
   }
   async function act(action: () => Promise<void>) {
     setBusy(true); setError("");
     try { await action(); } catch (cause) {
-      setTasks([]); setSelected(null);
-      if (cause instanceof ApiError && cause.status === 401) setAuthorized(false);
+      setLocalTasks([]); setSelected(null);
+      if (cause instanceof ApiError && cause.status === 401) {
+        setLocalAuthorized(false);
+        context.setAuthorized(false);
+      }
       setError(cause instanceof ApiError ? cause.message : cause instanceof Error && cause.message.includes("requires an authorized counsellor") ? cause.message : "The request could not be completed. Refresh assigned tasks or sign in again.");
     } finally { setBusy(false); }
   }
@@ -55,7 +75,9 @@ export default function Dashboard() {
         await api("/auth/logout", {});
         throw new Error("This development shell requires an authorized counsellor account.");
       }
-      setAuthorized(true); await load();
+      setLocalAuthorized(true);
+      context.setAuthorized(true);
+      await load();
     });
   }
   return (
@@ -76,8 +98,9 @@ export default function Dashboard() {
           <nav className="toolbar" aria-label="Review controls"><div><h2>Assigned tasks</h2><p className="hint">Refresh to recheck access and current consent.</p></div>
             <div className="actions"><button className="secondary" disabled={busy} onClick={() => act(load)}>Refresh assigned tasks</button>
               <button className="quiet" disabled={busy} onClick={() => act(async () => {
-                setAuthorized(false);
-                setTasks([]);
+                setLocalAuthorized(false);
+                context.setAuthorized(false);
+                setLocalTasks([]);
                 setSelected(null);
                 if (typeof window !== "undefined") {
                   const url = new URL(window.location.href);
@@ -85,7 +108,7 @@ export default function Dashboard() {
                   window.history.replaceState(null, "", url.pathname);
                 }
                 await api("/auth/logout", {});
-                await contextLogout();
+                await context.logout();
               })}>Sign out</button></div></nav>
           <p role="status" className="feedback">{busy ? "Checking authorized evidence…" : `${tasks.length} authorized synthetic task(s)`}</p>
           <div className="review-grid"><section className="card task-list" aria-label="Assigned synthetic cases">

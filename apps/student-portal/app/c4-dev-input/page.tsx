@@ -72,6 +72,8 @@ export default function C4DevInput() {
     }
 
     setValidationError("");
+    setPreparedText(text);
+    setPreparedLanguage(language);
     setIsAnalysing(true);
 
     try {
@@ -86,18 +88,10 @@ export default function C4DevInput() {
 
       if (response.ok) {
         const data = (await response.json()) as C4PredictionResponse;
-        setPreparedText(text);
-        setPreparedLanguage(language);
         setPrediction(data);
-      } else {
-        // Fallback for isolated test environments
-        setPreparedText(text);
-        setPreparedLanguage(language);
       }
     } catch {
-      // In tests or offline dev, still prepare text
-      setPreparedText(text);
-      setPreparedLanguage(language);
+      // In tests or offline dev, prepared text is already set
     } finally {
       setIsAnalysing(false);
     }
@@ -320,7 +314,6 @@ export default function C4DevInput() {
           type="button"
           aria-label="Prepare test input"
           onClick={handlePrepareOrAnalyse}
-          disabled={isAnalysing}
           style={{
             padding: "9px 20px",
             borderRadius: "7px",
@@ -474,7 +467,7 @@ export default function C4DevInput() {
           </div>
         ) : (
           <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
-            No test input prepared yet. Enter or select sample text and click &ldquo;Prepare test input&rdquo;.
+            {"No test input prepared yet. Enter or select sample text and click \"Prepare test input\"."}
           </p>
         )}
       </div>

@@ -26,6 +26,7 @@ export type DevelopmentInputData = DevelopmentInputSnapshot;
 export interface CaseContextType {
   authorized: boolean;
   checking: boolean;
+  setAuthorized: (auth: boolean) => void;
   tasks: ReviewTask[];
   selectedTask: ReviewTask | null;
   selectedTaskId: string | null;
@@ -46,6 +47,7 @@ export interface CaseContextType {
 const CaseContext = createContext<CaseContextType>({
   authorized: false,
   checking: true,
+  setAuthorized: () => {},
   tasks: [],
   selectedTask: null,
   selectedTaskId: null,
@@ -214,6 +216,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       value={{
         authorized,
         checking,
+        setAuthorized,
         tasks,
         selectedTask,
         selectedTaskId: selectedTask ? selectedTask.task_id : null,

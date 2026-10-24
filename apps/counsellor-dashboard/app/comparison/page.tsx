@@ -14,6 +14,7 @@ import {
   ErrorBar,
 } from "recharts";
 import { Sidebar } from "../components/Sidebar";
+import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
@@ -377,8 +378,9 @@ export default function ComparisonPage() {
   }
 
   return (
-    <div className="comp-page-container">
-      <Sidebar />
+    <RequireAuth workspace="research">
+      <div className="comp-page-container">
+        <Sidebar />
       <main className="comp-main">
         {/* Header */}
         <header className="comp-header">
@@ -1200,5 +1202,6 @@ export default function ComparisonPage() {
         </section>
       </main>
     </div>
+    </RequireAuth>
   );
 }

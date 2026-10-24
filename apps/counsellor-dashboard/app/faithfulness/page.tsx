@@ -14,6 +14,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Sidebar } from "../components/Sidebar";
+import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
@@ -387,8 +388,9 @@ export default function FaithfulnessPage() {
     : "#64748b";
 
   return (
-    <div className="faith-page-container">
-      <Sidebar isClassifierConnected={true} />
+    <RequireAuth workspace="research">
+      <div className="faith-page-container">
+        <Sidebar isClassifierConnected={true} />
 
       <main className="faith-main" id="main-content">
         {/* Top Header */}
@@ -970,5 +972,6 @@ export default function FaithfulnessPage() {
         </div>
       </main>
     </div>
+    </RequireAuth>
   );
 }

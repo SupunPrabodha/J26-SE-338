@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
+import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
 import { WaterfallChart } from "../components/WaterfallChart";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
@@ -366,8 +367,9 @@ export default function ShapPage() {
   const outputValue = explanation?.output_value ?? (explanation?.target_class_probability ?? 0.0);
 
   return (
-    <div className="shap-page-container">
-      <Sidebar isClassifierConnected={isClassifierConnected} />
+    <RequireAuth workspace="research">
+      <div className="shap-page-container">
+        <Sidebar isClassifierConnected={isClassifierConnected} />
 
       <main className="shap-main" id="content">
         {/* Top Header */}
@@ -1123,5 +1125,6 @@ export default function ShapPage() {
         </div>
       </main>
     </div>
+    </RequireAuth>
   );
 }
