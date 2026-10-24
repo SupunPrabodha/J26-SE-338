@@ -29,7 +29,6 @@ def test_custom_default_uses_actual_gliner_spans_and_blocks_release(monkeypatch)
     )
     monkeypatch.setattr(gliner_demo, "load_candidate", lambda: model)
     monkeypatch.setattr(gliner_demo, "combine", lambda value, spans: spans)
-    monkeypatch.setattr(gliner_demo, "sentence_windows", lambda text: ((0, len(text)),))
     body = C2CustomDemoRequest(text=text)
     assert body.strategy == "gliner"
     assert C2DemoRequest(scenario_id="english").strategy == "regex"
@@ -51,24 +50,27 @@ def test_loading_failure_has_no_fallback_or_text_leak(monkeypatch):
     assert "PRIVATE-SENTINEL" not in str(error.value)
 
 
-def test_runtime_supplements_only_location_with_original_sentence_offsets(monkeypatch):
-    def predict(value, labels, **kwargs):
-        assert labels == ["person name", "location name"]
-        assert kwargs == {"threshold": 0.7, "flat_ner": True}
-        if value == "I live in Elgin.":
-            return [
-                {"start": 10, "end": 15, "text": "Elgin", "label": "location name", "score": 0.8}
-            ]
-        return [{"start": 0, "end": 2, "text": "My", "label": "person name", "score": 0.99}]
+def test_runtime_keeps_preceding_whole_text_configuration_without_window_calls(monkeypatch):
+    from preprocessing import gliner_context_windows
 
-    model = SimpleNamespace(
-        detect=lambda text: (EntitySpan(11, 16, "PERSON"),),
-        model=SimpleNamespace(model=SimpleNamespace(predict_entities=predict)),
-    )
+    calls = []
+
+    def detect(text):
+        calls.append(text)
+        return (EntitySpan(11, 16, "PERSON"),)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Rejected sentence-context experiment entered active inference")
+
+    model = SimpleNamespace(detect=detect)
+    monkeypatch.setattr(gliner_context_windows, "window_predictions", forbidden)
+    monkeypatch.setattr(gliner_context_windows, "augment_locations", forbidden)
     monkeypatch.setattr(gliner_demo, "load_candidate", lambda: model)
     monkeypatch.setattr(gliner_demo, "combine", lambda text, spans: spans)
     result = gliner_demo.anonymize_gliner_demo("My name is Taria. I live in Elgin.")
-    assert result.anonymized_text == "My name is [PERSON]. I live in [LOCATION]."
+    assert result.anonymized_text == "My name is [PERSON]. I live in Elgin."
+    assert calls == ["My name is Taria. I live in Elgin."]
+    assert gliner_demo.VERSION == "gliner-name-labels-v4-context-demo-v1"
 
 
 def test_loader_disabled_without_explicit_switch(monkeypatch):

@@ -1,5 +1,10 @@
 # C2 LOCATION correction audit v6
 
+**Subsequent action (2026-10-25):** after checkpoint `52be4bb` was pushed, the
+user authorized removing the regressing addition from active inference through a
+separate follow-up. The offline implementation and all audit measurements below
+are preserved. Current status: [whole-text restoration](c2-location-followup-v1.md).
+
 2026-10-24. Branch `feature/c2-anonymization-pipeline`, HEAD
 `170151c26ee13c2fcb9b3a1801204ca87b735a74`, with existing uncommitted work
 preserved. This audit changes **no runtime rule, threshold, model, fixture label,

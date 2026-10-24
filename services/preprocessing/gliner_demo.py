@@ -10,17 +10,12 @@ from functools import lru_cache
 from threading import Lock
 
 from preprocessing.generalization_v3 import combine
-from preprocessing.gliner_context_windows import (
-    augment_locations,
-    sentence_windows,
-    window_predictions,
-)
 from preprocessing.multilingual_calibration import UnicodeWordSplitter, splits_boundary
 from preprocessing.multilingual_candidate import MultilingualCandidate
 from preprocessing.name_label_candidate_v4 import candidate
 from preprocessing.span_evaluation import render
 
-VERSION = "gliner-name-labels-v4-location-context-demo-v2"
+VERSION = "gliner-name-labels-v4-context-demo-v1"
 LOCK = Lock()
 
 
@@ -55,11 +50,6 @@ def anonymize_gliner_demo(text):
     with LOCK:
         model = load_candidate()
         spans = combine(text, model.detect(text))
-        # Keep whole-text PERSON/type/structured decisions. Only separately
-        # corroborated, non-overlapping LOCATION spans supplement the baseline.
-        # A single slice has no additional context and needs no repeated call.
-        if len(tuple(sentence_windows(text))) > 1:
-            spans = augment_locations(text, spans, window_predictions(text, model.model.model))
     if any(splits_boundary(text, edge) for span in spans for edge in (span.start, span.end)):
         raise RuntimeError("Unsafe experimental output boundary")
     if any(a.end > b.start for a, b in zip(spans, spans[1:], strict=False)):

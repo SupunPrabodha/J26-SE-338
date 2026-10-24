@@ -1,4 +1,4 @@
-"""Experimental sentence-context helper; LOCATION-only augmentation is active.
+"""Offline sentence-context experiment; excluded from active demo inference.
 
 Original-text slices only, unchanged model labels/threshold. An additive probe
 keeps baseline spans, abstains on overlapping alternatives, and protects existing

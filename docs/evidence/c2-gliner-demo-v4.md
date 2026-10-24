@@ -6,10 +6,12 @@ The user explicitly authorized an **experimental demo option**, despite the
 documented v4 retention/accuracy failures. This does not reverse historical
 rejection decisions or qualify the model for dataset release.
 
-**Current runtime update:** the separately evaluated LOCATION-only sentence
-supplement is now `gliner-name-labels-v4-location-context-demo-v2`; see
-[paragraph-context v5 evidence](c2-paragraph-context-v5.md) for its frozen
-development/evaluation comparison and 34 actual Python/Docker/browser checks.
+**Current runtime update (2026-10-25):** restored
+`gliner-name-labels-v4-context-demo-v1`, without the regressing sentence-context
+LOCATION addition. Its implementation and historical
+[paragraph-context v5 evidence](c2-paragraph-context-v5.md) remain offline; the
+[v6 audit](c2-location-correction-audit-v6.md) found two new false spans.
+See [follow-up verification/deployment](c2-location-followup-v1.md).
 The sections below retain the original v1 integration measurements and
 deployment history. PERSON misses and release restrictions remain; this update
 does not replace earlier scores with new results or imply complete anonymization.

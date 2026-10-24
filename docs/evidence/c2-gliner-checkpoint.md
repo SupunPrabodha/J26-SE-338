@@ -1,5 +1,10 @@
 # C2 GLiNER and output-validation checkpoint
 
+**Superseded deployment status (2026-10-25):** this report records checkpoint
+`52be4bb` as originally pushed with the v2 LOCATION extension. A separate
+[follow-up](c2-location-followup-v1.md) restores active v1 whole-text inference.
+All measurements and historical v2 findings below are preserved.
+
 2026-10-25. Scoped from `170151c26ee13c2fcb9b3a1801204ca87b735a74` on
 `feature/c2-anonymization-pipeline`. This is an experimental local demonstration,
 not validated multilingual anonymization or permission to release a dataset.
