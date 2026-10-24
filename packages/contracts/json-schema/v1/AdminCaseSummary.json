@@ -1,0 +1,298 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "AUTH_REQUIRED",
+        "AUTH_INVALID",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONSENT_REQUIRED",
+        "CONSENT_INVALID",
+        "CONTRACT_INVALID",
+        "CONFLICT",
+        "RATE_LIMITED",
+        "DEPENDENCY_UNAVAILABLE",
+        "DOWNSTREAM_FAILED",
+        "DOWNSTREAM_TIMEOUT",
+        "RETRY_EXHAUSTED",
+        "INTERNAL_ERROR"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "StaffSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "format": "uuid",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "display_name": {
+          "maxLength": 60,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At"
+        },
+        "is_current_account": {
+          "default": false,
+          "title": "Is Current Account",
+          "type": "boolean"
+        },
+        "role": {
+          "enum": [
+            "ADMIN",
+            "COUNSELLOR",
+            "RESEARCHER"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "usable": {
+          "title": "Usable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account_id",
+        "display_name",
+        "role",
+        "enabled",
+        "usable",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "StaffSummary",
+      "type": "object"
+    },
+    "WorkflowState": {
+      "enum": [
+        "RECEIVED",
+        "CONSENT_VERIFIED",
+        "PREPROCESSING",
+        "INFERENCE",
+        "EXPLANATION",
+        "READY_FOR_REVIEW",
+        "UNDER_REVIEW",
+        "COMPLETED",
+        "FAILED",
+        "WITHDRAWAL_REQUESTED",
+        "WITHDRAWN"
+      ],
+      "title": "WorkflowState",
+      "type": "string"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/AdminCaseSummary.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assignment_count": {
+      "title": "Assignment Count",
+      "type": "integer"
+    },
+    "assignment_eligible": {
+      "title": "Assignment Eligible",
+      "type": "boolean"
+    },
+    "assignment_state": {
+      "enum": [
+        "AWAITING_ASSIGNMENT",
+        "ASSIGNED",
+        "NOT_ELIGIBLE"
+      ],
+      "title": "Assignment State",
+      "type": "string"
+    },
+    "assignment_version": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Assignment Version",
+      "type": "string"
+    },
+    "attempts": {
+      "default": 0,
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Attempts",
+      "type": "integer"
+    },
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "counsellors": {
+      "items": {
+        "$ref": "#/$defs/StaffSummary"
+      },
+      "maxItems": 20,
+      "title": "Counsellors",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "disposal_reason": {
+      "anyOf": [
+        {
+          "enum": [
+            "RETENTION",
+            "OWNER_WITHDRAWAL",
+            "LEGACY_DISPOSAL"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Disposal Reason"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "failure_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "human_review_status": {
+      "default": "UNAVAILABLE",
+      "enum": [
+        "AWAITING_REVIEW",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "UNAVAILABLE"
+      ],
+      "title": "Human Review Status",
+      "type": "string"
+    },
+    "job_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "QUEUED",
+            "RUNNING",
+            "DONE",
+            "CANCELLED",
+            "DEAD_LETTER"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Job Status"
+    },
+    "last_assignment_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Assignment At"
+    },
+    "processing_status": {
+      "$ref": "#/$defs/WorkflowState"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "processing_status",
+    "created_at",
+    "updated_at",
+    "expires_at",
+    "assignment_eligible",
+    "assignment_state",
+    "assignment_version",
+    "assignment_count",
+    "counsellors"
+  ],
+  "title": "AdminCaseSummary",
+  "type": "object"
+}

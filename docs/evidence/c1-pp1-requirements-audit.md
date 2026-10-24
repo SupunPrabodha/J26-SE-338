@@ -1,5 +1,9 @@
 # C1 requirements and evidence audit for PP1
 
+2026-10-24: [current full FR/NFR implementation trace](c1-workspace-audit.md) and
+[current verification](c1-workspace-verification.md) supersede the old missing admin/saved-review
+visibility findings. Historical counts and research-evaluation limitations below retain their dates.
+
 FR09 was updated on 2026-10-23 with synthetic interpretation/follow-up recording.
 See [current implementation, tests and limitations](c1-fr09-review-record.md). Historical
 status-only descriptions and evaluation totals below remain dated evidence; the updated

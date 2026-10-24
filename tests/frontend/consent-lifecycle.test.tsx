@@ -68,7 +68,7 @@ test("rejection is a successful decision and disables submission", async () => {
   setup(); await screen.findByRole("option", { name: "english" });
   fireEvent.click(screen.getByText("Record consent decision"));
   await screen.findByText("REJECTED");
-  expect(screen.getByRole("status")).toHaveTextContent("Consent declined");
+  expect(screen.getByRole("status")).toHaveTextContent("Consent recorded—declined");
   expect(screen.getByText("Submit synthetic fixture")).toBeDisabled();
 });
 

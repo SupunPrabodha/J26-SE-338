@@ -84,7 +84,50 @@ def main():
                 "username": environment["DEV_COUNSELLOR_USERNAME"],
                 "password": environment["DEV_COUNSELLOR_PASSWORD"],
             }
-            assert reviewer.post("/api/v1/auth/login", json=login).status_code == 200
+            logged_in = reviewer.post("/api/v1/auth/login", json=login)
+            assert logged_in.status_code == 200
+            with httpx.Client(
+                base_url="http://localhost:8000", headers=headers, timeout=10, trust_env=False
+            ) as administrator:
+                assert (
+                    administrator.post(
+                        "/api/v1/auth/login",
+                        json={
+                            "username": environment["DEV_ADMIN_USERNAME"],
+                            "password": environment["DEV_ADMIN_PASSWORD"],
+                        },
+                    ).status_code
+                    == 200
+                )
+                summary = administrator.get("/api/v1/admin/cases", params={"q": case}).json()[
+                    "items"
+                ][0]
+                if (
+                    administrator.get("/api/v1/admin/overview").json()["assignment_policy"]
+                    == "MANUAL"
+                ):
+                    assert summary["assignment_state"] == "AWAITING_ASSIGNMENT"
+                    assert not any(
+                        t["case"]["case_id"] == case
+                        for t in reviewer.get("/api/v1/review-tasks").json()
+                    )
+                    assert (
+                        administrator.post(
+                            f"/api/v1/admin/cases/{case}/assignment",
+                            json={
+                                "counsellor_id": logged_in.json()["account_id"],
+                                "expected_version": summary["assignment_version"],
+                            },
+                        ).status_code
+                        == 200
+                    )
+                aggregates = administrator.get("/api/v1/admin/analytics", params={"q": case}).json()
+                assert (
+                    aggregates["total_cases"]
+                    == sum(row["cases"] for row in aggregates["statuses"])
+                    == 1
+                )
+                assert sum(row["cases"] for row in aggregates["submissions"]) == 1
             tasks = reviewer.get("/api/v1/review-tasks").json()
             task = next(t for t in tasks if t["case"]["case_id"] == case)
             assert task["explanation"]["reliability_status"] == "NOT_EVALUATED"
@@ -178,7 +221,8 @@ with Session(engine()) as db:
             assert reviewer.get("/api/v1/auth/me").status_code == 401
     for port in () if "--backend-only" in sys.argv else (3000, 3001):
         response = httpx.get(f"http://localhost:{port}", trust_env=False, timeout=15)
-        assert response.status_code == 200 and "DEVELOPMENT ONLY" in response.text
+        assert response.status_code == 200
+        assert "Screening support only" in response.text and "Mock data" in response.text
         response = httpx.get(
             f"http://localhost:{port}/api/v1/fixtures", trust_env=False, timeout=15
         )
@@ -217,6 +261,7 @@ with Session(engine()) as db:
                     "worker synthetic task",
                     "C1-C2-C3-C4",
                     "concurrent idempotency",
+                    "configured assignment policy and admin chart/table totals",
                     "assigned review",
                     "human action",
                     "review record save/read/replay and safe receipt",

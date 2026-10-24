@@ -2,7 +2,7 @@ import React from "react";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import Demo from "../../apps/student-portal/app/demo/page";
-import { checklist } from "../../apps/student-portal/components/checklist-rules";
+import { checklist, privacyGroups } from "../../apps/student-portal/components/checklist-rules";
 import { OBSERVER_INTERVAL, OBSERVER_LIMIT } from "../../apps/student-portal/components/demo-checklist";
 import type { DemoEvidence } from "../../packages/typescript-common/src/contracts";
 
@@ -31,7 +31,15 @@ async function setup(empty = false) {
 }
 async function select(id: string) { await act(async () => { fireEvent.change(screen.getByLabelText("Your runs"), { target: { value: id } }); }); }
 async function refresh() { await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Refresh evidence" })); }); }
-function row(id: string) { return within(document.querySelector(`[data-check="${id}"]`)! as HTMLElement); }
+function row(id: string) {
+  if (!document.querySelector(`[data-check="${id}"]`)) {
+    const close = screen.queryByRole("button", { name: "Close dialog" }); if (close) fireEvent.click(close);
+    const group = privacyGroups.find(value => (value.ids as readonly string[]).includes(id));
+    if (group) { fireEvent.click(screen.getByRole("button", { name: "Privacy controls" })); fireEvent.click(screen.getByRole("button", { name: `View evidence: ${group.title}` })); }
+    else { fireEvent.click(screen.getByRole("button", { name: "Reliability and oversight" })); fireEvent.click(screen.getByText("View reliability and oversight evidence")); }
+  }
+  return within(document.querySelector(`[data-check="${id}"]`)! as HTMLElement);
+}
 async function tick() { await act(async () => { await vi.advanceTimersByTimeAsync(OBSERVER_INTERVAL); }); }
 
 test("observer has no form, no automatic selection, and clear application links", async () => {
@@ -48,22 +56,22 @@ test("empty owner context can observe consent added in another tab after refresh
   const state = await setup(true);
   expect(screen.getByText(/No consent or case yet/)).toBeVisible();
   state.values([state.first]); await refresh(); await select(state.first.run.run_id);
-  expect(row("FR01.a").getByText("Verified for this run")).toBeVisible();
+  expect(row("FR01.a").getByText("Verified in selected run")).toBeVisible();
   expect(row("FR02.a").getByText("Not exercised")).toBeVisible();
 });
 
 test("rejection is a decision, not evidence of a denied processing request", async () => {
   const { first } = await setup(); first.run.consent_status = "REJECTED"; first.receipt_only = true;
   await select(first.run.run_id);
-  expect(row("FR01.a").getByText("Verified for this run")).toBeVisible();
+  expect(row("FR01.a").getByText("Verified in selected run")).toBeVisible();
   expect(row("FR02.a").getByText("Not exercised")).toBeVisible();
-  expect(row("FR05").getByText("Unavailable/stale")).toBeVisible();
+  expect(row("FR05").getByText("Unavailable or stale")).toBeVisible();
 });
 
 test("pre-case withdrawal shows only actual receipt and does not invent disposal", async () => {
   const { first } = await setup(); first.withdrawn_at = new Date().toISOString(); first.receipt_only = true; first.run.consent_status = "WITHDRAWN";
   await select(first.run.run_id);
-  expect(row("FR10.a").getByText("Verified for this run")).toBeVisible();
+  expect(row("FR10.a").getByText("Verified in selected run")).toBeVisible();
   expect(row("FR10.b").getByText("Not exercised")).toBeVisible();
 });
 
@@ -73,28 +81,28 @@ test("workflow and real review actions update through bounded polling without a 
   first.run.case_id = crypto.randomUUID(); first.run.processing_status = "READY_FOR_REVIEW";
   first.provenance_validated = true; first.review_task_authorized = true;
   await tick();
-  expect(row("FR07").getByText("Verified for this run")).toBeVisible();
+  expect(row("FR07").getByText("Verified in selected run")).toBeVisible();
   expect(row("FR09.b").getByText("Not exercised")).toBeVisible();
   first.run.processing_status = "COMPLETED";
   await tick(); expect(row("FR09.b").getByText("Not exercised")).toBeVisible();
   first.review_completed_at = new Date().toISOString(); await tick();
-  expect(row("FR09.b").getByText("Verified for this run")).toBeVisible();
+  expect(row("FR09.b").getByText("Verified in selected run")).toBeVisible();
   first.receipt_only = true; first.run.processing_status = "WITHDRAWN"; first.withdrawn_at = new Date().toISOString(); first.disposal_confirmed = true;
   first.provenance_validated = false; first.review_task_authorized = false; await tick();
-  expect(row("FR07").getByText("Unavailable/stale")).toBeVisible();
-  expect(row("FR10.b").getByText("Verified for this run")).toBeVisible();
+  expect(row("FR07").getByText("Unavailable or stale")).toBeVisible();
+  expect(row("FR10.b").getByText("Verified in selected run")).toBeVisible();
 });
 
 test("newly selected run cannot inherit old successful evidence", async () => {
   const { first, second } = await setup(); first.provenance_validated = true;
-  await select(first.run.run_id); expect(row("FR05").getByText("Verified for this run")).toBeVisible();
+  await select(first.run.run_id); expect(row("FR05").getByText("Verified in selected run")).toBeVisible();
   await select(second.run.run_id); expect(row("FR05").getByText("Not exercised")).toBeVisible();
 });
 
 for (const status of [401, 403, 404, 503]) test(`failed refresh ${status} removes green live evidence and stops polling`, async () => {
   const state = await setup(); await select(state.first.run.run_id); state.fail(status); await refresh();
-  expect(row("FR01.a").getByText("Unavailable/stale")).toBeVisible();
-  expect(screen.queryAllByText("Verified for this run")).toHaveLength(0);
+  expect(row("FR01.a").getByText("Unavailable or stale")).toBeVisible();
+  expect(screen.queryAllByText("Verified in selected run")).toHaveLength(0);
   const count = state.fetch.mock.calls.length;
   vi.useFakeTimers(); await tick(); expect(state.fetch.mock.calls.length).toBe(count);
   if (status === 401) expect(state.fetch.mock.calls.some(([url]) => url.endsWith("/auth/refresh"))).toBe(true);
@@ -105,24 +113,24 @@ test("polling budget expires honestly and manual refresh can resume", async () =
   vi.useFakeTimers(); await refresh();
   for (let i = 1; i < OBSERVER_LIMIT; i++) await tick();
   expect(screen.getByText(/Refresh window ended/)).toBeVisible();
-  expect(row("FR01.a").getByText("Unavailable/stale")).toBeVisible();
+  expect(row("FR01.a").getByText("Unavailable or stale")).toBeVisible();
   const count = state.fetch.mock.calls.length; await tick(); expect(state.fetch.mock.calls.length).toBe(count);
-  await refresh(); expect(row("FR01.a").getByText("Verified for this run")).toBeVisible();
+  await refresh(); expect(row("FR01.a").getByText("Verified in selected run")).toBeVisible();
 });
 
 test("HTTP, mocks, recorded tests and compound requirements never inherit a workflow pass", () => {
   const evidence = fixture(); evidence.provenance_validated = true; evidence.run.processing_status = "COMPLETED";
   const rows = checklist(evidence, false);
   const result = (id: string) => rows.find(r => r.id === id)!;
-  expect(result("FR04.b").result).toBe("Mock dependency");
-  expect(result("NFR02.b").result).toBe("Not implemented");
-  expect(result("NFR02.c").result).toBe("Not exercised");
+  expect(result("FR04.b").result).toBe("Recorded configuration evidence");
+  expect(result("NFR02.b").result).toBe("Recorded configuration evidence");
+  expect(result("NFR02.c").result).toBe("Recorded configuration evidence");
   expect(result("FR03.b").source).toBe("Recorded test evidence");
-  for (const id of ["FR02.a", "FR06.a", "FR06.b", "FR09.b", "FR11.b", "NFR04", "NFR07"]) expect(result(id).result).toBe("Not exercised");
+  for (const id of ["FR02.a", "FR06.a", "FR06.b", "FR09.b"]) expect(result(id).result).toBe("Not exercised");
 });
 
 test("server failure is a failed outcome, not a fabricated completed stage", () => {
   const evidence = fixture(); evidence.run.processing_status = "FAILED";
   expect(checklist(evidence, false).find(r => r.id === "FR04.a")?.result).toBe("Failed");
-  expect(checklist(evidence, true).find(r => r.id === "FR04.a")?.result).toBe("Unavailable/stale");
+  expect(checklist(evidence, true).find(r => r.id === "FR04.a")?.result).toBe("Unavailable or stale");
 });

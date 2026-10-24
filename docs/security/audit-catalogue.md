@@ -18,8 +18,11 @@ scenario execution is `tests/integration/test_audit_traces.py`.
 | WORKFLOW_TRANSITION | A valid state transition commits | Each real transition; retries can repeat states | FR-06/07/11 |
 | JOB_CLAIM | Queued claim or expired lease recovered | Once per attempt, at most three | FR-06 |
 | JOB_RETRY / JOB_TERMINAL | A worker failure requeues or permanently fails; exhausted interrupted lease | At most two retries, one terminal receipt per terminalization | FR-06, NFR-06 |
-| ASSIGNMENT | Automatic designated assignment or new administrator grant | Once per inserted assignment | FR-07/08 |
+| ASSIGNMENT | Automatic grant, administrator grant, exclusive reassignment or clearing | One GRANTED/REASSIGNED/CLEARED receipt per actual change; matching replay is a no-op | FR-07/08 |
+| STAFF_ADMINISTRATION / UPDATED | Authorized staff role/enabled change | One receipt per actual update; matching replay is a no-op | FR-08/12 |
+| SESSION_REVOKED / STAFF_CHANGED | Staff change revokes existing target sessions | One receipt per actual staff update; no credential or target identity in exported event | FR-08/12 |
 | HUMAN_REVIEW | Authorized START_REVIEW, COMPLETE_REVIEW, or RECORD_SAVED | Action key for transitions; one save receipt per task under case lock | FR-09 |
+| ADMIN_EVIDENCE_ACCESS / VIEWED | Successful authorized administrative evidence read | One per validated session row; filter/pagination reads deduplicate; refresh rotation produces a new session row | FR-12 |
 | WITHDRAWAL | Explicit owner withdrawal before/after submission, including after retention | One receipt/event per consent or linked case; repeats are no-ops | FR-10 |
 | RETENTION | Derived evidence disposed by retention or withdrawal | One disposal receipt/event per case | FR-10/11 |
 
@@ -44,6 +47,13 @@ use INSERT-on-conflict-do-nothing; no existing receipt is edited. A database adm
 can change the schema/triggers. This is not administrator-proof or cryptographic tamper resistance.
 
 ## Evaluated denominator
+
+The 2026-10-24 restricted viewer projects only explicit event/outcome pairs from persisted
+rows and excludes arbitrary/unknown statuses. It never backfills or reconstructs missing
+history. The existing historical denominator below does not cover the added administrative
+event. `tests/integration/test_operations.py` separately asserts access authorization,
+deduplication, pagination/filter bounds and safe projection. This is not full actor-attributed
+access/denial auditing or a new completeness percentage.
 
 The dated 29-observation evaluation below predates the FR09 record addition. It does
 not include `HUMAN_REVIEW / RECORD_SAVED`. The new save receipt, repeat suppression and
@@ -74,3 +84,8 @@ ordering, every denied RBAC request, login failure variant or deployment-wide au
 Recovery tests separately assert case-before-consent locks and durable domain-row uniqueness.
 Per-request authentication/CSRF/RBAC-denial audit coverage, broader event order validation,
 log transport/alerting and production audit access policy remain follow-up work.
+
+The role-workspace increment extends the allowlisted admin event/outcome projection with
+staff updates and assignment replacement/clear. It does not reuse the historical 29-event
+denominator as coverage of these additions. Their field/privacy and concurrency assertions
+are recorded separately in [role assignment evidence](../evidence/c1-role-assignment.md).

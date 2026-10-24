@@ -38,11 +38,35 @@ async function wait(page, fn, argument, timeout = 25000) {
   }
   throw new Error("UI condition timeout");
 }
+
+async function closeDetails(target) {
+  await evaluate(target,()=>document.querySelector('dialog [data-dialog-close]')?.click());
+  await wait(target,()=>!document.querySelector('dialog[open]'));
+}
+async function showCheck(target,id,expected) {
+  const groups={consent:['FR01.a','FR01.b','FR02.a','FR02.b','NFR03'],identity:['FR03.a','FR03.b','NFR01'],access:['FR07','FR08.a','FR08.b','FR09.d','FR09.e','NFR02.a','NFR02.b','NFR02.c'],routing:['FR04.a','FR04.b','FR05','NFR05'],withdrawal:['FR10.a','FR10.b','FR10.c'],audit:['FR11.a','FR11.b','FR12','NFR04','FR09.a','FR09.b','FR09.c']};
+  const titles={consent:'Consent and purpose',identity:'Pseudonymous identification',access:'Authentication, roles and assignment',routing:'Controlled orchestration and provenance',withdrawal:'Withdrawal and retention',audit:'Audit and accountability'};
+  if(!await evaluate(target,id=>!!document.querySelector('[data-check="'+id+'"]'),id)){
+    await closeDetails(target);
+    const group=Object.keys(groups).find(key=>groups[key].includes(id));
+    await click(target,group?'Privacy controls':'Reliability and oversight');
+    if(group) await evaluate(target,title=>document.querySelector('button[aria-label="View evidence: '+title+'"]').click(),titles[group]);
+    else await click(target,'View reliability and oversight evidence');
+  }
+  await wait(target,({id,expected})=>{const row=document.querySelector('[data-check="'+id+'"] [data-result]');return !!row&&(!expected||row.textContent===expected);},{id,expected});
+  return evaluate(target,id=>document.querySelector('[data-check="'+id+'"] [data-result]').textContent,id);
+}
+async function checkResult(target,id,expected){const result=await showCheck(target,id,expected);await closeDetails(target);return result;}
 async function click(page, label) {
+  if(label === "Sign out") {
+    await wait(page,()=>{const trigger=document.querySelector('.account-trigger');return !!trigger&&!trigger.disabled;});
+    await evaluate(page,()=>document.querySelector('.account-trigger').click());
+  }
   await wait(page, name => [...document.querySelectorAll("button")].some(e => e.textContent.trim() === name && !e.disabled), label);
   await evaluate(page, name => { const b = [...document.querySelectorAll("button")].find(e => e.textContent.trim() === name); b.focus(); b.click(); }, label);
 }
 async function fill(page, selector, value) {
+  await wait(page,selector=>{const element=document.querySelector(selector);return !!element&&!element.disabled;},selector);
   await evaluate(page, ({ selector, value }) => {
     const e = document.querySelector(selector);
     const prototype = e.tagName === "SELECT" ? HTMLSelectElement.prototype : e.tagName === "TEXTAREA" ? window.HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
@@ -142,6 +166,22 @@ try {
     if (await evaluate(owner, () => document.querySelector('.status-list')?.textContent.includes('Awaiting human review'))) break;
     await pause(250);
   }
+  if(process.argv.includes('--manual')) {
+    stage='manual_assignment_before_expiry';
+    const caseId=await evaluate(observer,async id=>(await (await fetch('/api/v1/demo/runs/'+id)).json()).run.case_id,runId);
+    const recipient=await evaluate(reviewer,async()=>(await (await fetch('/api/v1/auth/me')).json()).account_id);
+    const admin=await page('http://localhost:3001/admin');
+    await wait(admin,()=>!!document.querySelector('#username'));
+    await fill(admin,'#username',env.DEV_ADMIN_USERNAME);await fill(admin,'#password',env.DEV_ADMIN_PASSWORD);
+    await click(admin,'Sign in');await wait(admin,()=>!!document.querySelector('#audit-case'));
+    await send('Page.navigate',{url:'http://localhost:3001/admin/assignments'},admin);
+    await wait(admin,()=>!!document.querySelector('#record-search'));
+    await fill(admin,'#record-search',caseId);await click(admin,'Apply filters');await click(admin,'Manage case '+caseId.slice(0,8));
+    await wait(admin,id=>!!document.querySelector('#assignment-recipient option[value="'+id+'"]'),recipient);
+    await fill(admin,'#assignment-recipient',recipient);await click(admin,'Review assignment change');await click(admin,'Confirm change');
+    await wait(admin,()=>document.querySelector('.feedback')?.textContent.includes('Assignment saved'));
+    checks.push({name:'manual_assignment_before_expiry',passed:true});
+  }
   stage = 'cookie_isolation';
   const sharedReviewer = await page('http://localhost:3001', false, owner);
   await signIn(sharedReviewer);
@@ -181,7 +221,7 @@ try {
     stage = 'owner_after_refresh';
     await wait(owner, () => !document.querySelector('[role="alert"]') && document.querySelector('.status-badge')?.textContent === 'ACTIVE');
     stage = 'observer_after_refresh';
-    await wait(observer, () => document.querySelector('[data-check="FR01.a"] [data-result]')?.textContent === 'Verified for this run');
+    await checkResult(observer,'FR01.a','Verified in selected run');
     stage = 'reviewer_after_refresh';
     await wait(reviewer, () => !!document.querySelector('.toolbar'));
     // /auth/me on reload must also refresh (the separate sharedReviewer access has expired).
@@ -191,9 +231,9 @@ try {
     stage = 'review_selection';
     const caseId = await evaluate(observer, async run => (await (await fetch('/api/v1/demo/runs/'+run)).json()).run.case_id, runId);
     await evaluate(reviewer, async caseId => {
-      const tasks=await (await fetch('/api/v1/review-tasks')).json();
-      const index=tasks.findIndex(t=>t.case.case_id===caseId); if(index<0) throw new Error('Own task missing');
-      document.querySelectorAll('.task-button')[index].click();
+      const button=[...document.querySelectorAll('.task-button')].find(button=>button.getAttribute('aria-label')==='Open case '+caseId);
+      if(!button) throw new Error('Own task missing');
+      button.click();
     },caseId);
     stage = 'review_actions';
     await click(reviewer,'Start human review');
@@ -206,15 +246,15 @@ try {
     await click(reviewer, 'Refresh assigned tasks');
     await wait(reviewer, () => document.querySelector('.review-detail')?.textContent.includes('Fictional timetable context reviewed by a human.'));
     await click(reviewer,'Record review complete');
-    await click(observer,'Refresh evidence');
-    await wait(observer,()=>document.querySelector('[data-check="FR09.b"] [data-result]')?.textContent==='Verified for this run');
-    await wait(observer,()=>document.querySelector('[data-check="FR09.c"] [data-result]')?.textContent==='Verified for this run');
+    await closeDetails(observer); await click(observer,'Refresh evidence');
+    await checkResult(observer,'FR09.b','Verified in selected run');
+    await checkResult(observer,'FR09.c','Verified in selected run');
     assert(await evaluate(observer, () => !document.body.textContent.includes('Fictional timetable context reviewed by a human.')), 'Private review text reached the student checklist');
     checks.push({name:'fr09_record_save_read_and_safe_student_receipt',passed:true});
     await screenshot(observer,'session-after-refresh-review');
     stage = 'withdrawal_after_refresh';
-    await withdraw(owner); await click(observer,'Refresh evidence');
-    await wait(observer,()=>document.querySelector('[data-check="FR10.b"] [data-result]')?.textContent==='Verified for this run');
+    await withdraw(owner); await closeDetails(observer); await click(observer,'Refresh evidence');
+    await checkResult(observer,'FR10.b','Verified in selected run');
     await click(reviewer,'Refresh assigned tasks');
     stage = 'logout_after_refresh';
     await click(reviewer,'Sign out'); await send('Page.reload',{},reviewer);

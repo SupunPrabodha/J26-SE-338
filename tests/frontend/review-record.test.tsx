@@ -17,7 +17,7 @@ async function setup() {
   const fetcher = vi.fn(async (url: string, options?: RequestInit) => {
     if (url.endsWith("/me")) return ok({ role: "COUNSELLOR" });
     if (denied) return new Response(JSON.stringify({ error_code: "CONSENT_INVALID" }), { status: 403 });
-    if (url.endsWith("/review-tasks")) return ok([task]);
+    if (url.includes("/review-queue?")) return ok({ items: [{ task_id: task.task_id, case: task.case, review_record_saved_at: record ? new Date().toISOString() : null }], next_offset: null, observed_at: new Date().toISOString() });
     if (url.endsWith("/record")) {
       if (options?.method === "POST") {
         const body = JSON.parse(String(options.body));
@@ -29,7 +29,7 @@ async function setup() {
   });
   vi.stubGlobal("fetch", fetcher);
   render(<Dashboard />);
-  fireEvent.click(await screen.findByText("Open synthetic case 1"));
+  fireEvent.click(await screen.findByRole("button", { name: /^Open case / }));
   await screen.findByLabelText("Synthetic interpretation");
   return { fetcher, deny: () => { denied = true; } };
 }
@@ -48,7 +48,7 @@ test("assigned review form saves and retrieves protected content", async () => {
   const saved = fetcher.mock.calls.find(([url, init]) => url.endsWith("/record") && init?.method === "POST");
   expect(JSON.parse(String(saved?.[1]?.body))).toMatchObject({ interpretation: text, follow_up: "DISCUSSION_OFFERED" });
   fireEvent.click(screen.getByText("Refresh assigned tasks"));
-  await waitFor(() => expect(fetcher.mock.calls.filter(([url, init]) => url.endsWith("/record") && init?.method === "GET")).toHaveLength(2));
+  await waitFor(() => expect(fetcher.mock.calls.filter(([url, init]) => url.endsWith("/record") && init?.method === "GET")).toHaveLength(3));
   expect(await screen.findByText(text)).toBeVisible();
 });
 
@@ -69,8 +69,8 @@ test("checklist separates capability, recorded tests and actual save receipt", (
   expect(checklist(evidence, false).find(row => row.id === "FR09.c")?.result).toBe("Not exercised");
   evidence.review_record_saved_at = new Date().toISOString();
   const rows = checklist(evidence, false);
-  expect(rows.find(row => row.id === "FR09.c")?.result).toBe("Verified for this run");
+  expect(rows.find(row => row.id === "FR09.c")?.result).toBe("Verified in selected run");
   expect(rows.find(row => row.id === "FR09.d")?.source).toBe("Configuration evidence");
   expect(rows.find(row => row.id === "FR09.e")?.source).toBe("Recorded test evidence");
-  expect(checklist(evidence, true).find(row => row.id === "FR09.c")?.result).toBe("Unavailable/stale");
+  expect(checklist(evidence, true).find(row => row.id === "FR09.c")?.result).toBe("Unavailable or stale");
 });

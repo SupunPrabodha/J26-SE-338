@@ -117,7 +117,12 @@ def active_consent(consent, db=None, request=None, operation="SUBMISSION", case_
 
 
 def lock_case(db, case_id):
-    case = db.scalar(select(Case).where(Case.id == case_id).with_for_update())
+    case = db.scalar(
+        select(Case)
+        .where(Case.id == case_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
     if not case:
         raise SafeError(ErrorCode.NOT_FOUND, 404)
     return case
@@ -309,14 +314,22 @@ def process_job(job_id, attempt, adapter=call_service):
                 explainer_version=explanation.explainer_version,
             ).model_dump(mode="json")
             db.add(Review(case_id=case.id))
-            designated = db.scalar(
-                select(Account).where(
-                    Account.username == settings().dev_counsellor_username,
-                    Account.role == "COUNSELLOR",
-                    Account.enabled.is_(True),
+            designated = (
+                db.scalar(
+                    select(Account)
+                    .where(
+                        Account.username == settings().dev_counsellor_username,
+                        Account.role == "COUNSELLOR",
+                        Account.enabled.is_(True),
+                    )
+                    .with_for_update()
                 )
+                if settings().assignment_policy == "DESIGNATED_DEVELOPMENT"
+                else None
             )
-            if designated:
+            from orchestrator.auth import usable_staff
+
+            if usable_staff(designated):
                 db.add(Assignment(case_id=case.id, counsellor_id=designated.id))
                 audit(
                     db,

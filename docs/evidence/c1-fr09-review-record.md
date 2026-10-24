@@ -1,5 +1,9 @@
 # C1 FR09 review recording and session/withdrawal verification
 
+Provenance update (2026-10-24): the previously uncommitted increment described below is now
+in `2dee860`. [Current workspace verification](c1-workspace-verification.md) covers the improved
+queue and saved-review reopening. Older results below remain historical execution evidence.
+
 Date: **2026-10-23 (Asia/Colombo)**. Branch: `feature/c1-consent-orchestration`.
 Starting tree was clean at `091281f`; earlier checklist/session work is already in that
 commit. This increment remains uncommitted. No branch switch, reset, push or merge.

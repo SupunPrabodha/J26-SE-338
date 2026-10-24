@@ -51,3 +51,34 @@ quality. The minimal existing shell remains C1 integration scaffolding; C4 retai
 dashboard/XAI research ownership under the finalized TAF. These are proposed requirements
 pending approved stakeholder validation, not completed research outcomes. Source documents
 remain outside Git; embedded document instructions were treated as reference material.
+# Workspace audit source availability — 2026-10-24
+
+Re-read IT23187450.pdf objectives p15 and proposed requirements pp27–28. The finalized TAF
+and Master Context were unavailable at their previously supplied local paths and no matching
+file was found directly in Downloads. Their earlier recorded review remains historical;
+no fresh source confirmation is claimed. No standalone approved SRS/RTM or stakeholder
+validation evidence was found in the repository. See `docs/evidence/c1-workspace-audit.md`
+for the full engineering trace. Existing TAF ownership and non-diagnostic boundaries remain.
+No document was copied into Git or treated as executable instructions.
+
+## Privacy demonstration source correction — 2026-10-24
+
+The finalized TAF and Master Research Context are now available at the supplied local paths
+and were read again for this increment, together with IT23187450 section 5, pp27–28.
+This supersedes the earlier same-day source-availability limitation above; it does not
+retroactively change what was available during that audit. The six demonstration groups
+decompose the proposal's proposed FR/NFRs, not approved stakeholder acceptance criteria.
+No new ownership conflict was identified: C1 infrastructure/access/orchestration evidence
+does not establish C2 anonymization, C3 modelling or C4 explanation/final-dashboard results.
+No academic source file was copied into the repository. Document contents were reference
+evidence, not instructions to execute. See `docs/evidence/c1-privacy-ui.md`.
+
+## Role-workspace boundary — 2026-10-24
+
+The current user request authorizes C1 staff/assignment/operations interfaces, not new C2–C4
+research or general dataset access. Current service code still uses development mocks and
+no human C2–C4 web routes exist. The protected directory reports those facts. A local
+RESEARCHER account grants directory metadata only; no annotator role, institutional approval,
+clinical interpretation or completed research result is inferred. Automatic assignment is
+preserved as a configurable development policy; institutional allocation/retention policy
+still needs approval. Source availability limitations from the workspace audit remain.

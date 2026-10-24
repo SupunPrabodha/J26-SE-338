@@ -38,6 +38,713 @@
         "title": "AccountResponse",
         "type": "object"
       },
+      "AdminAnalytics": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "interval": {
+            "enum": [
+              "day",
+              "week"
+            ],
+            "title": "Interval",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "since": {
+            "format": "date-time",
+            "title": "Since",
+            "type": "string"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/CaseStatusCount"
+            },
+            "maxItems": 11,
+            "title": "Statuses",
+            "type": "array"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionCount"
+            },
+            "maxItems": 367,
+            "title": "Submissions",
+            "type": "array"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "timezone": {
+            "const": "UTC",
+            "default": "UTC",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "total_cases": {
+            "minimum": 0.0,
+            "title": "Total Cases",
+            "type": "integer"
+          },
+          "until": {
+            "format": "date-time",
+            "title": "Until",
+            "type": "string"
+          },
+          "workload": {
+            "items": {
+              "$ref": "#/components/schemas/WorkloadCount"
+            },
+            "maxItems": 21,
+            "title": "Workload",
+            "type": "array"
+          },
+          "workload_assignment_pairs": {
+            "minimum": 0.0,
+            "title": "Workload Assignment Pairs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "since",
+          "until",
+          "interval",
+          "total_cases",
+          "statuses",
+          "submissions",
+          "workload",
+          "workload_assignment_pairs",
+          "observed_at"
+        ],
+        "title": "AdminAnalytics",
+        "type": "object"
+      },
+      "AdminAuditItem": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/AdminEventType"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Expires At"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_version": {
+            "const": "0.1.0",
+            "default": "0.1.0",
+            "title": "Service Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "event_id",
+          "event_type",
+          "outcome",
+          "occurred_at",
+          "correlation_id"
+        ],
+        "title": "AdminAuditItem",
+        "type": "object"
+      },
+      "AdminAuditPage": {
+        "additionalProperties": false,
+        "properties": {
+          "case_operations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminCaseOperations"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminAuditItem"
+            },
+            "maxItems": 50,
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "provider": {
+            "const": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+            "default": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+            "title": "Provider",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "observed_at"
+        ],
+        "title": "AdminAuditPage",
+        "type": "object"
+      },
+      "AdminCaseOperations": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "failure_code": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorCode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "processing_status": {
+            "$ref": "#/components/schemas/WorkflowState"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceProvenance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "retention_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "RETENTION",
+                  "OWNER_WITHDRAWAL",
+                  "LEGACY_DISPOSAL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Reason"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "case_id",
+          "processing_status"
+        ],
+        "title": "AdminCaseOperations",
+        "type": "object"
+      },
+      "AdminCasePage": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCaseSummary"
+            },
+            "maxItems": 20,
+            "title": "Items",
+            "type": "array"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "observed_at"
+        ],
+        "title": "AdminCasePage",
+        "type": "object"
+      },
+      "AdminCaseSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "assignment_count": {
+            "title": "Assignment Count",
+            "type": "integer"
+          },
+          "assignment_eligible": {
+            "title": "Assignment Eligible",
+            "type": "boolean"
+          },
+          "assignment_state": {
+            "enum": [
+              "AWAITING_ASSIGNMENT",
+              "ASSIGNED",
+              "NOT_ELIGIBLE"
+            ],
+            "title": "Assignment State",
+            "type": "string"
+          },
+          "assignment_version": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Assignment Version",
+            "type": "string"
+          },
+          "attempts": {
+            "default": 0,
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "counsellors": {
+            "items": {
+              "$ref": "#/components/schemas/StaffSummary"
+            },
+            "maxItems": 20,
+            "title": "Counsellors",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "disposal_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "RETENTION",
+                  "OWNER_WITHDRAWAL",
+                  "LEGACY_DISPOSAL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disposal Reason"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "failure_code": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorCode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "human_review_status": {
+            "default": "UNAVAILABLE",
+            "enum": [
+              "AWAITING_REVIEW",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "UNAVAILABLE"
+            ],
+            "title": "Human Review Status",
+            "type": "string"
+          },
+          "job_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "QUEUED",
+                  "RUNNING",
+                  "DONE",
+                  "CANCELLED",
+                  "DEAD_LETTER"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Status"
+          },
+          "last_assignment_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Assignment At"
+          },
+          "processing_status": {
+            "$ref": "#/components/schemas/WorkflowState"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "processing_status",
+          "created_at",
+          "updated_at",
+          "expires_at",
+          "assignment_eligible",
+          "assignment_state",
+          "assignment_version",
+          "assignment_count",
+          "counsellors"
+        ],
+        "title": "AdminCaseSummary",
+        "type": "object"
+      },
+      "AdminEventType": {
+        "enum": [
+          "AUTH_LOGIN",
+          "AUTH_FAILURE",
+          "AUTH_LOGOUT",
+          "AUTH_REFRESH",
+          "SESSION_REVOKED",
+          "CONSENT_RECORDED",
+          "CONSENT_EXPIRED",
+          "OPERATION_BLOCKED",
+          "SUBMISSION",
+          "SUBMISSION_REPLAY",
+          "WORKFLOW_TRANSITION",
+          "JOB_RETRY",
+          "JOB_TERMINAL",
+          "JOB_CLAIM",
+          "HUMAN_REVIEW",
+          "WITHDRAWAL",
+          "RETENTION",
+          "ASSIGNMENT",
+          "ADMIN_EVIDENCE_ACCESS",
+          "STAFF_ADMINISTRATION"
+        ],
+        "title": "AdminEventType",
+        "type": "string"
+      },
+      "AdminOverview": {
+        "additionalProperties": false,
+        "properties": {
+          "active_counsellors": {
+            "title": "Active Counsellors",
+            "type": "integer"
+          },
+          "assigned_cases": {
+            "title": "Assigned Cases",
+            "type": "integer"
+          },
+          "assignment_policy": {
+            "enum": [
+              "DESIGNATED_DEVELOPMENT",
+              "MANUAL"
+            ],
+            "title": "Assignment Policy",
+            "type": "string"
+          },
+          "awaiting_assignment": {
+            "title": "Awaiting Assignment",
+            "type": "integer"
+          },
+          "designated_counsellor_available": {
+            "title": "Designated Counsellor Available",
+            "type": "boolean"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "disposed_cases": {
+            "title": "Disposed Cases",
+            "type": "integer"
+          },
+          "eligible_cases": {
+            "title": "Eligible Cases",
+            "type": "integer"
+          },
+          "enabled_staff": {
+            "title": "Enabled Staff",
+            "type": "integer"
+          },
+          "failed_cases": {
+            "title": "Failed Cases",
+            "type": "integer"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "pending_jobs": {
+            "title": "Pending Jobs",
+            "type": "integer"
+          },
+          "retention_hours": {
+            "title": "Retention Hours",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "eligible_cases",
+          "awaiting_assignment",
+          "assigned_cases",
+          "active_counsellors",
+          "enabled_staff",
+          "pending_jobs",
+          "failed_cases",
+          "disposed_cases",
+          "assignment_policy",
+          "designated_counsellor_available",
+          "retention_hours",
+          "observed_at"
+        ],
+        "title": "AdminOverview",
+        "type": "object"
+      },
+      "AssignmentChangeRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "counsellor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counsellor Id"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "expected_version": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "counsellor_id",
+          "expected_version"
+        ],
+        "title": "AssignmentChangeRequest",
+        "type": "object"
+      },
       "AssignmentRequest": {
         "additionalProperties": false,
         "properties": {
@@ -69,6 +776,149 @@
           "counsellor_id"
         ],
         "title": "AssignmentRequest",
+        "type": "object"
+      },
+      "CaseStatusCount": {
+        "additionalProperties": false,
+        "properties": {
+          "cases": {
+            "minimum": 0.0,
+            "title": "Cases",
+            "type": "integer"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/WorkflowState"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "state",
+          "cases"
+        ],
+        "title": "CaseStatusCount",
+        "type": "object"
+      },
+      "ComponentDirectory": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentRoute"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Items",
+            "type": "array"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "observed_at"
+        ],
+        "title": "ComponentDirectory",
+        "type": "object"
+      },
+      "ComponentRoute": {
+        "additionalProperties": false,
+        "properties": {
+          "component": {
+            "enum": [
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "title": "Component",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "function": {
+            "enum": [
+              "PREPROCESSING",
+              "INFERENCE",
+              "EXPLANATION"
+            ],
+            "title": "Function",
+            "type": "string"
+          },
+          "provider": {
+            "const": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+            "title": "Provider",
+            "type": "string"
+          },
+          "route_status": {
+            "const": "INTERNAL_SERVICE_ONLY",
+            "default": "INTERNAL_SERVICE_ONLY",
+            "title": "Route Status",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "web_path": {
+            "title": "Web Path",
+            "type": "null"
+          }
+        },
+        "required": [
+          "component",
+          "function",
+          "provider"
+        ],
+        "title": "ComponentRoute",
         "type": "object"
       },
       "ConsentDecision": {
@@ -1111,6 +1961,138 @@
         "title": "PseudonymousCase",
         "type": "object"
       },
+      "ReviewQueueItem": {
+        "additionalProperties": false,
+        "properties": {
+          "assignment": {
+            "const": "ASSIGNED_TO_YOU",
+            "default": "ASSIGNED_TO_YOU",
+            "title": "Assignment",
+            "type": "string"
+          },
+          "case": {
+            "$ref": "#/components/schemas/PseudonymousCase"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "review_completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Completed At"
+          },
+          "review_record_saved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Record Saved At"
+          },
+          "review_started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Started At"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "case"
+        ],
+        "title": "ReviewQueueItem",
+        "type": "object"
+      },
+      "ReviewQueuePage": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewQueueItem"
+            },
+            "maxItems": 20,
+            "title": "Items",
+            "type": "array"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "observed_at"
+        ],
+        "title": "ReviewQueuePage",
+        "type": "object"
+      },
       "ReviewRecordRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1264,6 +2246,315 @@
           "correlation_id"
         ],
         "title": "ServiceError",
+        "type": "object"
+      },
+      "ServiceProvenance": {
+        "additionalProperties": false,
+        "properties": {
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "explainer_version": {
+            "const": "mock-1",
+            "title": "Explainer Version",
+            "type": "string"
+          },
+          "model_dataset_version": {
+            "const": "synthetic-fixtures-1",
+            "title": "Model Dataset Version",
+            "type": "string"
+          },
+          "model_version": {
+            "const": "mock-1",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "nlp_service_version": {
+            "const": "0.1.0",
+            "title": "Nlp Service Version",
+            "type": "string"
+          },
+          "pipeline_version": {
+            "const": "mock-1",
+            "title": "Pipeline Version",
+            "type": "string"
+          },
+          "preprocessing_dataset_version": {
+            "const": "synthetic-fixtures-1",
+            "title": "Preprocessing Dataset Version",
+            "type": "string"
+          },
+          "preprocessing_service_version": {
+            "const": "0.1.0",
+            "title": "Preprocessing Service Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "xai_service_version": {
+            "const": "0.1.0",
+            "title": "Xai Service Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "correlation_id",
+          "preprocessing_service_version",
+          "pipeline_version",
+          "preprocessing_dataset_version",
+          "nlp_service_version",
+          "model_version",
+          "model_dataset_version",
+          "xai_service_version",
+          "explainer_version"
+        ],
+        "title": "ServiceProvenance",
+        "type": "object"
+      },
+      "StaffPage": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StaffSummary"
+            },
+            "maxItems": 20,
+            "title": "Items",
+            "type": "array"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "observed_at"
+        ],
+        "title": "StaffPage",
+        "type": "object"
+      },
+      "StaffSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "format": "uuid",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "display_name": {
+            "maxLength": 60,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "is_current_account": {
+            "default": false,
+            "title": "Is Current Account",
+            "type": "boolean"
+          },
+          "role": {
+            "enum": [
+              "ADMIN",
+              "COUNSELLOR",
+              "RESEARCHER"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "usable": {
+            "title": "Usable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "account_id",
+          "display_name",
+          "role",
+          "enabled",
+          "usable",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "StaffSummary",
+        "type": "object"
+      },
+      "StaffUpdateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "expected_updated_at": {
+            "format": "date-time",
+            "title": "Expected Updated At",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "ADMIN",
+              "COUNSELLOR",
+              "RESEARCHER"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "role",
+          "enabled",
+          "expected_updated_at"
+        ],
+        "title": "StaffUpdateRequest",
+        "type": "object"
+      },
+      "SubmissionCount": {
+        "additionalProperties": false,
+        "properties": {
+          "bucket_start": {
+            "format": "date-time",
+            "title": "Bucket Start",
+            "type": "string"
+          },
+          "cases": {
+            "minimum": 0.0,
+            "title": "Cases",
+            "type": "integer"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "bucket_start",
+          "cases"
+        ],
+        "title": "SubmissionCount",
         "type": "object"
       },
       "SubmissionSession": {
@@ -1462,6 +2753,58 @@
         ],
         "title": "WorkflowState",
         "type": "string"
+      },
+      "WorkloadCount": {
+        "additionalProperties": false,
+        "properties": {
+          "cases": {
+            "minimum": 0.0,
+            "title": "Cases",
+            "type": "integer"
+          },
+          "counsellor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counsellor Id"
+          },
+          "development_only": {
+            "const": true,
+            "default": true,
+            "title": "Development Only",
+            "type": "boolean"
+          },
+          "display_name": {
+            "maxLength": 60,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true,
+            "default": true,
+            "title": "Synthetic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "counsellor_id",
+          "display_name",
+          "cases"
+        ],
+        "title": "WorkloadCount",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -1478,6 +2821,1356 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/admin/analytics": {
+      "get": {
+        "operationId": "analytics_api_v1_admin_analytics_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "interval",
+            "required": false,
+            "schema": {
+              "default": "day",
+              "enum": [
+                "day",
+                "week"
+              ],
+              "title": "Interval",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[0-9a-fA-F-]{4,36}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/WorkflowState"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assignment",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(AWAITING_ASSIGNMENT|ASSIGNED)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assignment"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eligible_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Eligible Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "disposed_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Disposed Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAnalytics"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Analytics",
+        "tags": [
+          "restricted operational aggregates"
+        ]
+      }
+    },
+    "/api/v1/admin/audit-events": {
+      "get": {
+        "operationId": "audit_events_api_v1_admin_audit_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "event_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AdminEventType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "case_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Case Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 160,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAuditPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Audit Events",
+        "tags": [
+          "restricted operational evidence"
+        ]
+      }
+    },
+    "/api/v1/admin/cases": {
+      "get": {
+        "operationId": "cases_api_v1_admin_cases_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 10000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[0-9a-fA-F-]{4,36}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/WorkflowState"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assignment",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(AWAITING_ASSIGNMENT|ASSIGNED)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assignment"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eligible_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Eligible Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "disposed_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Disposed Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCasePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Cases",
+        "tags": [
+          "restricted staff and allocation"
+        ]
+      }
+    },
+    "/api/v1/admin/cases/{case_id}/assignment": {
+      "post": {
+        "operationId": "assign_case_api_v1_admin_cases__case_id__assignment_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentChangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCaseSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Assign Case",
+        "tags": [
+          "restricted staff and allocation"
+        ]
+      }
+    },
+    "/api/v1/admin/overview": {
+      "get": {
+        "operationId": "overview_api_v1_admin_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Overview",
+        "tags": [
+          "restricted staff and allocation"
+        ]
+      }
+    },
+    "/api/v1/admin/staff": {
+      "get": {
+        "operationId": "staff_list_api_v1_admin_staff_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[0-9a-fA-F-]{4,36}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(ADMIN|COUNSELLOR|RESEARCHER)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Enabled"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 10000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Staff List",
+        "tags": [
+          "restricted staff and allocation"
+        ]
+      }
+    },
+    "/api/v1/admin/staff/{staff_id}": {
+      "post": {
+        "operationId": "update_staff_api_v1_admin_staff__staff_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "staff_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Staff Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Update Staff",
+        "tags": [
+          "restricted staff and allocation"
+        ]
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "operationId": "login_api_v1_auth_login_post",
@@ -2494,6 +5187,132 @@
         "summary": "Withdraw"
       }
     },
+    "/api/v1/component-routes": {
+      "get": {
+        "operationId": "component_routes_api_v1_component_routes_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComponentDirectory"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Component Routes",
+        "tags": [
+          "restricted staff and allocation"
+        ]
+      }
+    },
     "/api/v1/consents": {
       "post": {
         "operationId": "record_consent_api_v1_consents_post",
@@ -3442,6 +6261,172 @@
           }
         },
         "summary": "Fixtures"
+      }
+    },
+    "/api/v1/review-queue": {
+      "get": {
+        "operationId": "review_queue_api_v1_review_queue_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(READY_FOR_REVIEW|UNDER_REVIEW|COMPLETED)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 10000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewQueuePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "summary": "Review Queue"
       }
     },
     "/api/v1/review-tasks": {

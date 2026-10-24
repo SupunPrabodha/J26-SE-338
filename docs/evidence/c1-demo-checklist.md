@@ -1,5 +1,33 @@
 # C1 live requirements checklist
 
+Privacy presentation correction (2026-10-24): [current increment and verification](c1-privacy-ui.md).
+The default view now has six privacy groups with independent implementation and selected-run
+evidence columns. Details and safe receipts use accessible dialogs. Reliability and dated
+evaluation are secondary views. No overall completion score is calculated. The October 21
+status vocabulary and missing FR09/FR12 statements below describe that historical revision;
+they do not describe the current implementation. Current status rules and remaining gaps
+are recorded in the linked note. Manual assignment is explained in the student notice.
+
+Manual-assignment update (2026-10-24): [current manual demo and operational charts](c1-manual-assignment-charts.md).
+With the explicit Compose demo override, a processed task remains unverified at FR07 until
+an actual assignment exists. Current owner evidence already uses that persisted check;
+no checklist pass is inferred from submission alone. New admin aggregate charts remain
+in the admin application; interpretation/follow-up contents remain counsellor-only.
+
+Role-workspace update (2026-10-24): [assignment/staff delivery and actual verification](c1-role-assignment.md).
+FR08/FR12 administration now includes confirmed eligible assignment/reassignment, staff role
+changes and session revocation. These are separate ADMIN pages; the owner checklist cannot
+read their records or interpretation/follow-up contents. Its implementation/current-run/
+recorded-test distinction is preserved. C2–C4 route metadata remains staff-only; their live
+providers are mocks and no human research pages are connected. Earlier missing-feature
+claims below are historical and do not supersede these dated implementation notes.
+
+Workspace update (2026-10-24): see [current audit](c1-workspace-audit.md) and
+[runtime verification](c1-workspace-verification.md). The compact table separates implementation
+from current-run observations and recorded/configuration evidence. FR12 now has a separate
+restricted admin interface; this student checklist cannot read admin events or counselling
+content. Historical missing-interface statements below are superseded by this dated update.
+
 FR09 update (2026-10-23): [implementation and verification](c1-fr09-review-record.md).
 Interpretation/follow-up recording is implemented for synthetic assigned-counsellor use.
 FR09.c shows only an actual save receipt; FR09.d describes capability and FR09.e links
