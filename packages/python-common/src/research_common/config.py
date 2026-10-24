@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -23,6 +24,7 @@ class Settings(BaseSettings):
     refresh_seconds: int = 3600
     retention_hours: int = 24
     dev_counsellor_username: str = ""
+    assignment_policy: Literal["DESIGNATED_DEVELOPMENT", "MANUAL"] = "DESIGNATED_DEVELOPMENT"
     service_timeout_seconds: float = 5.0
 
     @field_validator("environment")

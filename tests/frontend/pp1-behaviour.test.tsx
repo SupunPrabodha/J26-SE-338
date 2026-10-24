@@ -61,14 +61,16 @@ test.each([401, 403, 404])("counsellor denial %i clears cached evidence and acti
     explanation: { evidence: ["SYNTHETIC selected evidence"], reliability_status: "NOT_EVALUATED", explainer_version: "mock-1" } };
   vi.stubGlobal("fetch", vi.fn(async (url: string) => {
     if (url.endsWith("/me")) return ok({ role: "COUNSELLOR" });
-    if (url.endsWith("/review-tasks")) return ok([task]);
+    if (url.includes("/review-queue?")) return ok({ items: [{ task_id: task.task_id, case: task.case }], next_offset: null, observed_at: new Date().toISOString() });
+    if (url.endsWith("/record")) return ok(null);
     if (url.endsWith("/actions") || url.endsWith("/refresh")) return { ok: false, status };
     return ok(task);
   }));
   render(<Dashboard />);
-  fireEvent.click(await screen.findByText("Open synthetic case 1"));
+  fireEvent.click(await screen.findByRole("button", { name: /^Open case / }));
   await screen.findByText("SYNTHETIC selected evidence");
-  expect(screen.getByText("Processing complete")).toBeVisible();
+  fireEvent.click(screen.getByText("Screening evidence"));
+  expect(screen.getAllByText("Processing complete")[0]).toBeVisible();
   expect(screen.queryByText("Human review completed")).not.toBeInTheDocument();
   fireEvent.click(screen.getByText("Start human review"));
   await screen.findByRole("alert");

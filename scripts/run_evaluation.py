@@ -8,12 +8,16 @@ from pathlib import Path
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("evaluation", choices=("postgres", "performance"))
+    parser.add_argument("evaluation", choices=("postgres", "performance", "assignment"))
     parser.add_argument("--samples", type=int, default=200)
     parser.add_argument("--warmup", type=int, default=20)
     parser.add_argument("--concurrency", type=int, default=4)
     args = parser.parse_args()
-    script = "postgres_checks.py" if args.evaluation == "postgres" else "c1_performance.py"
+    script = {
+        "postgres": "postgres_checks.py",
+        "performance": "c1_performance.py",
+        "assignment": "assignment_checks.py",
+    }[args.evaluation]
     command = [
         "docker",
         "compose",

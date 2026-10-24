@@ -1,0 +1,41 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/SubmissionCount.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bucket_start": {
+      "format": "date-time",
+      "title": "Bucket Start",
+      "type": "string"
+    },
+    "cases": {
+      "minimum": 0,
+      "title": "Cases",
+      "type": "integer"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "bucket_start",
+    "cases"
+  ],
+  "title": "SubmissionCount",
+  "type": "object"
+}

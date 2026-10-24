@@ -1,0 +1,52 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/ReviewRecordRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "follow_up": {
+      "enum": [
+        "NO_FOLLOW_UP_PLANNED",
+        "DISCUSSION_OFFERED",
+        "FOLLOW_UP_REQUESTED"
+      ],
+      "title": "Follow Up",
+      "type": "string"
+    },
+    "idempotency_key": {
+      "format": "uuid",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "interpretation": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "interpretation",
+    "follow_up",
+    "idempotency_key"
+  ],
+  "title": "ReviewRecordRequest",
+  "type": "object"
+}

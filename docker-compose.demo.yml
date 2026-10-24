@@ -1,0 +1,9 @@
+# Explicit manual-assignment demo; default docker-compose.yml remains compatible.
+# docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d --build --wait
+services:
+  orchestrator:
+    environment:
+      ASSIGNMENT_POLICY: MANUAL
+  worker:
+    environment:
+      ASSIGNMENT_POLICY: MANUAL

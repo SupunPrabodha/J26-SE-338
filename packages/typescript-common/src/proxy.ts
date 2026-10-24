@@ -1,5 +1,5 @@
 // Server-only same-origin adapter. Ports share a cookie jar, so each app has a namespace.
-export async function proxy(request: Request, application: "student" | "counsellor"): Promise<Response> {
+export async function proxy(request: Request, application: "student" | "counsellor" | "admin" | "research"): Promise<Response> {
   const headers = new Headers();
   for (const name of ["content-type", "origin", "x-requested-with"]) {
     const value = request.headers.get(name);
@@ -13,6 +13,8 @@ export async function proxy(request: Request, application: "student" | "counsell
   const incoming = new URL(request.url);
   const upstream = new URL(process.env.API_INTERNAL_URL || "http://localhost:8000");
   upstream.pathname = incoming.pathname;
+  if (application === "admin" && incoming.pathname.startsWith("/api/v1/admin-auth/")) upstream.pathname = incoming.pathname.replace("/api/v1/admin-auth/", "/api/v1/auth/");
+  if (application === "research" && incoming.pathname.startsWith("/api/v1/research-auth/")) upstream.pathname = incoming.pathname.replace("/api/v1/research-auth/", "/api/v1/auth/");
   upstream.search = incoming.search;
   try {
     const response = await fetch(upstream, {

@@ -1,0 +1,248 @@
+{
+  "$defs": {
+    "CaseStatusCount": {
+      "additionalProperties": false,
+      "properties": {
+        "cases": {
+          "minimum": 0,
+          "title": "Cases",
+          "type": "integer"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/WorkflowState"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "state",
+        "cases"
+      ],
+      "title": "CaseStatusCount",
+      "type": "object"
+    },
+    "SubmissionCount": {
+      "additionalProperties": false,
+      "properties": {
+        "bucket_start": {
+          "format": "date-time",
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "cases": {
+          "minimum": 0,
+          "title": "Cases",
+          "type": "integer"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "cases"
+      ],
+      "title": "SubmissionCount",
+      "type": "object"
+    },
+    "WorkflowState": {
+      "enum": [
+        "RECEIVED",
+        "CONSENT_VERIFIED",
+        "PREPROCESSING",
+        "INFERENCE",
+        "EXPLANATION",
+        "READY_FOR_REVIEW",
+        "UNDER_REVIEW",
+        "COMPLETED",
+        "FAILED",
+        "WITHDRAWAL_REQUESTED",
+        "WITHDRAWN"
+      ],
+      "title": "WorkflowState",
+      "type": "string"
+    },
+    "WorkloadCount": {
+      "additionalProperties": false,
+      "properties": {
+        "cases": {
+          "minimum": 0,
+          "title": "Cases",
+          "type": "integer"
+        },
+        "counsellor_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Counsellor Id"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "display_name": {
+          "maxLength": 60,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "counsellor_id",
+        "display_name",
+        "cases"
+      ],
+      "title": "WorkloadCount",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/AdminAnalytics.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "interval": {
+      "enum": [
+        "day",
+        "week"
+      ],
+      "title": "Interval",
+      "type": "string"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "since": {
+      "format": "date-time",
+      "title": "Since",
+      "type": "string"
+    },
+    "statuses": {
+      "items": {
+        "$ref": "#/$defs/CaseStatusCount"
+      },
+      "maxItems": 11,
+      "title": "Statuses",
+      "type": "array"
+    },
+    "submissions": {
+      "items": {
+        "$ref": "#/$defs/SubmissionCount"
+      },
+      "maxItems": 367,
+      "title": "Submissions",
+      "type": "array"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "timezone": {
+      "const": "UTC",
+      "default": "UTC",
+      "title": "Timezone",
+      "type": "string"
+    },
+    "total_cases": {
+      "minimum": 0,
+      "title": "Total Cases",
+      "type": "integer"
+    },
+    "until": {
+      "format": "date-time",
+      "title": "Until",
+      "type": "string"
+    },
+    "workload": {
+      "items": {
+        "$ref": "#/$defs/WorkloadCount"
+      },
+      "maxItems": 21,
+      "title": "Workload",
+      "type": "array"
+    },
+    "workload_assignment_pairs": {
+      "minimum": 0,
+      "title": "Workload Assignment Pairs",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "since",
+    "until",
+    "interval",
+    "total_cases",
+    "statuses",
+    "submissions",
+    "workload",
+    "workload_assignment_pairs",
+    "observed_at"
+  ],
+  "title": "AdminAnalytics",
+  "type": "object"
+}

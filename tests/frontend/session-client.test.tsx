@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { api, ApiError } from "../../packages/typescript-common/src/api";
+import { api, adminApi, ApiError } from "../../packages/typescript-common/src/api";
 import { proxy } from "../../packages/typescript-common/src/proxy";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -15,6 +15,18 @@ test("simultaneous expiry requests share rotation and retry each original once",
   await Promise.all([api("/demo/runs"), api("/consents/synthetic/lifecycle"), api("/auth/me")]);
   expect(rotations).toBe(1);
   expect(fetch.mock.calls.filter(([p]) => p.endsWith("/demo/runs"))).toHaveLength(2);
+});
+
+test("admin concurrent expiry shares rotation in its own auth namespace", async () => {
+  let valid = false, rotations = 0;
+  const fetcher = vi.fn(async (path: string) => {
+    if (path === "/api/v1/admin-auth/refresh") { valid = true; rotations++; return response(200, { role: "ADMIN" }); }
+    return response(valid ? 200 : 401, valid ? { role: "ADMIN" } : { error_code: "AUTH_REQUIRED" });
+  });
+  vi.stubGlobal("fetch", fetcher);
+  await Promise.all([adminApi("/admin/audit-events"), adminApi("/auth/me")]);
+  expect(rotations).toBe(1);
+  expect(fetcher.mock.calls.every(([path]) => path.includes("/admin/") || path.includes("/admin-auth/"))).toBe(true);
 });
 
 test("late old 401 probes refreshed cookies instead of rotating or clearing a newer session", async () => {
@@ -105,4 +117,13 @@ test("unsupported cross-tab coordination fails safely without racing a refresh",
   const fetch = vi.fn(async () => response(401)); vi.stubGlobal("fetch", fetch);
   await expect(api("/demo/runs")).rejects.toMatchObject({ status: 503 });
   expect(fetch).toHaveBeenCalledTimes(1);
+});
+test.each(["admin", "research"] as const)("%s browser cookies are namespaced and auth mapping preserves backend guards", async realm => {
+  const { proxy } = await import("../../packages/typescript-common/src/proxy");
+  const fetcher = vi.fn(async () => new Response("{}", { headers: { "Set-Cookie": "j26_access=synthetic-cookie; HttpOnly; SameSite=Strict; Path=/api/v1" } }));
+  vi.stubGlobal("fetch", fetcher);
+  const response = await proxy(new Request(`http://localhost:3001/api/v1/${realm}-auth/me`, { headers: { cookie: `j26_counsellor_access=other; j26_student_access=other; j26_admin_access=synthetic-admin; j26_research_access=synthetic-research` } }), realm);
+  expect(String(fetcher.mock.calls[0][0])).toContain("/api/v1/auth/me");
+  expect(fetcher.mock.calls[0][1].headers.get("cookie")).toBe(`j26_access=synthetic-${realm}`);
+  expect(response.headers.get("set-cookie")).toContain(`j26_${realm}_access=`);
 });

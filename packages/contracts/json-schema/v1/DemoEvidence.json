@@ -225,6 +225,19 @@
       "default": null,
       "title": "Review Completed At"
     },
+    "review_record_saved_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Review Record Saved At"
+    },
     "review_started_at": {
       "anyOf": [
         {

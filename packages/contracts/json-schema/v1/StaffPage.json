@@ -1,0 +1,147 @@
+{
+  "$defs": {
+    "StaffSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "format": "uuid",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "display_name": {
+          "maxLength": 60,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At"
+        },
+        "is_current_account": {
+          "default": false,
+          "title": "Is Current Account",
+          "type": "boolean"
+        },
+        "role": {
+          "enum": [
+            "ADMIN",
+            "COUNSELLOR",
+            "RESEARCHER"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "usable": {
+          "title": "Usable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account_id",
+        "display_name",
+        "role",
+        "enabled",
+        "usable",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "StaffSummary",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/StaffPage.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/StaffSummary"
+      },
+      "maxItems": 20,
+      "title": "Items",
+      "type": "array"
+    },
+    "next_offset": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Offset"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "items",
+    "observed_at"
+  ],
+  "title": "StaffPage",
+  "type": "object"
+}

@@ -56,7 +56,9 @@
         "HUMAN_REVIEW",
         "WITHDRAWAL",
         "RETENTION",
-        "ASSIGNMENT"
+        "ASSIGNMENT",
+        "ADMIN_EVIDENCE_ACCESS",
+        "STAFF_ADMINISTRATION"
       ],
       "title": "Event Type",
       "type": "string"

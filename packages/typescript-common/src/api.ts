@@ -11,6 +11,8 @@ const messages: Record<string, string> = {
   NOT_FOUND: "This resource is unavailable to your session. Refresh the current view.",
   RATE_LIMITED: "Too many attempts. Please wait a minute.",
   DEPENDENCY_UNAVAILABLE: "A service is unavailable. Please retry; this does not indicate consent withdrawal.",
+  CONFLICT: "The record or assignment changed, or this action is not allowed in its current state. Refresh and review before retrying.",
+  CONTRACT_INVALID: "Check the required fields and permitted values, then retry.",
 };
 
 async function failure(response: Response): Promise<ApiError> {
@@ -34,22 +36,25 @@ async function request(path: string, body?: unknown, signal?: AbortSignal): Prom
   }
 }
 
-async function sessionLock<T>(operation: () => Promise<T>): Promise<T> {
+async function sessionLock<T>(operation: () => Promise<T>, name = "j26-session-transition"): Promise<T> {
   // Web Locks coordinates same-origin tabs without storing credentials or auth flags.
   // Never silently race rotation in browsers lacking cross-tab coordination.
   if (!globalThis.navigator?.locks) throw new ApiError(503, "Session renewal requires a browser with Web Locks support. Use a current supported browser and retry.");
-  return navigator.locks.request("j26-session-transition", { signal: AbortSignal.timeout(8000) }, operation);
+  return navigator.locks.request(name, { signal: AbortSignal.timeout(8000) }, operation);
 }
 
+function createClient(realm: "default" | "admin" | "research" = "default") {
+const send = (path: string, body?: unknown, signal?: AbortSignal) => request(realm !== "default" && path.startsWith("/auth/") ? path.replace("/auth/", `/${realm}-auth/`) : path, body, signal);
+const lock = <T,>(operation: () => Promise<T>) => sessionLock(operation, realm === "default" ? "j26-session-transition" : `j26-${realm}-session-transition`);
 let renewal: Promise<unknown> | null = null;
 async function renew(): Promise<unknown> {
   if (!renewal) {
-    renewal = sessionLock(async () => {
+    renewal = lock(async () => {
       // Another tab, or an earlier request, may already have refreshed. Probe inside the lock.
-      const probe = await request("/auth/me", undefined, AbortSignal.timeout(8000));
+      const probe = await send("/auth/me", undefined, AbortSignal.timeout(8000));
       if (probe.ok) return probe.json();
       if (probe.status !== 401) throw await failure(probe);
-      const refreshed = await request("/auth/refresh", {}, AbortSignal.timeout(8000));
+      const refreshed = await send("/auth/refresh", {}, AbortSignal.timeout(8000));
       if (!refreshed.ok) throw await failure(refreshed);
       return refreshed.json();
     }).finally(() => { renewal = null; });
@@ -57,20 +62,26 @@ async function renew(): Promise<unknown> {
   return renewal;
 }
 
-export async function api<T>(path: string, body?: unknown, retry = true, signal?: AbortSignal): Promise<T> {
+async function client<T>(path: string, body?: unknown, retry = true, signal?: AbortSignal): Promise<T> {
   if (path === "/auth/refresh") return await renew() as T;
   const perform = async () => {
-    const response = await request(path, body, signal);
+    const response = await send(path, body, signal);
     if (!response.ok) throw await failure(response);
     return response.status === 204 ? undefined as T : response.json() as Promise<T>;
   };
   // Do not let a queued refresh finish after logout and restore revoked cookies.
-  if (["/auth/login", "/auth/logout", "/auth/student-session"].includes(path)) return sessionLock(perform);
+  if (["/auth/login", "/auth/logout", "/auth/student-session"].includes(path)) return lock(perform);
   try { return await perform(); }
   catch (error) {
     if (!(error instanceof ApiError) || error.status !== 401 || !retry) throw error;
     await renew();
     signal?.throwIfAborted();
-    return api<T>(path, body, false, signal);
+    return client<T>(path, body, false, signal);
   }
 }
+return client;
+}
+
+export const api = createClient();
+export const adminApi = createClient("admin");
+export const researchApi = createClient("research");

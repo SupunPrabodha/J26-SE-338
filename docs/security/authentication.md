@@ -48,3 +48,33 @@ sessions use the existing rolling one-hour policy, not a new absolute staff-sess
 The refresh cookie can outlast the remaining student-account window; server checks prevail.
 No expiry settings, JWT verification, replay protection or consent guards were weakened.
 See `docs/evidence/c1-session-continuity.md` for reproduction and actual browser timings.
+# Restricted administrative workspace — 2026-10-24
+
+Staff `/admin` reuses the same backend JWT/refresh/session/CSRF/RBAC implementation.
+The proxy selects `j26_admin_access` / `j26_admin_refresh` for `/api/v1/admin/*` and
+`/api/v1/admin-auth/*`; the latter maps to the existing `/api/v1/auth/*` endpoints upstream.
+Browser namespaces prevent accidental session selection collisions. They do not protect
+against a compromised application sharing the host. Canonical direct API cookie names remain
+unchanged. Security attributes, logout deletion and both Set-Cookie headers are preserved.
+
+The common admin client has its own renewal promise and cross-tab lock and retries the
+original protected request at most once, using the same renewal implementation as the
+student/counsellor client. No tokens enter browser storage. Five-minute access and one-hour
+refresh policies remain unchanged. `current_account` adds the validated session-row reference
+to internal request state solely for bounded administrative access-receipt deduplication;
+that reference is not returned to clients or exported in audit evidence.
+
+## Staff mutation and directory isolation (2026-10-24)
+
+The directory uses `j26_research_access` / `j26_research_refresh` selected by the same proxy;
+`/research-auth/*` maps to canonical backend auth routes. Its shared client has a distinct
+renewal lock/promise and the same single-retry, revocation and cookie protections. It grants
+only component-route metadata, not research data. ADMIN and COUNSELLOR namespaces remain.
+
+Staff role/access changes revoke all target sessions. Re-enabling never reactivates old
+sessions. Last-usable-admin protection uses enabled/expiry/credential checks under sorted
+staff-account locks. Review revalidates account/session after case/consent locks. Login and
+refresh lock account before session, serializing with staff revocation; direct concurrent
+refresh replay still revokes the family. No token/consent lifetimes were extended.
+Private generated account provisioning: `scripts/provision_staff.py --role COUNSELLOR`.
+See [actual tests and browser evidence](../evidence/c1-role-assignment.md).
