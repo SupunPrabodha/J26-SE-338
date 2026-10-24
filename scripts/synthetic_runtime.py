@@ -36,11 +36,15 @@ def isolated_postgres():
     settings.cache_clear()
     engine.cache_clear()
     try:
+        # Assert actual connection isolation before any migration or test mutation.
+        with engine().connect() as connection:
+            if connection.scalar(text("SELECT current_schema()")) != schema:
+                raise RuntimeError("Disposable schema isolation was not established")
         command.upgrade(Config("alembic.ini"), "head")
         with redirect_stdout(StringIO()):
             config = Config("alembic.ini", stdout=StringIO())
             command.check(config)
-        yield
+        yield schema
     finally:
         engine().dispose()
         engine.cache_clear()

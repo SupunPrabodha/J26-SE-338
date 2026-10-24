@@ -132,6 +132,21 @@ class ReviewAction(Entity, Base):
     idempotency_key: Mapped[str] = mapped_column(String(36), unique=True)
 
 
+class ReviewRecord(Entity, Base):
+    __tablename__ = "review_records"
+    task_id: Mapped[str] = mapped_column(ForeignKey("review_tasks.id"), unique=True)
+    actor_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    interpretation: Mapped[str] = mapped_column(String(2000))
+    follow_up: Mapped[str] = mapped_column(String(30))
+    idempotency_key: Mapped[str] = mapped_column(String(36))
+    __table_args__ = (
+        CheckConstraint("length(interpretation) BETWEEN 1 AND 2000"),
+        CheckConstraint(
+            "follow_up IN ('NO_FOLLOW_UP_PLANNED','DISCUSSION_OFFERED','FOLLOW_UP_REQUESTED')"
+        ),
+    )
+
+
 class Withdrawal(Entity, Base):
     __tablename__ = "linkage_withdrawals"
     case_id: Mapped[str] = mapped_column(ForeignKey("workflow_cases.id"), unique=True)
