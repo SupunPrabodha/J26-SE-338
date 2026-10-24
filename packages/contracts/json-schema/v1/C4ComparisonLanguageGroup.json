@@ -1,0 +1,118 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4ComparisonLanguageGroup.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "language": {
+      "enum": [
+        "English",
+        "Sinhala",
+        "Romanized Sinhala",
+        "Code-mixed",
+        "Unknown"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "lime_mean": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Mean"
+    },
+    "lime_std": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Std"
+    },
+    "paired_difference_mean": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Paired Difference Mean"
+    },
+    "paired_difference_std": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Paired Difference Std"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "shap_mean": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Mean"
+    },
+    "shap_std": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Std"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "valid_pairs_count": {
+      "default": 0,
+      "title": "Valid Pairs Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "language"
+  ],
+  "title": "C4ComparisonLanguageGroup",
+  "type": "object"
+}

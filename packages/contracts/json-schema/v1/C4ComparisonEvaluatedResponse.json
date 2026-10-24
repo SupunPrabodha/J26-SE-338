@@ -1,0 +1,703 @@
+{
+  "$defs": {
+    "C4ComparisonLanguageGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "language": {
+          "enum": [
+            "English",
+            "Sinhala",
+            "Romanized Sinhala",
+            "Code-mixed",
+            "Unknown"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "lime_mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Mean"
+        },
+        "lime_std": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Std"
+        },
+        "paired_difference_mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paired Difference Mean"
+        },
+        "paired_difference_std": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paired Difference Std"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "shap_mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Mean"
+        },
+        "shap_std": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Std"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "valid_pairs_count": {
+          "default": 0,
+          "title": "Valid Pairs Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "language"
+      ],
+      "title": "C4ComparisonLanguageGroup",
+      "type": "object"
+    },
+    "C4ComparisonMetricSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "common_k": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Common K"
+        },
+        "definition_version": {
+          "default": "1.0.0",
+          "title": "Definition Version",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "effective_k": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective K"
+        },
+        "excluded_count": {
+          "default": 0,
+          "title": "Excluded Count",
+          "type": "integer"
+        },
+        "incompatible_count": {
+          "default": 0,
+          "title": "Incompatible Count",
+          "type": "integer"
+        },
+        "lime_iqr": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Iqr"
+        },
+        "lime_mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Mean"
+        },
+        "lime_median": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Median"
+        },
+        "lime_std": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Std"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "metric_label": {
+          "title": "Metric Label",
+          "type": "string"
+        },
+        "missing_count": {
+          "default": 0,
+          "title": "Missing Count",
+          "type": "integer"
+        },
+        "paired_difference_mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paired Difference Mean"
+        },
+        "paired_difference_std": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paired Difference Std"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "shap_iqr": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Iqr"
+        },
+        "shap_mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Mean"
+        },
+        "shap_median": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Median"
+        },
+        "shap_std": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Std"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "valid_pairs_count": {
+          "default": 0,
+          "title": "Valid Pairs Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "metric",
+        "metric_label",
+        "unit"
+      ],
+      "title": "C4ComparisonMetricSummary",
+      "type": "object"
+    },
+    "C4CoverageCard": {
+      "additionalProperties": false,
+      "properties": {
+        "comparable_pairs": {
+          "default": 0,
+          "title": "Comparable Pairs",
+          "type": "integer"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "distinct_inputs_in_scope": {
+          "default": 0,
+          "title": "Distinct Inputs In Scope",
+          "type": "integer"
+        },
+        "incompatible_evidence": {
+          "default": 0,
+          "title": "Incompatible Evidence",
+          "type": "integer"
+        },
+        "missing_evidence": {
+          "default": 0,
+          "title": "Missing Evidence",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "title": "C4CoverageCard",
+      "type": "object"
+    },
+    "C4PairedEvidenceItem": {
+      "additionalProperties": false,
+      "properties": {
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "explained_class": {
+          "title": "Explained Class",
+          "type": "string"
+        },
+        "input_reference": {
+          "title": "Input Reference",
+          "type": "string"
+        },
+        "language": {
+          "default": "Unknown",
+          "enum": [
+            "English",
+            "Sinhala",
+            "Romanized Sinhala",
+            "Code-mixed",
+            "Unknown"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "lime_created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Created At"
+        },
+        "lime_evaluation_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Evaluation Id"
+        },
+        "lime_explanation_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Explanation Id"
+        },
+        "lime_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lime Value"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "paired_difference": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paired Difference"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "settings_summary": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Settings Summary",
+          "type": "object"
+        },
+        "shap_created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Created At"
+        },
+        "shap_evaluation_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Evaluation Id"
+        },
+        "shap_explanation_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Explanation Id"
+        },
+        "shap_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shap Value"
+        },
+        "source_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Hash"
+        },
+        "status": {
+          "default": "COMPARABLE",
+          "enum": [
+            "COMPARABLE",
+            "INCOMPATIBLE",
+            "MISSING_LIME",
+            "MISSING_SHAP",
+            "MISSING_BOTH",
+            "EVALUATION_FAILED",
+            "PROVENANCE_UNAVAILABLE"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "input_reference",
+        "explained_class",
+        "metric"
+      ],
+      "title": "C4PairedEvidenceItem",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/C4ComparisonEvaluatedResponse.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "coverage": {
+      "$ref": "#/$defs/C4CoverageCard"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "language_groups": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/C4ComparisonLanguageGroup"
+      },
+      "title": "Language Groups",
+      "type": "array"
+    },
+    "limit": {
+      "default": 20,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "metric_summaries": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/C4ComparisonMetricSummary"
+      },
+      "title": "Metric Summaries",
+      "type": "array"
+    },
+    "non_diagnostic_notice": {
+      "default": "This page compares saved explanation-evaluation evidence. Consistency and deletion behaviour do not establish prediction correctness or clinical validity. The system supports counsellor-assisted screening review and does not replace professional counselling.",
+      "title": "Non Diagnostic Notice",
+      "type": "string"
+    },
+    "offset": {
+      "default": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "paired_items": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/C4PairedEvidenceItem"
+      },
+      "title": "Paired Items",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "selected_metric": {
+      "title": "Selected Metric",
+      "type": "string"
+    },
+    "selection_rules": {
+      "default": "Deterministic default: latest successfully completed compatible LIME and SHAP pair within selected configuration.",
+      "title": "Selection Rules",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "total_items": {
+      "default": 0,
+      "title": "Total Items",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "coverage",
+    "selected_metric"
+  ],
+  "title": "C4ComparisonEvaluatedResponse",
+  "type": "object"
+}

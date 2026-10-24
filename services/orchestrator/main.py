@@ -33,10 +33,14 @@ from research_contracts import (
     FIXTURES,
     AccountResponse,
     AssignmentRequest,
+    C4ComparisonCurrentRequest,
+    C4ComparisonCurrentResponse,
+    C4ComparisonEvaluatedResponse,
     C4CounterfactualListResponse,
     C4CounterfactualRequest,
     C4CounterfactualResponse,
     C4CounterfactualSummary,
+    C4CoverageCard,
     C4ExplanationListResponse,
     C4ExplanationRequest,
     C4ExplanationResponse,
@@ -51,6 +55,7 @@ from research_contracts import (
     C4InternalStabilityRequest,
     C4ManualEvaluationRequest,
     C4ManualEvaluationResponse,
+    C4PairedEvidenceItem,
     C4PredictionRequest,
     C4PredictionResponse,
     C4StabilityListResponse,
@@ -84,6 +89,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from orchestrator import auth
+from orchestrator.comparison import (
+    METRIC_DEFINITIONS,
+    build_comparison_csv,
+    build_current_comparison,
+    compute_language_groups,
+    compute_metric_summary,
+    compute_source_hash,
+    query_c4_paired_evidence,
+)
 from orchestrator.workflow import active_consent, check_case_consent, dispose, lock_case, transition
 
 app = create_app("orchestrator", database=True)
@@ -619,7 +633,10 @@ def create_c4_explanation(
     is_temporary_model = True  # Mark temporary-model records as development explanations
     created_time = now()
 
-    diagnostics_data: dict[str, int | float | str | bool] = {}
+    source_hash_val = compute_source_hash(body.text)
+    diagnostics_data: dict[str, int | float | str | bool] = {"source_hash": source_hash_val}
+    if body.language:
+        diagnostics_data["language"] = body.language
     if explanation_res.token_count is not None:
         diagnostics_data["token_count"] = explanation_res.token_count
     if explanation_res.truncated is not None:
@@ -635,6 +652,8 @@ def create_c4_explanation(
                 id=explanation_id,
                 account_id=account.id,
                 source_reference=body.source_reference,
+                source_hash=source_hash_val,
+                language=body.language,
                 idempotency_key=str(body.idempotency_key) if body.idempotency_key else None,
                 request_hash=fingerprint,
                 method=explanation_res.method,
@@ -1554,6 +1573,9 @@ def evaluate_c4_faithfulness(
         "seed": eval_res.seed,
     }
 
+    source_hash_val = exp_record.source_hash or compute_source_hash(body.text)
+    lang_val = body.language or exp_record.language
+
     try:
         with Session(engine()) as tx_db:
             record = FaithfulnessRecord(
@@ -1561,6 +1583,8 @@ def evaluate_c4_faithfulness(
                 explanation_id=str(body.explanation_id),
                 account_id=account.id,
                 source_reference=body.source_reference or exp_record.source_reference,
+                source_hash=source_hash_val,
+                language=lang_val,
                 idempotency_key=str(body.idempotency_key) if body.idempotency_key else None,
                 request_hash=eval_fingerprint,
                 method=eval_res.method,
@@ -1952,6 +1976,9 @@ def evaluate_c4_stability(
         "explainer_evals": body.explainer_evals,
     }
 
+    source_hash_val = exp_record.source_hash or compute_source_hash(body.text)
+    lang_val = body.language or exp_record.language
+
     try:
         with Session(engine()) as tx_db:
             record = StabilityRecord(
@@ -1959,6 +1986,8 @@ def evaluate_c4_stability(
                 explanation_id=str(body.explanation_id),
                 account_id=account.id,
                 source_reference=body.source_reference or exp_record.source_reference,
+                source_hash=source_hash_val,
+                language=lang_val,
                 idempotency_key=str(body.idempotency_key) if body.idempotency_key else None,
                 request_hash=eval_fingerprint,
                 method=eval_res.method,
@@ -2104,6 +2133,147 @@ def get_c4_stability_by_explanation(
     if not record:
         raise SafeError(ErrorCode.NOT_FOUND, 404)
     return stability_record_to_response(record)
+
+
+# ==============================================================================
+# Component 4 Evidence Comparison Endpoints
+# ==============================================================================
+
+@app.get("/api/v1/c4/comparison/evaluated", response_model=C4ComparisonEvaluatedResponse)
+def get_c4_comparison_evaluated(
+    metric: str = "DELETION_AOPC",
+    model_revision: str | None = None,
+    explained_class: str | None = None,
+    language: str | None = None,
+    common_k: int = 5,
+    limit: int = 20,
+    offset: int = 0,
+    account=Depends(auth.current_account),
+    db: Session = Depends(session),
+):
+    """Retrieve paired comparison summaries and evidence listing across evaluated inputs."""
+    if account.role not in {Role.COUNSELLOR, Role.ADMIN, Role.RESEARCHER}:
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    bounded_k = max(1, min(common_k, 50))
+    bounded_limit = max(1, min(limit, 100))
+    bounded_offset = max(0, offset)
+
+    # 1. Query and pair records across the full authorized dataset
+    paired_items, distinct_inputs_count = query_c4_paired_evidence(
+        db=db,
+        account=account,
+        metric=metric,
+        model_revision=model_revision,
+        explained_class=explained_class,
+        language=language,
+        common_k=bounded_k,
+    )
+
+    # 2. Compute summaries across all supported metrics
+    metric_summaries = [
+        compute_metric_summary(
+            items=query_c4_paired_evidence(
+                db=db,
+                account=account,
+                metric=m_key,
+                model_revision=model_revision,
+                explained_class=explained_class,
+                language=language,
+                common_k=bounded_k,
+            )[0],
+            metric=m_key,
+            common_k=bounded_k,
+        )
+        for m_key in METRIC_DEFINITIONS.keys()
+    ]
+
+    # 3. Compute language breakdown for the selected metric
+    lang_groups = compute_language_groups(paired_items, metric)
+
+    # 4. Coverage cards
+    comparable_count = sum(1 for it in paired_items if it["status"] == "COMPARABLE")
+    missing_count = sum(1 for it in paired_items if it["status"] in {"MISSING_LIME", "MISSING_SHAP", "MISSING_BOTH"})
+    incomp_count = sum(1 for it in paired_items if it["status"] in {"INCOMPATIBLE", "PROVENANCE_UNAVAILABLE"})
+
+    coverage = C4CoverageCard(
+        distinct_inputs_in_scope=len(paired_items),
+        comparable_pairs=comparable_count,
+        missing_evidence=missing_count,
+        incompatible_evidence=incomp_count,
+    )
+
+    # 5. Paginate items for the evidence inspection table
+    paged_items = [
+        C4PairedEvidenceItem.model_validate(it)
+        for it in paired_items[bounded_offset : bounded_offset + bounded_limit]
+    ]
+
+    return C4ComparisonEvaluatedResponse(
+        coverage=coverage,
+        selected_metric=metric,
+        metric_summaries=metric_summaries,
+        language_groups=lang_groups,
+        paired_items=paged_items,
+        total_items=len(paired_items),
+        limit=bounded_limit,
+        offset=bounded_offset,
+    )
+
+
+@app.post("/api/v1/c4/comparison/current", response_model=C4ComparisonCurrentResponse)
+def post_c4_comparison_current(
+    body: C4ComparisonCurrentRequest,
+    request: Request,
+    account=Depends(auth.current_account),
+    db: Session = Depends(session),
+):
+    """Retrieve paired evidence and alternative record selection for the current development input."""
+    auth.csrf(request)
+    if account.role not in {Role.COUNSELLOR, Role.ADMIN, Role.RESEARCHER}:
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    return build_current_comparison(db=db, account=account, body=body)
+
+
+@app.get("/api/v1/c4/comparison/export")
+def export_c4_comparison_csv(
+    metric: str = "DELETION_AOPC",
+    model_revision: str | None = None,
+    explained_class: str | None = None,
+    language: str | None = None,
+    common_k: int = 5,
+    account=Depends(auth.current_account),
+    db: Session = Depends(session),
+):
+    """Export the full filtered paired dataset as sanitized CSV with formula injection protection."""
+    if account.role not in {Role.COUNSELLOR, Role.ADMIN, Role.RESEARCHER}:
+        raise SafeError(ErrorCode.FORBIDDEN, 403)
+
+    bounded_k = max(1, min(common_k, 50))
+
+    paired_items, _ = query_c4_paired_evidence(
+        db=db,
+        account=account,
+        metric=metric,
+        model_revision=model_revision,
+        explained_class=explained_class,
+        language=language,
+        common_k=bounded_k,
+    )
+
+    metric_summaries = [compute_metric_summary(paired_items, metric, bounded_k)]
+    csv_text = build_comparison_csv(paired_items, metric_summaries)
+
+    return Response(
+        content=csv_text,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": 'attachment; filename="c4_comparison_metrics_export.csv"',
+            "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+    )
+
 
 
 

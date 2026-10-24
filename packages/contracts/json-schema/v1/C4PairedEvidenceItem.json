@@ -1,0 +1,244 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4PairedEvidenceItem.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "explained_class": {
+      "title": "Explained Class",
+      "type": "string"
+    },
+    "input_reference": {
+      "title": "Input Reference",
+      "type": "string"
+    },
+    "language": {
+      "default": "Unknown",
+      "enum": [
+        "English",
+        "Sinhala",
+        "Romanized Sinhala",
+        "Code-mixed",
+        "Unknown"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "lime_created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Created At"
+    },
+    "lime_evaluation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Evaluation Id"
+    },
+    "lime_explanation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Explanation Id"
+    },
+    "lime_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Value"
+    },
+    "metric": {
+      "title": "Metric",
+      "type": "string"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
+    "paired_difference": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Paired Difference"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "settings_summary": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "default": {},
+      "title": "Settings Summary",
+      "type": "object"
+    },
+    "shap_created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Created At"
+    },
+    "shap_evaluation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Evaluation Id"
+    },
+    "shap_explanation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Explanation Id"
+    },
+    "shap_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Value"
+    },
+    "source_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Hash"
+    },
+    "status": {
+      "default": "COMPARABLE",
+      "enum": [
+        "COMPARABLE",
+        "INCOMPATIBLE",
+        "MISSING_LIME",
+        "MISSING_SHAP",
+        "MISSING_BOTH",
+        "EVALUATION_FAILED",
+        "PROVENANCE_UNAVAILABLE"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "input_reference",
+    "explained_class",
+    "metric"
+  ],
+  "title": "C4PairedEvidenceItem",
+  "type": "object"
+}

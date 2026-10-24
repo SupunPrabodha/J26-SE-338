@@ -1,0 +1,213 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C4ComparisonMetricSummary.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "common_k": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Common K"
+    },
+    "definition_version": {
+      "default": "1.0.0",
+      "title": "Definition Version",
+      "type": "string"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "effective_k": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Effective K"
+    },
+    "excluded_count": {
+      "default": 0,
+      "title": "Excluded Count",
+      "type": "integer"
+    },
+    "incompatible_count": {
+      "default": 0,
+      "title": "Incompatible Count",
+      "type": "integer"
+    },
+    "lime_iqr": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Iqr"
+    },
+    "lime_mean": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Mean"
+    },
+    "lime_median": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Median"
+    },
+    "lime_std": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lime Std"
+    },
+    "metric": {
+      "title": "Metric",
+      "type": "string"
+    },
+    "metric_label": {
+      "title": "Metric Label",
+      "type": "string"
+    },
+    "missing_count": {
+      "default": 0,
+      "title": "Missing Count",
+      "type": "integer"
+    },
+    "paired_difference_mean": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Paired Difference Mean"
+    },
+    "paired_difference_std": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Paired Difference Std"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "shap_iqr": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Iqr"
+    },
+    "shap_mean": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Mean"
+    },
+    "shap_median": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Median"
+    },
+    "shap_std": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shap Std"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "unit": {
+      "title": "Unit",
+      "type": "string"
+    },
+    "valid_pairs_count": {
+      "default": 0,
+      "title": "Valid Pairs Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "metric",
+    "metric_label",
+    "unit"
+  ],
+  "title": "C4ComparisonMetricSummary",
+  "type": "object"
+}

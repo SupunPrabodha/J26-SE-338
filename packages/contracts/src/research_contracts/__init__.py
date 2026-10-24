@@ -840,6 +840,141 @@ class C4StabilityListResponse(Contract):
     offset: int
 
 
+class C4ComparisonMetricSummary(Contract):
+    metric: str
+    metric_label: str
+    definition_version: str = "1.0.0"
+    unit: str
+    lime_mean: float | None = None
+    lime_std: float | None = None
+    shap_mean: float | None = None
+    shap_std: float | None = None
+    paired_difference_mean: float | None = None
+    paired_difference_std: float | None = None
+    valid_pairs_count: int = 0
+    missing_count: int = 0
+    incompatible_count: int = 0
+    excluded_count: int = 0
+    lime_median: float | None = None
+    lime_iqr: float | None = None
+    shap_median: float | None = None
+    shap_iqr: float | None = None
+    effective_k: int | None = None
+    common_k: int | None = None
+
+
+class C4PairedEvidenceItem(Contract):
+    input_reference: str
+    source_hash: str | None = None
+    language: Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed", "Unknown"] = "Unknown"
+    model_revision: str | None = None
+    explained_class: str
+    metric: str
+    lime_value: float | None = None
+    shap_value: float | None = None
+    paired_difference: float | None = None
+    status: Literal[
+        "COMPARABLE",
+        "INCOMPATIBLE",
+        "MISSING_LIME",
+        "MISSING_SHAP",
+        "MISSING_BOTH",
+        "EVALUATION_FAILED",
+        "PROVENANCE_UNAVAILABLE",
+    ] = "COMPARABLE"
+    reason: str | None = None
+    lime_explanation_id: UUID | None = None
+    shap_explanation_id: UUID | None = None
+    lime_evaluation_id: UUID | None = None
+    shap_evaluation_id: UUID | None = None
+    lime_created_at: AwareDatetime | None = None
+    shap_created_at: AwareDatetime | None = None
+    settings_summary: dict[str, str | int | float | bool | None] = {}
+
+
+class C4ComparisonLanguageGroup(Contract):
+    language: Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed", "Unknown"]
+    valid_pairs_count: int = 0
+    lime_mean: float | None = None
+    lime_std: float | None = None
+    shap_mean: float | None = None
+    shap_std: float | None = None
+    paired_difference_mean: float | None = None
+    paired_difference_std: float | None = None
+
+
+class C4CoverageCard(Contract):
+    distinct_inputs_in_scope: int = 0
+    comparable_pairs: int = 0
+    missing_evidence: int = 0
+    incompatible_evidence: int = 0
+
+
+class C4ComparisonEvaluatedResponse(Contract):
+    coverage: C4CoverageCard
+    selected_metric: str
+    metric_summaries: list[C4ComparisonMetricSummary] = []
+    language_groups: list[C4ComparisonLanguageGroup] = []
+    paired_items: list[C4PairedEvidenceItem] = []
+    total_items: int = 0
+    limit: int = 20
+    offset: int = 0
+    selection_rules: str = "Deterministic default: latest successfully completed compatible LIME and SHAP pair within selected configuration."
+    non_diagnostic_notice: str = (
+        "This page compares saved explanation-evaluation evidence. Consistency and deletion behaviour "
+        "do not establish prediction correctness or clinical validity. The system supports counsellor-assisted "
+        "screening review and does not replace professional counselling."
+    )
+
+
+class C4ComparisonCandidateRecord(Contract):
+    record_id: UUID
+    explanation_id: UUID
+    method: Literal["LIME", "SHAP"]
+    record_type: Literal["FAITHFULNESS", "STABILITY", "EXPLANATION"]
+    created_at: AwareDatetime
+    is_compatible: bool = True
+    incompatibility_reason: str | None = None
+    settings: dict[str, str | int | float | bool | None] = {}
+
+
+class C4ComparisonCurrentRequest(Contract):
+    text: Annotated[str, Field(max_length=2000)] | None = None
+    source_reference: Annotated[str, Field(max_length=100)] | None = None
+    language: (
+        Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed"] | None
+    ) = None
+    target_class: str | None = None
+    common_k: int = 5
+    selected_lime_exp_id: UUID | None = None
+    selected_shap_exp_id: UUID | None = None
+    selected_lime_eval_id: UUID | None = None
+    selected_shap_eval_id: UUID | None = None
+
+
+class C4ComparisonCurrentResponse(Contract):
+    input_reference: str
+    source_hash: str | None = None
+    authorized_source_text: str | None = None
+    text_available: bool = False
+    language: Literal["English", "Sinhala", "Romanized Sinhala", "Code-mixed", "Unknown"] = "Unknown"
+    model_revision: str | None = None
+    explained_class: str
+    selected_lime_explanation_id: UUID | None = None
+    selected_shap_explanation_id: UUID | None = None
+    metrics: list[C4ComparisonMetricSummary] = []
+    evidence_items: list[C4PairedEvidenceItem] = []
+    available_lime_records: list[C4ComparisonCandidateRecord] = []
+    available_shap_records: list[C4ComparisonCandidateRecord] = []
+    selection_rules: str = "Deterministic default: latest successfully completed compatible LIME and SHAP pair for current input."
+    non_diagnostic_notice: str = (
+        "This page compares saved explanation-evaluation evidence. Consistency and deletion behaviour "
+        "do not establish prediction correctness or clinical validity. The system supports counsellor-assisted "
+        "screening review and does not replace professional counselling."
+    )
+
+
+
 
 
 
