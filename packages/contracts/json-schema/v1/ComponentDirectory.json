@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "ComponentRoute": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "enum": [
+            "C2",
+            "C3",
+            "C4"
+          ],
+          "title": "Component",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "function": {
+          "enum": [
+            "PREPROCESSING",
+            "INFERENCE",
+            "EXPLANATION"
+          ],
+          "title": "Function",
+          "type": "string"
+        },
+        "provider": {
+          "const": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+          "title": "Provider",
+          "type": "string"
+        },
+        "route_status": {
+          "const": "INTERNAL_SERVICE_ONLY",
+          "default": "INTERNAL_SERVICE_ONLY",
+          "title": "Route Status",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "web_path": {
+          "default": null,
+          "title": "Web Path",
+          "type": "null"
+        }
+      },
+      "required": [
+        "component",
+        "function",
+        "provider"
+      ],
+      "title": "ComponentRoute",
+      "type": "object"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/ComponentDirectory.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/ComponentRoute"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Items",
+      "type": "array"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "items",
+    "observed_at"
+  ],
+  "title": "ComponentDirectory",
+  "type": "object"
+}

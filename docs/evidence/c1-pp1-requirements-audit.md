@@ -1,5 +1,14 @@
 # C1 requirements and evidence audit for PP1
 
+2026-10-24: [current full FR/NFR implementation trace](c1-workspace-audit.md) and
+[current verification](c1-workspace-verification.md) supersede the old missing admin/saved-review
+visibility findings. Historical counts and research-evaluation limitations below retain their dates.
+
+FR09 was updated on 2026-10-23 with synthetic interpretation/follow-up recording.
+See [current implementation, tests and limitations](c1-fr09-review-record.md). Historical
+status-only descriptions and evaluation totals below remain dated evidence; the updated
+FR09 row supersedes that specific missing-feature finding without claiming clinical validation.
+
 Audit date: 2026-10-08 (Asia/Colombo). Inspected baseline: `c5a433b`, clean on
 `feature/c1-consent-orchestration`. Contrary to the task's historical state, the earlier
 five-stage increment is already committed. This audit does not modify that history.
@@ -73,7 +82,7 @@ Evidence identifiers below reference actual assertions (paths relative to reposi
 | FR-06 P27 | Bounded retries/timeouts/idempotency, unambiguous failure | `claim_job/process_job/call_service`, `main.submit` | E2 conflict/recovery; E3/E5 failures; E9 PG fencing | One PG worker design and fixed services | partial | Soak/real process crash, backoff/jitter, safe operator replay | Before PP1: demonstrate scoped reliability; later: resilience |
 | FR-07 P27 | Review tasks only for authorized consent/contract-valid evidence | `process_job.finish`, `main.authorized_review` | E3 no Review on failure, assigned access only; E9 single task | Mock evidence; server permission controls | verified | Real service validation remains external | Before PP1: never equate processing with human completion |
 | FR-08 P27 | Enforce role and per-case authorization | `auth.require_role/current_account`, `own_case/authorized_review` | E3 foreign/unassigned/admin/researcher denials; E4 | Local development identity | verified | Institutional identity, deployment security separately partial | Before PP1: preserve server checks and denial handling |
-| FR-09 P27 | Record human review status, interpretation and follow-up without clinical autonomy | `main.review_action`, `database.ReviewAction`, counsellor shell | E3 START/COMPLETE and repeats; no interpretation/follow-up fields | Two status actions only | partial | Policy-approved interpretation/follow-up workflow; C4 coordination | Before PP1: describe status-only actions; later: full workflow |
+| FR-09 P27 (updated 2026-10-23) | Record human review status, interpretation and follow-up without clinical autonomy | `main.review_action`, `save_review_record`, `get_review_record`, `database.ReviewRecord`, counsellor shell | `test_review_records.py`, `review-record.test.tsx`, PostgreSQL and browser evidence linked below | START/COMPLETE plus immutable synthetic interpretation and follow-up category; student receives only a save receipt | implemented for synthetic C1 scope; operational validation pending | Approved policy, human task study and C4 dashboard coordination; no edits/outreach scheduling in this increment | Assigned save/read, role denials, state/replay rules, consent expiry and disposal, audit/log/demo text exclusion; see `c1-fr09-review-record.md` |
 | FR-10 P27 | Withdrawal propagates to jobs, access, results and retention | `main.withdraw_consent/withdraw`, `workflow.dispose/enforce_retention` | E1/E3 receipt/repeat/retention tests; E9 races; E10 | C1 evidence/assignment deletion only; receipt metadata remains | partial | Remote deletion, identity/audit retention policy, owner recovery | Before PP1: exact disposal/receipt display; later: institutional policy |
 | FR-11 P27 | Lifecycle/policy append-only audit without text | common `audit.record`, `database.session`; audit migration | E5 update/delete rejected; E8 catalogue29/27 and scan | DB-admin trust; no cryptographic tamper proof | partial | All denial variants/event ordering/delivery/audit access policy | Before PP1: denominator transparency; later: comprehensive audit |
 | FR-12 P27 (Should) | Authorized ops evidence for versions/failures/retention/access | health/version, allowlisted container query documented | E10 health/probe; no admin evidence API test | Local operator CLI, not admin UI | partial | Governed ops access, incident and replay procedure | Later; no broad dashboard needed for synthetic demo |

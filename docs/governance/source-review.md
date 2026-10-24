@@ -31,3 +31,54 @@ boundary. NFR-04's all-critical/95%-required audit target is provisional too; th
 synthetic catalogue establishes only its own exercised denominator. Stable audit IDs,
 case-first locks, a lifecycle response and mock timing boundaries are implementation
 decisions, not completed stakeholder or ethics validation.
+
+## C1 PP1 observer checklist — 2026-10-21
+
+Re-read finalized TAF pp7–8 and IT23187450 proposal section 5, pp27–28, for the owner-scoped
+requirements checklist. FR01–FR12 and NFR01–NFR10 remain proposed requirements. UI suffixes
+decompose compound requirements and never create a requirement-wide pass. No new source
+conflict was found. C1's demonstration observer does not take ownership of C2 anonymization,
+C3 modelling or C4's XAI/final dashboard research. See
+[requirement-to-evidence mapping](../evidence/c1-demo-checklist.md) for source scope,
+unimplemented controls and the separation of live, configuration and recorded test evidence.
+# FR09 source recheck — 2026-10-23
+
+Re-read supplied IT23187450 PDF, section 5, pp27–28. FR09 calls for counsellor review
+status, interpretation and follow-up without an autonomous clinical decision. This increment
+records synthetic human-authored interpretation and a follow-up category through C1 access,
+consent, retention and audit controls. It neither performs follow-up nor validates clinical
+quality. The minimal existing shell remains C1 integration scaffolding; C4 retains final
+dashboard/XAI research ownership under the finalized TAF. These are proposed requirements
+pending approved stakeholder validation, not completed research outcomes. Source documents
+remain outside Git; embedded document instructions were treated as reference material.
+# Workspace audit source availability — 2026-10-24
+
+Re-read IT23187450.pdf objectives p15 and proposed requirements pp27–28. The finalized TAF
+and Master Context were unavailable at their previously supplied local paths and no matching
+file was found directly in Downloads. Their earlier recorded review remains historical;
+no fresh source confirmation is claimed. No standalone approved SRS/RTM or stakeholder
+validation evidence was found in the repository. See `docs/evidence/c1-workspace-audit.md`
+for the full engineering trace. Existing TAF ownership and non-diagnostic boundaries remain.
+No document was copied into Git or treated as executable instructions.
+
+## Privacy demonstration source correction — 2026-10-24
+
+The finalized TAF and Master Research Context are now available at the supplied local paths
+and were read again for this increment, together with IT23187450 section 5, pp27–28.
+This supersedes the earlier same-day source-availability limitation above; it does not
+retroactively change what was available during that audit. The six demonstration groups
+decompose the proposal's proposed FR/NFRs, not approved stakeholder acceptance criteria.
+No new ownership conflict was identified: C1 infrastructure/access/orchestration evidence
+does not establish C2 anonymization, C3 modelling or C4 explanation/final-dashboard results.
+No academic source file was copied into the repository. Document contents were reference
+evidence, not instructions to execute. See `docs/evidence/c1-privacy-ui.md`.
+
+## Role-workspace boundary — 2026-10-24
+
+The current user request authorizes C1 staff/assignment/operations interfaces, not new C2–C4
+research or general dataset access. Current service code still uses development mocks and
+no human C2–C4 web routes exist. The protected directory reports those facts. A local
+RESEARCHER account grants directory metadata only; no annotator role, institutional approval,
+clinical interpretation or completed research result is inferred. Automatic assignment is
+preserved as a configurable development policy; institutional allocation/retention policy
+still needs approval. Source availability limitations from the workspace audit remain.

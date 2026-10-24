@@ -1,0 +1,382 @@
+{
+  "$defs": {
+    "AdminAuditItem": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Id"
+        },
+        "correlation_id": {
+          "format": "uuid",
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "$ref": "#/$defs/AdminEventType"
+        },
+        "occurred_at": {
+          "format": "date-time",
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "outcome": {
+          "title": "Outcome",
+          "type": "string"
+        },
+        "policy_expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Policy Expires At"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "service_version": {
+          "const": "0.1.0",
+          "default": "0.1.0",
+          "title": "Service Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "outcome",
+        "occurred_at",
+        "correlation_id"
+      ],
+      "title": "AdminAuditItem",
+      "type": "object"
+    },
+    "AdminCaseOperations": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "format": "uuid",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "processing_status": {
+          "$ref": "#/$defs/WorkflowState"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "retention_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "RETENTION",
+                "OWNER_WITHDRAWAL",
+                "LEGACY_DISPOSAL"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retention Reason"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "processing_status"
+      ],
+      "title": "AdminCaseOperations",
+      "type": "object"
+    },
+    "AdminEventType": {
+      "enum": [
+        "AUTH_LOGIN",
+        "AUTH_FAILURE",
+        "AUTH_LOGOUT",
+        "AUTH_REFRESH",
+        "SESSION_REVOKED",
+        "CONSENT_RECORDED",
+        "CONSENT_EXPIRED",
+        "OPERATION_BLOCKED",
+        "SUBMISSION",
+        "SUBMISSION_REPLAY",
+        "WORKFLOW_TRANSITION",
+        "JOB_RETRY",
+        "JOB_TERMINAL",
+        "JOB_CLAIM",
+        "HUMAN_REVIEW",
+        "WITHDRAWAL",
+        "RETENTION",
+        "ASSIGNMENT",
+        "ADMIN_EVIDENCE_ACCESS",
+        "STAFF_ADMINISTRATION"
+      ],
+      "title": "AdminEventType",
+      "type": "string"
+    },
+    "ErrorCode": {
+      "enum": [
+        "AUTH_REQUIRED",
+        "AUTH_INVALID",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONSENT_REQUIRED",
+        "CONSENT_INVALID",
+        "CONTRACT_INVALID",
+        "CONFLICT",
+        "RATE_LIMITED",
+        "DEPENDENCY_UNAVAILABLE",
+        "DOWNSTREAM_FAILED",
+        "DOWNSTREAM_TIMEOUT",
+        "RETRY_EXHAUSTED",
+        "INTERNAL_ERROR"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "ServiceProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "correlation_id": {
+          "format": "uuid",
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "development_only": {
+          "const": true,
+          "default": true,
+          "title": "Development Only",
+          "type": "boolean"
+        },
+        "explainer_version": {
+          "const": "mock-1",
+          "title": "Explainer Version",
+          "type": "string"
+        },
+        "model_dataset_version": {
+          "const": "synthetic-fixtures-1",
+          "title": "Model Dataset Version",
+          "type": "string"
+        },
+        "model_version": {
+          "const": "mock-1",
+          "title": "Model Version",
+          "type": "string"
+        },
+        "nlp_service_version": {
+          "const": "0.1.0",
+          "title": "Nlp Service Version",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "const": "mock-1",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "preprocessing_dataset_version": {
+          "const": "synthetic-fixtures-1",
+          "title": "Preprocessing Dataset Version",
+          "type": "string"
+        },
+        "preprocessing_service_version": {
+          "const": "0.1.0",
+          "title": "Preprocessing Service Version",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "xai_service_version": {
+          "const": "0.1.0",
+          "title": "Xai Service Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "correlation_id",
+        "preprocessing_service_version",
+        "pipeline_version",
+        "preprocessing_dataset_version",
+        "nlp_service_version",
+        "model_version",
+        "model_dataset_version",
+        "xai_service_version",
+        "explainer_version"
+      ],
+      "title": "ServiceProvenance",
+      "type": "object"
+    },
+    "WorkflowState": {
+      "enum": [
+        "RECEIVED",
+        "CONSENT_VERIFIED",
+        "PREPROCESSING",
+        "INFERENCE",
+        "EXPLANATION",
+        "READY_FOR_REVIEW",
+        "UNDER_REVIEW",
+        "COMPLETED",
+        "FAILED",
+        "WITHDRAWAL_REQUESTED",
+        "WITHDRAWN"
+      ],
+      "title": "WorkflowState",
+      "type": "string"
+    }
+  },
+  "$id": "https://j26.invalid/contracts/1.0.0/AdminAuditPage.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "case_operations": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AdminCaseOperations"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/AdminAuditItem"
+      },
+      "maxItems": 50,
+      "title": "Items",
+      "type": "array"
+    },
+    "next_cursor": {
+      "anyOf": [
+        {
+          "maxLength": 160,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Cursor"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "provider": {
+      "const": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+      "default": "MOCK_SYNTHETIC_DEVELOPMENT_ONLY",
+      "title": "Provider",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "items",
+    "observed_at"
+  ],
+  "title": "AdminAuditPage",
+  "type": "object"
+}

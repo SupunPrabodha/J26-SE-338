@@ -2,7 +2,7 @@ import hashlib
 from datetime import timedelta
 from uuid import UUID
 
-from fastapi import Depends, Request, Response
+from fastapi import Depends, Query, Request, Response
 from research_common.config import settings
 from research_common.database import (
     Account,
@@ -15,22 +15,28 @@ from research_common.database import (
     Retention,
     Review,
     ReviewAction,
+    ReviewRecord,
     Withdrawal,
     session,
 )
 from research_common.web import SafeError, create_app
 from research_contracts import (
     FIXTURES,
+    PURPOSE,
     AccountResponse,
     AssignmentRequest,
     ConsentDecision,
     ConsentLifecycle,
     ConsentRecord,
+    CounsellorReviewRecord,
     ErrorCode,
     FixturesResponse,
     HumanReviewAction,
     LoginRequest,
     PseudonymousCase,
+    ReviewQueueItem,
+    ReviewQueuePage,
+    ReviewRecordRequest,
     ReviewTask,
     Role,
     SubmissionSession,
@@ -43,9 +49,18 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from orchestrator import auth
+from orchestrator.administration import grant_legacy_assignment
+from orchestrator.administration import router as administration_router
+from orchestrator.analytics import router as analytics_router
+from orchestrator.demo import router as demo_router
+from orchestrator.operations import router as operations_router
 from orchestrator.workflow import active_consent, check_case_consent, dispose, lock_case, transition
 
 app = create_app("orchestrator", database=True)
+app.include_router(demo_router)
+app.include_router(operations_router)
+app.include_router(administration_router)
+app.include_router(analytics_router)
 student = auth.require_role(Role.STUDENT)
 counsellor = auth.require_role(Role.COUNSELLOR)
 admin = auth.require_role(Role.ADMIN)
@@ -96,6 +111,7 @@ def authorized_review(db, task_id, account):
     ):
         raise SafeError(ErrorCode.NOT_FOUND, 404)
     check_case_consent(db, case, "REVIEW")
+    auth.lock_valid_account(db, account, None, "COUNSELLOR")
     if case.status not in {"READY_FOR_REVIEW", "UNDER_REVIEW", "COMPLETED"}:
         raise SafeError(ErrorCode.NOT_FOUND, 404)
     return task, case
@@ -384,6 +400,66 @@ def review_tasks(account=Depends(counsellor), db: Session = Depends(session)):
     return result
 
 
+@app.get("/api/v1/review-queue", response_model=ReviewQueuePage)
+def review_queue(
+    state: str | None = Query(None, pattern="^(READY_FOR_REVIEW|UNDER_REVIEW|COMPLETED)$"),
+    offset: int = Query(0, ge=0, le=10000),
+    limit: int = Query(20, ge=1, le=20),
+    account=Depends(counsellor),
+    db: Session = Depends(session),
+):
+    # Only current authorized tasks enter the page, even when older rows are disposed.
+    query = (
+        select(Review)
+        .join(Case, Case.id == Review.case_id)
+        .join(Assignment, Assignment.case_id == Case.id)
+        .join(CaseLink, CaseLink.case_id == Case.id)
+        .join(Consent, Consent.id == CaseLink.consent_id)
+        .where(
+            Assignment.counsellor_id == account.id,
+            Case.status.in_(["READY_FOR_REVIEW", "UNDER_REVIEW", "COMPLETED"]),
+            Case.expires_at > now(),
+            Consent.status == "ACTIVE",
+            Consent.expires_at > now(),
+            Consent.purpose == PURPOSE,
+            Consent.version == "dev-notice-1",
+        )
+    )
+    if state:
+        query = query.where(Case.status == state)
+    tasks = db.scalars(
+        query.order_by(Review.created_at.desc(), Review.id).offset(offset).limit(limit + 1)
+    ).all()
+    items = []
+    for task in tasks[:limit]:
+        try:
+            _, case = authorized_review(db, task.id, account)
+        except SafeError:
+            continue
+        actions = dict(
+            db.execute(
+                select(ReviewAction.action, ReviewAction.created_at).where(
+                    ReviewAction.task_id == task.id
+                )
+            ).all()
+        )
+        saved = db.scalar(select(ReviewRecord.created_at).where(ReviewRecord.task_id == task.id))
+        items.append(
+            ReviewQueueItem(
+                task_id=task.id,
+                case=case_response(case),
+                review_started_at=actions.get("START_REVIEW"),
+                review_completed_at=actions.get("COMPLETE_REVIEW"),
+                review_record_saved_at=saved,
+            )
+        )
+    return ReviewQueuePage(
+        items=items,
+        next_offset=offset + limit if len(tasks) > limit and offset + limit <= 10000 else None,
+        observed_at=now(),
+    )
+
+
 @app.get("/api/v1/review-tasks/{task_id}", response_model=ReviewTask)
 def review_task(task_id: UUID, account=Depends(counsellor), db: Session = Depends(session)):
     return review_response(*authorized_review(db, task_id, account))
@@ -419,6 +495,56 @@ def review_action(
     return review_response(task, case)
 
 
+def recorded_review_response(record):
+    return CounsellorReviewRecord(
+        task_id=record.task_id,
+        interpretation=record.interpretation,
+        follow_up=record.follow_up,
+        saved_at=record.created_at,
+    )
+
+
+@app.get("/api/v1/review-tasks/{task_id}/record", response_model=CounsellorReviewRecord | None)
+def get_review_record(task_id: UUID, account=Depends(counsellor), db: Session = Depends(session)):
+    task, _ = authorized_review(db, task_id, account)
+    record = db.scalar(select(ReviewRecord).where(ReviewRecord.task_id == task.id))
+    return recorded_review_response(record) if record else None
+
+
+@app.post("/api/v1/review-tasks/{task_id}/record", response_model=CounsellorReviewRecord)
+def save_review_record(
+    task_id: UUID,
+    body: ReviewRecordRequest,
+    request: Request,
+    account=Depends(counsellor),
+    db: Session = Depends(session),
+):
+    # Reuse case -> consent locking, including on replay, to serialize with disposal.
+    task, case = authorized_review(db, task_id, account)
+    prior = db.scalar(select(ReviewRecord).where(ReviewRecord.task_id == task.id))
+    if prior:
+        if (
+            prior.actor_id != account.id
+            or prior.interpretation != body.interpretation
+            or prior.follow_up != body.follow_up
+        ):
+            raise SafeError(ErrorCode.CONFLICT, 409)
+        return recorded_review_response(prior)
+    if case.status != "UNDER_REVIEW":
+        raise SafeError(ErrorCode.CONFLICT, 409)
+    record = ReviewRecord(
+        task_id=task.id,
+        actor_id=account.id,
+        interpretation=body.interpretation,
+        follow_up=body.follow_up,
+        idempotency_key=str(body.idempotency_key),
+    )
+    db.add(record)
+    auth.audit(db, request, "HUMAN_REVIEW", "RECORD_SAVED", case.id)
+    db.commit()
+    return recorded_review_response(record)
+
+
 @app.post("/api/v1/cases/{case_id}/assign", status_code=204)
 def assign(
     case_id: UUID,
@@ -427,17 +553,4 @@ def assign(
     account=Depends(admin),
     db: Session = Depends(session),
 ):
-    case = lock_case(db, str(case_id))
-    check_case_consent(db, case)
-    reviewer = db.get(Account, str(body.counsellor_id))
-    if not auth.account_valid(reviewer) or reviewer.role != "COUNSELLOR":
-        raise SafeError(ErrorCode.FORBIDDEN, 403)
-    existing = db.scalar(
-        select(Assignment).where(
-            Assignment.case_id == case.id, Assignment.counsellor_id == reviewer.id
-        )
-    )
-    if not existing:
-        db.add(Assignment(case_id=case.id, counsellor_id=reviewer.id))
-        auth.audit(db, request, "ASSIGNMENT", "GRANTED", case.id)
-        db.commit()
+    grant_legacy_assignment(db, str(case_id), str(body.counsellor_id), request, account)

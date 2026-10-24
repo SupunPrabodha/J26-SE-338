@@ -1,0 +1,402 @@
+{
+  "variant": "DAPT-Packed",
+  "strategy": "packed",
+  "base_model": "xlm-roberta-base",
+  "output_dir": "models/xlm-roberta-dapt-packed",
+  "hyperparameters": {
+    "max_seq_length": 256,
+    "per_device_train_batch_size": 8,
+    "gradient_accumulation_steps": 8,
+    "effective_batch_size": 64,
+    "learning_rate": 2.5e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "num_train_epochs": 3.0,
+    "fp16": true,
+    "seed": 42
+  },
+  "results": {
+    "final_eval_loss": 2.9388,
+    "final_perplexity": 18.89,
+    "baseline_perplexity": 146.36,
+    "delta_perplexity": 127.47,
+    "percent_perplexity_reduction": 87.09,
+    "top1_accuracy": 49.11,
+    "top5_accuracy": 66.46,
+    "global_steps": 1119,
+    "total_epochs": 3.0,
+    "total_runtime_seconds": 3846.07,
+    "runtime_formatted": "1:04:06"
+  },
+  "qualitative_probe_predictions": [
+    {
+      "probe_sentence": "mata stress eka wadi wela night <mask> ganna ba, full depressed inne.",
+      "top5_candidates": [
+        {
+          "token": "shift",
+          "probability": 0.1131
+        },
+        {
+          "token": "s",
+          "probability": 0.0938
+        },
+        {
+          "token": "time",
+          "probability": 0.0472
+        },
+        {
+          "token": "life",
+          "probability": 0.0391
+        },
+        {
+          "token": "out",
+          "probability": 0.0324
+        }
+      ]
+    },
+    {
+      "probe_sentence": "oya mata help karanna <mask> puluwanda mee assignment eka karanna.",
+      "top5_candidates": [
+        {
+          "token": ".",
+          "probability": 0.1773
+        },
+        {
+          "token": "th",
+          "probability": 0.0979
+        },
+        {
+          "token": ",",
+          "probability": 0.0613
+        },
+        {
+          "token": "bari",
+          "probability": 0.0541
+        },
+        {
+          "token": "ona",
+          "probability": 0.0541
+        }
+      ]
+    },
+    {
+      "probe_sentence": "campus eke exam eka thiyena nisa mata <mask> wadi wela thiyenne.",
+      "top5_candidates": [
+        {
+          "token": "th",
+          "probability": 0.4563
+        },
+        {
+          "token": "ta",
+          "probability": 0.119
+        },
+        {
+          "token": "nam",
+          "probability": 0.0927
+        },
+        {
+          "token": "ma",
+          "probability": 0.0134
+        },
+        {
+          "token": "ka",
+          "probability": 0.0125
+        }
+      ]
+    },
+    {
+      "probe_sentence": "mage yaaluwa mata godak <mask> kara mama dukin inna welawata.",
+      "top5_candidates": [
+        {
+          "token": "wada",
+          "probability": 0.0374
+        },
+        {
+          "token": "set",
+          "probability": 0.0249
+        },
+        {
+          "token": "job",
+          "probability": 0.0242
+        },
+        {
+          "token": "call",
+          "probability": 0.0188
+        },
+        {
+          "token": "try",
+          "probability": 0.0161
+        }
+      ]
+    },
+    {
+      "probe_sentence": "hithata hari na wage, kawuruth na mata <mask> karanna.",
+      "top5_candidates": [
+        {
+          "token": "th",
+          "probability": 0.0518
+        },
+        {
+          "token": "wada",
+          "probability": 0.0269
+        },
+        {
+          "token": "hari",
+          "probability": 0.0237
+        },
+        {
+          "token": "call",
+          "probability": 0.0163
+        },
+        {
+          "token": "use",
+          "probability": 0.0148
+        }
+      ]
+    },
+    {
+      "probe_sentence": "doctor gen <mask> ekak ganna one mata thiyena depression ekata.",
+      "top5_candidates": [
+        {
+          "token": "advice",
+          "probability": 0.1885
+        },
+        {
+          "token": "na",
+          "probability": 0.0383
+        },
+        {
+          "token": "appointment",
+          "probability": 0.0255
+        },
+        {
+          "token": "help",
+          "probability": 0.024
+        },
+        {
+          "token": "opinion",
+          "probability": 0.0175
+        }
+      ]
+    },
+    {
+      "probe_sentence": "ada lecture eka cut karala gedara hitiya, kisi <mask> na.",
+      "top5_candidates": [
+        {
+          "token": "nam",
+          "probability": 0.0308
+        },
+        {
+          "token": "liya",
+          "probability": 0.0248
+        },
+        {
+          "token": "kale",
+          "probability": 0.0193
+        },
+        {
+          "token": "mata",
+          "probability": 0.0193
+        },
+        {
+          "token": "ne",
+          "probability": 0.0146
+        }
+      ]
+    },
+    {
+      "probe_sentence": "api okkoma ekathu wela me prashneta <mask> ekak hoyamu.",
+      "top5_candidates": [
+        {
+          "token": "thread",
+          "probability": 0.035
+        },
+        {
+          "token": "set",
+          "probability": 0.0281
+        },
+        {
+          "token": "video",
+          "probability": 0.0264
+        },
+        {
+          "token": "job",
+          "probability": 0.0199
+        },
+        {
+          "token": "post",
+          "probability": 0.0121
+        }
+      ]
+    },
+    {
+      "probe_sentence": "මට හරිම <mask>, කිසිම දෙයක් කරගන්න හිතෙන්නෙ නෑ.",
+      "top5_candidates": [
+        {
+          "token": "අමාරු",
+          "probability": 0.2503
+        },
+        {
+          "token": "දුක",
+          "probability": 0.0838
+        },
+        {
+          "token": "බය",
+          "probability": 0.0409
+        },
+        {
+          "token": "එපා",
+          "probability": 0.0328
+        },
+        {
+          "token": "මහන්සි",
+          "probability": 0.0318
+        }
+      ]
+    },
+    {
+      "probe_sentence": "campus eke friends la ekka katha karama <mask> adu wenawa.",
+      "top5_candidates": [
+        {
+          "token": "wada",
+          "probability": 0.0664
+        },
+        {
+          "token": "tika",
+          "probability": 0.039
+        },
+        {
+          "token": "gana",
+          "probability": 0.0286
+        },
+        {
+          "token": "hari",
+          "probability": 0.0237
+        },
+        {
+          "token": "nam",
+          "probability": 0.023
+        }
+      ]
+    }
+  ],
+  "training_loss_history": [
+    {
+      "loss": 34.9848681640625,
+      "grad_norm": 48.28656768798828,
+      "learning_rate": 2.2297297297297298e-05,
+      "epoch": 0.2684563758389262,
+      "step": 100
+    },
+    {
+      "loss": 30.2922509765625,
+      "grad_norm": 40.474117279052734,
+      "learning_rate": 2.453280308687515e-05,
+      "epoch": 0.5369127516778524,
+      "step": 200
+    },
+    {
+      "loss": 27.89733642578125,
+      "grad_norm": 42.5272102355957,
+      "learning_rate": 2.2914963680155614e-05,
+      "epoch": 0.8053691275167785,
+      "step": 300
+    },
+    {
+      "loss": 26.66761474609375,
+      "grad_norm": 40.707305908203125,
+      "learning_rate": 2.029362252323417e-05,
+      "epoch": 1.07248322147651,
+      "step": 400
+    },
+    {
+      "loss": 26.15138427734375,
+      "grad_norm": 41.076812744140625,
+      "learning_rate": 1.6921350870282267e-05,
+      "epoch": 1.3409395973154363,
+      "step": 500
+    },
+    {
+      "eval_loss": 3.08549165725708,
+      "eval_top1_accuracy": 47.66,
+      "eval_top5_accuracy": 64.73,
+      "eval_runtime": 38.1502,
+      "eval_samples_per_second": 35.019,
+      "eval_steps_per_second": 4.377,
+      "epoch": 1.3409395973154363,
+      "step": 500
+    },
+    {
+      "loss": 25.5265966796875,
+      "grad_norm": 41.489501953125,
+      "learning_rate": 1.3123073570758716e-05,
+      "epoch": 1.6093959731543626,
+      "step": 600
+    },
+    {
+      "loss": 25.34235595703125,
+      "grad_norm": 43.25637435913086,
+      "learning_rate": 9.26476193621849e-06,
+      "epoch": 1.8778523489932886,
+      "step": 700
+    },
+    {
+      "loss": 24.72100341796875,
+      "grad_norm": 39.26796340942383,
+      "learning_rate": 5.718171701678009e-06,
+      "epoch": 2.14496644295302,
+      "step": 800
+    },
+    {
+      "loss": 25.0161962890625,
+      "grad_norm": 40.54493713378906,
+      "learning_rate": 2.8250236466721576e-06,
+      "epoch": 2.4134228187919464,
+      "step": 900
+    },
+    {
+      "loss": 24.6419140625,
+      "grad_norm": 41.38813781738281,
+      "learning_rate": 8.640781419474483e-07,
+      "epoch": 2.6818791946308727,
+      "step": 1000
+    },
+    {
+      "eval_loss": 2.9631710052490234,
+      "eval_top1_accuracy": 48.89,
+      "eval_top5_accuracy": 66.12,
+      "eval_runtime": 37.7918,
+      "eval_samples_per_second": 35.352,
+      "eval_steps_per_second": 4.419,
+      "epoch": 2.6818791946308727,
+      "step": 1000
+    },
+    {
+      "loss": 24.68961669921875,
+      "grad_norm": 41.41519546508789,
+      "learning_rate": 2.4276052443351906e-08,
+      "epoch": 2.9503355704697984,
+      "step": 1100
+    },
+    {
+      "eval_loss": 2.9382729530334473,
+      "eval_top1_accuracy": 49.34,
+      "eval_top5_accuracy": 66.47,
+      "eval_runtime": 38.0869,
+      "eval_samples_per_second": 35.078,
+      "eval_steps_per_second": 4.385,
+      "epoch": 3.0,
+      "step": 1119
+    },
+    {
+      "eval_loss": 2.938812017440796,
+      "eval_top1_accuracy": 49.11,
+      "eval_top5_accuracy": 66.46,
+      "eval_runtime": 40.5335,
+      "eval_samples_per_second": 32.96,
+      "eval_steps_per_second": 4.12,
+      "epoch": 3.0,
+      "step": 1119
+    }
+  ]
+}

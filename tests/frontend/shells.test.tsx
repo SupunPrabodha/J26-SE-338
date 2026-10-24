@@ -9,7 +9,8 @@ afterEach(() => vi.unstubAllGlobals());
 
 test("visible non-diagnostic and synthetic-only notice", () => {
   render(<SafetyNotice />);
-  expect(screen.getByText(/Screening support, with people in control/)).toBeVisible();
+  expect(screen.getByText(/Screening support only/)).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "About this prototype" }));
   expect(screen.getByText(/does not provide clinical diagnosis/)).toBeVisible();
   expect(screen.getByText(/Do not enter real student information/)).toBeVisible();
 });

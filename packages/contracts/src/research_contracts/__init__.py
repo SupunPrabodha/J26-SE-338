@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, field_validator
 
 VERSION = "1.0.0"
 PURPOSE = "synthetic-wellbeing-screening"
@@ -212,6 +212,27 @@ class HumanReviewAction(Contract):
     idempotency_key: UUID
 
 
+class ReviewRecordRequest(Contract):
+    interpretation: Annotated[str, Field(min_length=1, max_length=2000)]
+    follow_up: Literal["NO_FOLLOW_UP_PLANNED", "DISCUSSION_OFFERED", "FOLLOW_UP_REQUESTED"]
+    idempotency_key: UUID
+
+    @field_validator("interpretation")
+    @classmethod
+    def synthetic_interpretation(cls, value):
+        value = value.strip()
+        if not value.startswith("SYNTHETIC:") or not value[len("SYNTHETIC:") :].strip():
+            raise ValueError("A synthetic interpretation is required")
+        return value
+
+
+class CounsellorReviewRecord(Contract):
+    task_id: UUID
+    interpretation: Annotated[str, Field(min_length=1, max_length=2000)]
+    follow_up: Literal["NO_FOLLOW_UP_PLANNED", "DISCUSSION_OFFERED", "FOLLOW_UP_REQUESTED"]
+    saved_at: AwareDatetime
+
+
 class WithdrawalRequest(Contract):
     idempotency_key: UUID
 
@@ -265,6 +286,8 @@ class LifecycleAuditEvent(AuditEvent):
         "WITHDRAWAL",
         "RETENTION",
         "ASSIGNMENT",
+        "ADMIN_EVIDENCE_ACCESS",
+        "STAFF_ADMINISTRATION",
     ]
     policy_expires_at: AwareDatetime | None = None
     trace_id: UUID | None = None
@@ -288,6 +311,184 @@ class ServiceError(Contract):
     message: Literal["Request could not be completed safely."] = (
         "Request could not be completed safely."
     )
+
+
+class ReviewQueueItem(Contract):
+    task_id: UUID
+    case: PseudonymousCase
+    assignment: Literal["ASSIGNED_TO_YOU"] = "ASSIGNED_TO_YOU"
+    review_started_at: AwareDatetime | None = None
+    review_completed_at: AwareDatetime | None = None
+    review_record_saved_at: AwareDatetime | None = None
+
+
+class ReviewQueuePage(Contract):
+    items: Annotated[list[ReviewQueueItem], Field(max_length=20)]
+    next_offset: int | None = None
+    observed_at: AwareDatetime
+
+
+class AdminEventType(StrEnum):
+    AUTH_LOGIN = "AUTH_LOGIN"
+    AUTH_FAILURE = "AUTH_FAILURE"
+    AUTH_LOGOUT = "AUTH_LOGOUT"
+    AUTH_REFRESH = "AUTH_REFRESH"
+    SESSION_REVOKED = "SESSION_REVOKED"
+    CONSENT_RECORDED = "CONSENT_RECORDED"
+    CONSENT_EXPIRED = "CONSENT_EXPIRED"
+    OPERATION_BLOCKED = "OPERATION_BLOCKED"
+    SUBMISSION = "SUBMISSION"
+    SUBMISSION_REPLAY = "SUBMISSION_REPLAY"
+    WORKFLOW_TRANSITION = "WORKFLOW_TRANSITION"
+    JOB_RETRY = "JOB_RETRY"
+    JOB_TERMINAL = "JOB_TERMINAL"
+    JOB_CLAIM = "JOB_CLAIM"
+    HUMAN_REVIEW = "HUMAN_REVIEW"
+    WITHDRAWAL = "WITHDRAWAL"
+    RETENTION = "RETENTION"
+    ASSIGNMENT = "ASSIGNMENT"
+    ADMIN_EVIDENCE_ACCESS = "ADMIN_EVIDENCE_ACCESS"
+    STAFF_ADMINISTRATION = "STAFF_ADMINISTRATION"
+
+
+class AdminAuditItem(Contract):
+    event_id: UUID
+    event_type: AdminEventType
+    outcome: str
+    occurred_at: AwareDatetime
+    policy_expires_at: AwareDatetime | None = None
+    case_id: UUID | None = None
+    correlation_id: UUID
+    service_version: Literal["0.1.0"] = "0.1.0"
+
+
+class AdminCaseOperations(Contract):
+    case_id: UUID
+    processing_status: WorkflowState
+    failure_code: ErrorCode | None = None
+    retention_reason: Literal["RETENTION", "OWNER_WITHDRAWAL", "LEGACY_DISPOSAL"] | None = None
+    provenance: ServiceProvenance | None = None
+
+
+class AdminAuditPage(Contract):
+    items: Annotated[list[AdminAuditItem], Field(max_length=50)]
+    next_cursor: Annotated[str, Field(max_length=160)] | None = None
+    observed_at: AwareDatetime
+    case_operations: AdminCaseOperations | None = None
+    provider: Literal["MOCK_SYNTHETIC_DEVELOPMENT_ONLY"] = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY"
+
+
+class StaffSummary(Contract):
+    account_id: UUID
+    display_name: Annotated[str, Field(max_length=60)]
+    role: Literal["ADMIN", "COUNSELLOR", "RESEARCHER"]
+    enabled: bool
+    usable: bool
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
+    expires_at: AwareDatetime | None = None
+    is_current_account: bool = False
+
+
+class StaffPage(Contract):
+    items: Annotated[list[StaffSummary], Field(max_length=20)]
+    next_offset: int | None = None
+    observed_at: AwareDatetime
+
+
+class StaffUpdateRequest(Contract):
+    role: Literal["ADMIN", "COUNSELLOR", "RESEARCHER"]
+    enabled: StrictBool
+    expected_updated_at: AwareDatetime
+
+
+class AssignmentChangeRequest(Contract):
+    counsellor_id: UUID | None
+    expected_version: Annotated[str, Field(pattern="^[0-9a-f]{64}$")]
+
+
+class AdminCaseSummary(Contract):
+    case_id: UUID
+    processing_status: WorkflowState
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
+    expires_at: AwareDatetime
+    assignment_eligible: bool
+    assignment_state: Literal["AWAITING_ASSIGNMENT", "ASSIGNED", "NOT_ELIGIBLE"]
+    assignment_version: Annotated[str, Field(pattern="^[0-9a-f]{64}$")]
+    assignment_count: int
+    counsellors: Annotated[list[StaffSummary], Field(max_length=20)]
+    last_assignment_at: AwareDatetime | None = None
+    human_review_status: Literal["AWAITING_REVIEW", "IN_PROGRESS", "COMPLETED", "UNAVAILABLE"] = (
+        "UNAVAILABLE"
+    )
+    job_status: Literal["QUEUED", "RUNNING", "DONE", "CANCELLED", "DEAD_LETTER"] | None = None
+    attempts: Annotated[int, Field(ge=0, le=3)] = 0
+    failure_code: ErrorCode | None = None
+    disposal_reason: Literal["RETENTION", "OWNER_WITHDRAWAL", "LEGACY_DISPOSAL"] | None = None
+
+
+class AdminCasePage(Contract):
+    items: Annotated[list[AdminCaseSummary], Field(max_length=20)]
+    next_offset: int | None = None
+    observed_at: AwareDatetime
+
+
+class AdminOverview(Contract):
+    eligible_cases: int
+    awaiting_assignment: int
+    assigned_cases: int
+    active_counsellors: int
+    enabled_staff: int
+    pending_jobs: int
+    failed_cases: int
+    disposed_cases: int
+    assignment_policy: Literal["DESIGNATED_DEVELOPMENT", "MANUAL"]
+    designated_counsellor_available: bool
+    retention_hours: int
+    observed_at: AwareDatetime
+
+
+class CaseStatusCount(Contract):
+    state: WorkflowState
+    cases: Annotated[int, Field(ge=0)]
+
+
+class SubmissionCount(Contract):
+    bucket_start: AwareDatetime
+    cases: Annotated[int, Field(ge=0)]
+
+
+class WorkloadCount(Contract):
+    counsellor_id: UUID | None
+    display_name: Annotated[str, Field(max_length=60)]
+    cases: Annotated[int, Field(ge=0)]
+
+
+class AdminAnalytics(Contract):
+    since: AwareDatetime
+    until: AwareDatetime
+    timezone: Literal["UTC"] = "UTC"
+    interval: Literal["day", "week"]
+    total_cases: Annotated[int, Field(ge=0)]
+    statuses: Annotated[list[CaseStatusCount], Field(max_length=11)]
+    submissions: Annotated[list[SubmissionCount], Field(max_length=367)]
+    workload: Annotated[list[WorkloadCount], Field(max_length=21)]
+    workload_assignment_pairs: Annotated[int, Field(ge=0)]
+    observed_at: AwareDatetime
+
+
+class ComponentRoute(Contract):
+    component: Literal["C2", "C3", "C4"]
+    function: Literal["PREPROCESSING", "INFERENCE", "EXPLANATION"]
+    provider: Literal["MOCK_SYNTHETIC_DEVELOPMENT_ONLY"]
+    route_status: Literal["INTERNAL_SERVICE_ONLY"] = "INTERNAL_SERVICE_ONLY"
+    web_path: None = None
+
+
+class ComponentDirectory(Contract):
+    items: Annotated[list[ComponentRoute], Field(min_length=3, max_length=3)]
+    observed_at: AwareDatetime
 
 
 class HealthResponse(Contract):
@@ -317,3 +518,53 @@ class AccountResponse(Contract):
 
 class FixturesResponse(Contract):
     fixtures: dict[str, str]
+
+
+class DemoRun(Contract):
+    run_id: UUID
+    created_at: AwareDatetime
+    consent_status: ConsentState
+    case_id: UUID | None = None
+    processing_status: WorkflowState | None = None
+
+
+class DemoRunPage(Contract):
+    runs: Annotated[list[DemoRun], Field(max_length=20)]
+    next_offset: int | None = None
+
+
+class DemoReceipt(Contract):
+    event: Literal[
+        "CONSENT_RECORDED",
+        "CONSENT_EXPIRED",
+        "OPERATION_BLOCKED",
+        "SUBMISSION_REPLAY",
+        "WORKFLOW_TRANSITION",
+        "JOB_RETRY",
+        "JOB_TERMINAL",
+        "HUMAN_REVIEW",
+        "WITHDRAWAL",
+        "RETENTION",
+    ]
+    occurred_at: AwareDatetime
+
+
+class DemoEvidence(Contract):
+    run: DemoRun
+    observed_at: AwareDatetime
+    receipt_only: bool
+    consent_recorded: bool
+    consent_policy_valid: bool
+    blocking_observed: bool
+    replay_observed: bool
+    failure_observed: bool
+    provenance_validated: bool
+    review_task_authorized: bool
+    review_started_at: AwareDatetime | None = None
+    review_completed_at: AwareDatetime | None = None
+    review_record_saved_at: AwareDatetime | None = None
+    withdrawn_at: AwareDatetime | None = None
+    disposal_confirmed: bool
+    receipts: Annotated[list[DemoReceipt], Field(max_length=50)]
+    receipts_truncated: bool
+    provider: Literal["MOCK_SYNTHETIC_DEVELOPMENT_ONLY"] = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY"

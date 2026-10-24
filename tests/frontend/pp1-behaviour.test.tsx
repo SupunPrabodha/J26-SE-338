@@ -11,7 +11,7 @@ const consent = () => ({ consent_id: crypto.randomUUID(), consent_status: "ACTIV
 test("submission waits for server-confirmed acceptance", async () => {
   let resolveDecision: (value: unknown) => void = () => {};
   const pending = new Promise(resolve => { resolveDecision = resolve; });
-  vi.stubGlobal("fetch", vi.fn(async (url: string) => url.endsWith("/fixtures") ? ok({ fixtures: { english: "SYNTHETIC: fixture" } }) : url.endsWith("/consents") ? pending : ok({})));
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => url.endsWith("/fixtures") ? ok({ fixtures: { english: "SYNTHETIC: fixture" } }) : url.endsWith("/consents") ? pending : ok({ role: "STUDENT" })));
   render(<StudentPortal />);
   await screen.findByRole("option", { name: "english" });
   fireEvent.change(screen.getByLabelText("Consent choice"), { target: { value: "ACTIVE" } });
@@ -24,6 +24,7 @@ test("submission waits for server-confirmed acceptance", async () => {
 test.each([401, 403])("student controls respond to server denial %i without inventing withdrawal", async status => {
   const record = consent();
   vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+    if (url.endsWith("/auth/me")) return ok({ role: "STUDENT" });
     if (url.endsWith("/fixtures")) return ok({ fixtures: { english: "SYNTHETIC: fixture" } });
     if (url.endsWith("/consents")) return ok(record);
     if (url.endsWith("/submissions") || url.endsWith("/auth/refresh")) return { ok: false, status };
@@ -46,7 +47,7 @@ test.each([401, 403])("student controls respond to server denial %i without inve
 
 test("expired consent cannot enable submission even if server status says ACTIVE", async () => {
   const record = { ...consent(), expires_at: new Date(Date.now() - 1).toISOString() };
-  vi.stubGlobal("fetch", vi.fn(async (url: string) => url.endsWith("/fixtures") ? ok({ fixtures: { english: "SYNTHETIC: fixture" } }) : url.endsWith("/consents") ? ok(record) : ok({})));
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => url.endsWith("/fixtures") ? ok({ fixtures: { english: "SYNTHETIC: fixture" } }) : url.endsWith("/consents") ? ok(record) : ok({ role: "STUDENT" })));
   render(<StudentPortal />);
   await screen.findByRole("option", { name: "english" });
   fireEvent.click(screen.getByText("Record consent decision"));
@@ -60,14 +61,16 @@ test.each([401, 403, 404])("counsellor denial %i clears cached evidence and acti
     explanation: { evidence: ["SYNTHETIC selected evidence"], reliability_status: "NOT_EVALUATED", explainer_version: "mock-1" } };
   vi.stubGlobal("fetch", vi.fn(async (url: string) => {
     if (url.endsWith("/me")) return ok({ role: "COUNSELLOR" });
-    if (url.endsWith("/review-tasks")) return ok([task]);
+    if (url.includes("/review-queue?")) return ok({ items: [{ task_id: task.task_id, case: task.case }], next_offset: null, observed_at: new Date().toISOString() });
+    if (url.endsWith("/record")) return ok(null);
     if (url.endsWith("/actions") || url.endsWith("/refresh")) return { ok: false, status };
     return ok(task);
   }));
   render(<Dashboard />);
-  fireEvent.click(await screen.findByText("Open synthetic case 1"));
+  fireEvent.click(await screen.findByRole("button", { name: /^Open case / }));
   await screen.findByText("SYNTHETIC selected evidence");
-  expect(screen.getByText("Processing complete")).toBeVisible();
+  fireEvent.click(screen.getByText("Screening evidence"));
+  expect(screen.getAllByText("Processing complete")[0]).toBeVisible();
   expect(screen.queryByText("Human review completed")).not.toBeInTheDocument();
   fireEvent.click(screen.getByText("Start human review"));
   await screen.findByRole("alert");

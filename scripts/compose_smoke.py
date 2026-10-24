@@ -84,7 +84,50 @@ def main():
                 "username": environment["DEV_COUNSELLOR_USERNAME"],
                 "password": environment["DEV_COUNSELLOR_PASSWORD"],
             }
-            assert reviewer.post("/api/v1/auth/login", json=login).status_code == 200
+            logged_in = reviewer.post("/api/v1/auth/login", json=login)
+            assert logged_in.status_code == 200
+            with httpx.Client(
+                base_url="http://localhost:8000", headers=headers, timeout=10, trust_env=False
+            ) as administrator:
+                assert (
+                    administrator.post(
+                        "/api/v1/auth/login",
+                        json={
+                            "username": environment["DEV_ADMIN_USERNAME"],
+                            "password": environment["DEV_ADMIN_PASSWORD"],
+                        },
+                    ).status_code
+                    == 200
+                )
+                summary = administrator.get("/api/v1/admin/cases", params={"q": case}).json()[
+                    "items"
+                ][0]
+                if (
+                    administrator.get("/api/v1/admin/overview").json()["assignment_policy"]
+                    == "MANUAL"
+                ):
+                    assert summary["assignment_state"] == "AWAITING_ASSIGNMENT"
+                    assert not any(
+                        t["case"]["case_id"] == case
+                        for t in reviewer.get("/api/v1/review-tasks").json()
+                    )
+                    assert (
+                        administrator.post(
+                            f"/api/v1/admin/cases/{case}/assignment",
+                            json={
+                                "counsellor_id": logged_in.json()["account_id"],
+                                "expected_version": summary["assignment_version"],
+                            },
+                        ).status_code
+                        == 200
+                    )
+                aggregates = administrator.get("/api/v1/admin/analytics", params={"q": case}).json()
+                assert (
+                    aggregates["total_cases"]
+                    == sum(row["cases"] for row in aggregates["statuses"])
+                    == 1
+                )
+                assert sum(row["cases"] for row in aggregates["submissions"]) == 1
             tasks = reviewer.get("/api/v1/review-tasks").json()
             task = next(t for t in tasks if t["case"]["case_id"] == case)
             assert task["explanation"]["reliability_status"] == "NOT_EVALUATED"
@@ -96,6 +139,20 @@ def main():
                     ).status_code
                     == 200
                 )
+                if action == "START_REVIEW":
+                    record_path = f"/api/v1/review-tasks/{task['task_id']}/record"
+                    record_body = {
+                        "interpretation": "SYNTHETIC: Smoke review privacy marker.",
+                        "follow_up": "DISCUSSION_OFFERED",
+                        "idempotency_key": str(uuid4()),
+                    }
+                    saved = reviewer.post(record_path, json=record_body)
+                    assert saved.status_code == 200
+                    assert reviewer.get(record_path).json() == saved.json()
+                    assert reviewer.post(record_path, json=record_body).json() == saved.json()
+                    evidence = student.get(f"/api/v1/demo/runs/{consent['consent_id']}")
+                    assert evidence.json()["review_record_saved_at"]
+                    assert record_body["interpretation"] not in evidence.text
             # Expire only this synthetic case while its owner session remains valid.
             # This tests retention-before-withdrawal without waiting for the default TTL.
             case = str(UUID(case))
@@ -117,6 +174,18 @@ enforce_retention()
                 == "WITHDRAWN"
             )
             assert reviewer.get(f"/api/v1/review-tasks/{task['task_id']}").status_code == 404
+            assert reviewer.get(record_path).status_code == 404
+            container_python(
+                "orchestrator",
+                f"""
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from research_common.database import Review, ReviewRecord, engine
+with Session(engine()) as db:
+    task = db.scalar(select(Review).where(Review.case_id == '{case}'))
+    assert db.scalar(select(ReviewRecord).where(ReviewRecord.task_id == task.id)) is None
+""",
+            )
             with ThreadPoolExecutor(max_workers=2) as executor:
                 withdrawals = list(
                     executor.map(
@@ -152,7 +221,8 @@ with Session(engine()) as db:
             assert reviewer.get("/api/v1/auth/me").status_code == 401
     for port in () if "--backend-only" in sys.argv else (3000, 3001):
         response = httpx.get(f"http://localhost:{port}", trust_env=False, timeout=15)
-        assert response.status_code == 200 and "DEVELOPMENT ONLY" in response.text
+        assert response.status_code == 200
+        assert "Screening support only" in response.text and "Mock data" in response.text
         response = httpx.get(
             f"http://localhost:{port}/api/v1/fixtures", trust_env=False, timeout=15
         )
@@ -174,6 +244,7 @@ with Session(engine()) as db:
         check=True,
     ).stdout
     assert all(value not in logs for value in fixtures.values())
+    assert "SYNTHETIC: Smoke review privacy marker." not in logs
     assert all(
         value not in logs
         for key, value in environment.items()
@@ -190,8 +261,11 @@ with Session(engine()) as db:
                     "worker synthetic task",
                     "C1-C2-C3-C4",
                     "concurrent idempotency",
+                    "configured assignment policy and admin chart/table totals",
                     "assigned review",
                     "human action",
+                    "review record save/read/replay and safe receipt",
+                    "review content disposal and log exclusion",
                     "withdrawal access revocation",
                     "retention before concurrent owner withdrawals",
                     "single withdrawal receipt and audit event",

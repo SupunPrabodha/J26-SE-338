@@ -1,0 +1,52 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/DemoReceipt.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "event": {
+      "enum": [
+        "CONSENT_RECORDED",
+        "CONSENT_EXPIRED",
+        "OPERATION_BLOCKED",
+        "SUBMISSION_REPLAY",
+        "WORKFLOW_TRANSITION",
+        "JOB_RETRY",
+        "JOB_TERMINAL",
+        "HUMAN_REVIEW",
+        "WITHDRAWAL",
+        "RETENTION"
+      ],
+      "title": "Event",
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "title": "Occurred At",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "event",
+    "occurred_at"
+  ],
+  "title": "DemoReceipt",
+  "type": "object"
+}

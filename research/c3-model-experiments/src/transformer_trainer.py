@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """
 Stage A Multilingual Transformer Fine-Tuning & Evaluation.
 Owner: C3 - Ramanayake R. H. B. D. G. (IT23164130)
@@ -11,10 +12,9 @@ Trains on 80% train splits and evaluates on the exact 20% held-out test splits.
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 # Add current src directory to sys.path so imports resolve both in IDE and across execution CWDs
 CURRENT_DIR = Path(__file__).resolve().parent
@@ -23,8 +23,6 @@ if str(CURRENT_DIR) not in sys.path:
 
 import numpy as np
 import pandas as pd
-
-from data_loader import load_dreaddit_dataset, load_goemotions_dataset, EKMAN_LABELS  # type: ignore
 from metrics import evaluate_predictions, save_confusion_matrix_plot  # type: ignore
 
 
@@ -33,24 +31,24 @@ def train_transformer_candidate(
     train_df: pd.DataFrame,
     test_df: pd.DataFrame,
     num_labels: int,
-    target_names: List[str],
+    target_names: list[str],
     dataset_name: str,
     output_dir: Path | str,
     batch_size: int = 16,
     num_epochs: int = 3,
     learning_rate: float = 2e-5,
     seed: int = 42,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Fine-tunes a transformer model candidate and evaluates on the test split."""
     try:
         import torch  # type: ignore
         from datasets import Dataset  # type: ignore
         from transformers import (  # type: ignore
-            AutoTokenizer,
             AutoModelForSequenceClassification,
+            AutoTokenizer,
+            DataCollatorWithPadding,
             Trainer,
             TrainingArguments,
-            DataCollatorWithPadding,
             set_seed,
         )
     except ImportError as e:
@@ -65,10 +63,10 @@ def train_transformer_candidate(
     checkpoint_dir = out_dir / f"checkpoints_{dataset_name}_{model_slug}"
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"\n=======================================================")
+    print("\n=======================================================")
     print(f" Fine-tuning {model_name_or_path} on {dataset_name}")
     print(f" Train: {len(train_df)} samples | Test: {len(test_df)} samples | Classes: {num_labels}")
-    print(f"=======================================================")
+    print("=======================================================")
 
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     model = AutoModelForSequenceClassification.from_pretrained(

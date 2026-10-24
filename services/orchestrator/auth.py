@@ -89,6 +89,37 @@ def account_valid(account):
     )
 
 
+def usable_staff(account):
+    return bool(account_valid(account) and account.username and account.password_hash)
+
+
+def lock_valid_account(db, account, request, role):
+    """After domain locks, refresh account/session state before a protected mutation/read."""
+    fresh = db.scalar(
+        select(Account)
+        .where(Account.id == account.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    if not account_valid(fresh) or fresh.role != role:
+        raise SafeError(ErrorCode.AUTH_INVALID, 401)
+    session_id = (
+        getattr(request.state, "auth_session_id", None)
+        if request
+        else db.info.get("auth_session_id")
+    )
+    if session_id:
+        record = db.get(AuthSession, session_id, populate_existing=True)
+        if (
+            not record
+            or record.account_id != fresh.id
+            or record.revoked
+            or record.expires_at <= now()
+        ):
+            raise SafeError(ErrorCode.AUTH_INVALID, 401)
+    return fresh
+
+
 def current_account(request: Request, db: Session = Depends(session), token=Depends(access_cookie)):
     csrf(request)
     if not token:
@@ -117,6 +148,8 @@ def current_account(request: Request, db: Session = Depends(session), token=Depe
             raise ValueError()
     except (jwt.PyJWTError, ValueError, TypeError):
         raise SafeError(ErrorCode.AUTH_INVALID, 401) from None
+    request.state.auth_session_id = record.id
+    db.info["auth_session_id"] = record.id
     return account
 
 
@@ -147,7 +180,7 @@ def rate_limit(request, namespace):
 def login(body, request, response, db):
     csrf(request)
     rate_limit(request, "login")
-    account = db.scalar(select(Account).where(Account.username == body.username))
+    account = db.scalar(select(Account).where(Account.username == body.username).with_for_update())
     # A process-local random dummy hash keeps absent-account verification comparable.
     stored = account.password_hash if account and account.password_hash else dummy_password_hash
     valid = passwords.verify(body.password, stored)
@@ -165,14 +198,25 @@ def refresh(request, response, db):
     csrf(request)
     rate_limit(request, "refresh")
     token = request.cookies.get("j26_refresh", "")
-    record = db.scalar(
-        select(AuthSession).where(AuthSession.refresh_hash == digest(token)).with_for_update()
-    )
+    record = db.scalar(select(AuthSession).where(AuthSession.refresh_hash == digest(token)))
     if not record:
         audit(db, request, "AUTH_FAILURE", "REFRESH_DENIED")
         db.commit()
         raise SafeError(ErrorCode.AUTH_INVALID, 401)
-    account = db.get(Account, record.account_id)
+    # Account -> session ordering matches staff revocation. Refresh/login cannot issue a
+    # surviving session across a completed staff disable/role change.
+    account = db.scalar(
+        select(Account)
+        .where(Account.id == record.account_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    record = db.scalar(
+        select(AuthSession)
+        .where(AuthSession.id == record.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
     if record.revoked or record.expires_at <= now() or not account_valid(account):
         db.execute(
             update(AuthSession)

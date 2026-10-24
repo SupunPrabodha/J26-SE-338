@@ -1,0 +1,94 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/AdminOverview.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "active_counsellors": {
+      "title": "Active Counsellors",
+      "type": "integer"
+    },
+    "assigned_cases": {
+      "title": "Assigned Cases",
+      "type": "integer"
+    },
+    "assignment_policy": {
+      "enum": [
+        "DESIGNATED_DEVELOPMENT",
+        "MANUAL"
+      ],
+      "title": "Assignment Policy",
+      "type": "string"
+    },
+    "awaiting_assignment": {
+      "title": "Awaiting Assignment",
+      "type": "integer"
+    },
+    "designated_counsellor_available": {
+      "title": "Designated Counsellor Available",
+      "type": "boolean"
+    },
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "disposed_cases": {
+      "title": "Disposed Cases",
+      "type": "integer"
+    },
+    "eligible_cases": {
+      "title": "Eligible Cases",
+      "type": "integer"
+    },
+    "enabled_staff": {
+      "title": "Enabled Staff",
+      "type": "integer"
+    },
+    "failed_cases": {
+      "title": "Failed Cases",
+      "type": "integer"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "pending_jobs": {
+      "title": "Pending Jobs",
+      "type": "integer"
+    },
+    "retention_hours": {
+      "title": "Retention Hours",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "eligible_cases",
+    "awaiting_assignment",
+    "assigned_cases",
+    "active_counsellors",
+    "enabled_staff",
+    "pending_jobs",
+    "failed_cases",
+    "disposed_cases",
+    "assignment_policy",
+    "designated_counsellor_available",
+    "retention_hours",
+    "observed_at"
+  ],
+  "title": "AdminOverview",
+  "type": "object"
+}
