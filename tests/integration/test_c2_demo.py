@@ -300,6 +300,26 @@ def test_existing_mock_contracts_unchanged():
                 assert value["paths"][route] == definition, (path, route)
             for name, definition in previous["components"]["schemas"].items():
                 current = deepcopy(value["components"]["schemas"][name])
+                # Additive C2 residual assessment; every old required field and
+                # unrelated schema must still match the committed snapshot.
+                if (
+                    name == "C2DemoRecordValidation"
+                    and "residual_assessment" not in definition["properties"]
+                ):
+                    assert "residual_assessment" not in current.get("required", [])
+                    assert current["properties"].pop("residual_assessment") == {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/C2DemoResidualAssessment"},
+                            {"type": "null"},
+                        ],
+                    }
+                if (
+                    name == "C2DemoValidationSummary"
+                    and "c2-output-validation-v1.2+residual-output-v1"
+                    not in definition["properties"]["method"]["enum"]
+                ):
+                    versions = current["properties"]["method"]["enum"]
+                    assert versions.pop() == "c2-output-validation-v1.2+residual-output-v1"
                 # Explicit opt-in C2 strategy extension; keep every unrelated
                 # component/property byte-equivalent to the committed contract.
                 if name in {"C2CustomDemoRequest", "C2CustomDemoResponse"}:

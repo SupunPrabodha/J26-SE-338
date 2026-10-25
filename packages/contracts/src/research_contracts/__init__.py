@@ -460,9 +460,18 @@ class C2DemoValidationCheck(Contract):
     reasons: list[str]
 
 
+class C2DemoResidualAssessment(Contract):
+    status: Literal["FAIL", "REVIEW", "NO_SIGNAL", "NOT_EVALUATED"]
+    verification: Literal["NOT_VERIFIED"] = "NOT_VERIFIED"
+    method: Literal["c2-residual-output-v1"] = "c2-residual-output-v1"
+    rule_ids: list[str]
+    reasons: list[str]
+
+
 class C2DemoRecordValidation(Contract):
     record_index: int = Field(ge=1)
     checks: list[C2DemoValidationCheck]
+    residual_assessment: C2DemoResidualAssessment | None = None
 
 
 class C2DemoStageValidation(Contract):
@@ -476,7 +485,11 @@ class C2DemoStageValidation(Contract):
 
 
 class C2DemoValidationSummary(Contract):
-    method: Literal["c2-output-validation-v1", "c2-output-validation-v1.1+residual-output-v1"]
+    method: Literal[
+        "c2-output-validation-v1",
+        "c2-output-validation-v1.1+residual-output-v1",
+        "c2-output-validation-v1.2+residual-output-v1",
+    ]
     anonymization_strategy: DemoStrategy
     records_processed: int = Field(ge=0)
     measurement: Literal["policy_and_integrity_checks_not_accuracy"]

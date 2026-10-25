@@ -40,9 +40,10 @@ def test_batch_denominators_reviews_and_skips_are_explicit():
         "not_evaluated_records": 0,
         "pass_rate_percent": 25.0,
     }
-    assert stages["anonymization"]["checked_records"] == 3
+    assert stages["anonymization"]["checked_records"] == 1
     assert stages["anonymization"]["review_records"] == 1
-    assert stages["anonymization"]["pass_rate_percent"] == 66.67
+    assert stages["anonymization"]["pass_rate_percent"] == 0
+    assert stages["anonymization"]["not_evaluated_records"] == 3
     assert stages["normalization"]["not_evaluated_records"] == 1
     assert stages["tokenization"]["checked_records"] == 3
     for stage in stages.values():
@@ -55,6 +56,42 @@ def test_empty_batch_never_claims_one_hundred_percent():
     report = run_preprocessing_pipeline([]).validation_summary
     assert report["records_processed"] == 0
     assert all(stage["pass_rate_percent"] is None for stage in report["stages"])
+
+
+@pytest.mark.parametrize("text", ["Supun blames me", "I feel tired.", "[PERSON] [LOCATION]"])
+def test_no_signal_is_not_verified_and_not_a_residual_pass(record, text):
+    report = build_validation_summary(
+        (replace(record, anonymized_text=text, requires_privacy_review=False),), strategy="regex"
+    )
+    assessment = report["records"][0]["residual_assessment"]
+    assert assessment["status"] == "NO_SIGNAL"
+    assert assessment["verification"] == "NOT_VERIFIED"
+    residual = report["stages"][0]
+    assert residual["passed_records"] == 0
+    assert residual["not_evaluated_records"] == 1
+    checks = {check["rule_id"]: check for check in report["records"][0]["checks"]}
+    assert checks["anonymization.residual_email"]["status"] == "PASS"
+    assert checks["anonymization.person_context"]["status"] == "NOT_EVALUATED"
+    C2DemoValidationSummary.model_validate(report)
+
+
+@pytest.mark.parametrize(
+    "text,status",
+    [
+        ("Name: Alina Rowan", "FAIL"),
+        ("My name is [PERSON] Ellison.", "REVIEW"),
+        ("fixture@example.com", "FAIL"),
+        ("", "NOT_EVALUATED"),
+    ],
+)
+def test_assessment_preserves_real_fail_review_and_empty(record, text, status):
+    report = build_validation_summary(
+        (replace(record, anonymized_text=text, requires_privacy_review=False),), strategy="regex"
+    )
+    assessment = report["records"][0]["residual_assessment"]
+    assert assessment["status"] == status
+    assert assessment["verification"] == "NOT_VERIFIED"
+    assert assessment["reasons"]
 
 
 def test_report_is_text_and_identifier_free_and_repeatable():

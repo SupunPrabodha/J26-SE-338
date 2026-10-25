@@ -9,6 +9,18 @@ import RunValidation from "./RunValidation";
 import "./demo.css";
 
 const readable = (value: string) => value.replaceAll(/[-_:]/g, " ");
+const languageLabels: Record<string, string> = { english: "English", sinhala: "Sinhala", "romanized-si": "Romanized Sinhala", "code-mixed": "Code-mixed", unknown: "Unknown", uncertain: "Uncertain" };
+const transformationLabels: Record<string, string> = {
+  "mask:person": "Person", "mask:location": "Location", "mask:email": "Email", "mask:phone": "Phone", "mask:student-id": "Student ID",
+  "presidio:person": "Person", "presidio:location": "Location", "presidio:email": "Email", "presidio:phone": "Phone", "presidio:student-id": "Student ID",
+  "gliner-name-labels-v4-context-demo-v1:person": "Person", "gliner-name-labels-v4-context-demo-v1:location": "Location", "gliner-name-labels-v4-context-demo-v1:email": "Email", "gliner-name-labels-v4-context-demo-v1:phone": "Phone", "gliner-name-labels-v4-context-demo-v1:student_id": "Student ID",
+  "gliner-name-labels-v4-location-context-demo-v2:person": "Person", "gliner-name-labels-v4-location-context-demo-v2:location": "Location", "gliner-name-labels-v4-location-context-demo-v2:email": "Email", "gliner-name-labels-v4-location-context-demo-v2:phone": "Phone", "gliner-name-labels-v4-location-context-demo-v2:student_id": "Student ID",
+};
+function maskedTypes(transformations: readonly string[] | undefined) {
+  if (!Array.isArray(transformations)) return ["Unavailable"];
+  return transformations.length ? [...new Set(transformations.map(value => transformationLabels[value] ?? "Unknown"))] : ["None reported"];
+}
+const statusTone = (status: string | undefined) => ["FAIL", "FAILED", "REJECT"].includes(status ?? "") ? "c2-status-fail" : status === "REVIEW" ? "c2-status-review" : ["PASS", "PASSED"].includes(status ?? "") ? "c2-status-pass" : "c2-status-unknown";
 const issueExplanation = (value: string) => ({
   very_short_text: "Very short content needs human review.",
   empty_text: "Empty content cannot pass the quality gate.",
@@ -125,13 +137,15 @@ export default function C2Demo() {
     finally { authenticating.current = false; setAuthBusy(false); }
   }
 
+  const hasFindings = !!result && (result.quality_summary.data_quality_gate === "FAILED" || result.records.some(record => record.requires_privacy_review || ["REVIEW", "REJECT"].includes(record.quality_status)));
+
   return <main className="c2-demo">
-    <DemoHeader title="C2 Dataset Pipeline Demo" subtitle="Explore actual anonymization and data-quality gates with fictional samples." component="Component 2" badge="Development only · Live pipeline" />
-    <PipelineStepper result={result} busy={busy} />
+    <DemoHeader title="C2 Dataset Pipeline Demo" subtitle="Explore actual anonymization and data-quality gates with fictional samples." component="Component 2" badge="Live pipeline" />
+    <PipelineStepper result={result} busy={busy} showReleaseStatus={false} />
     <nav className="actions" aria-label="Demo navigation"><a href="/">Back to dashboard</a>
       <a href="/c2-demo/annotation">Synthetic dataset annotation</a>
       {catalogue && !denied && <button className="quiet" onClick={logout}>Sign out</button>}</nav>
-    <aside className="notice c2-synthetic"><strong>Synthetic demonstration — not participant data</strong><p>Fictional test text only. Results stay in page memory; outputs are non-diagnostic and require human interpretation.</p></aside>
+    <aside className="hint c2-synthetic">Development demo · Synthetic data only</aside>
     {denied && <section className="card c2-sign-in" aria-labelledby="c2-sign-in-title">
       <h2 id="c2-sign-in-title">Development sign-in</h2><p className="hint">Use your private local development counsellor credentials. No student submission, consent form, review task or LMS flow is needed.</p>
       <form onSubmit={login}><div className="c2-columns">
@@ -140,44 +154,36 @@ export default function C2Demo() {
       </div><button disabled={authBusy}>{authBusy ? "Signing in…" : "Sign in"}</button></form>
     </section>}
     <div className="c2-notifications" aria-label="Demo notifications">
-      {error ? <ErrorMessage message={error} /> : result ? <div role="status" aria-live="polite" aria-atomic="true" className={"feedback c2-toast " + (!result.release_ready ? "c2-toast-review" : "")}>Live results received. Automated gate {result.release_ready ? "passed; human approval still required" : "blocked — inspect review/rejection reasons"}.</div> : busy ? <p className="feedback">Processing — waiting for the actual pipeline response…</p> : <p className="feedback">No live results. Enter fictional text and run the demonstration.</p>}
+      {error ? <ErrorMessage message={error} /> : result ? <div role="status" aria-live="polite" aria-atomic="true" className={"feedback c2-toast " + (hasFindings ? "c2-toast-review" : "")}>Live results received.{hasFindings && " Check quality/privacy findings below."}</div> : busy ? <p className="feedback">Processing — waiting for the actual pipeline response…</p> : <p className="feedback">Enter fictional text, then select Anonymize.</p>}
     </div>
     <div className="c2-workbench">
-    {loading ? <p role="status" className="empty">Checking development access…</p> : <section className="card" aria-labelledby="configure-title">
-      <h2 id="configure-title">Custom fictional test</h2>
-      {!catalogue ? <><p>{denied ? "Sign in above to run a fictional test." : "Development access is unavailable."}</p>{!denied && <button className="secondary" onClick={() => { invalidate(); setLoading(true); setReload(value => value + 1); }}>Retry access</button>}</> : <>
+    <section className="card c2-text-card" aria-labelledby="input-title">
+      <h2 id="input-title"><label htmlFor="custom-text">Input text</label></h2>
+      {loading ? <p role="status" className="empty">Checking development access…</p> : !catalogue ? <><p>{denied ? "Sign in above to run a fictional test." : "Development access is unavailable."}</p>{!denied && <button className="secondary" onClick={() => { invalidate(); setLoading(true); setReload(value => value + 1); }}>Retry access</button>}</> : <>
         <div className="c2-custom">
-          <label htmlFor="custom-text">Fictional test text only</label><textarea id="custom-text" value={text} maxLength={1000} rows={4} autoComplete="off" onChange={event => { invalidate(); setText(event.target.value); }} />
-          <p className="hint c2-example"><strong>Illustrative examples (not inserted):</strong> I feel worried about exams. / <span lang="si">විභාග නිසා මට බයයි.</span> / Mata exams gana dukai.</p>
-          <p className="hint">Up to 1,000 characters. No participant records or uploads. Empty text demonstrates the actual rejection policy.</p>
+          <textarea id="custom-text" className="c2-editor" aria-describedby="input-limit" value={text} maxLength={1000} rows={10} autoComplete="off" onChange={event => { invalidate(); setText(event.target.value); }} />
+          <p id="input-limit" className="hint">Fictional text · up to 1,000 characters.</p>
         </div>
-          <div><p><strong>Anonymizer: GLiNER v4 (experimental)</strong></p><p className="hint c2-description">Multilingual detection remains limited. Sinhala and Romanized Sinhala can miss names or mask ordinary words. Quality PASS does not certify anonymization correctness.</p>
-          <p className="notice-inline">Experimental demonstration only; not release-validated. Automated release stays blocked. Unavailable models produce an error; there is no fallback.</p>
-          <details><summary>Anonymizer configuration</summary><p>Pinned urchade/gliner_multi-v2.1, revision <code>443d26d654e0324125a96bebd8e796c14ff2efe6</code>. Unicode-safe v4, person name/location name labels, threshold 0.7 and existing bounded contextual grammar. Uses whole-text detection; the regressing sentence-context LOCATION experiment remains offline. Structured email, phone and student-ID recognizers remain active. Failures are reported without switching anonymizers. Trained candidates remain offline.</p></details></div>
-        <div className="actions"><button disabled={busy || denied} onClick={run}>{busy ? "Running demonstration…" : "Run demonstration"}</button>
+        <p className="c2-anonymizer">Anonymizer: GLiNER</p>
+        <div className="actions"><button disabled={busy || denied} onClick={run}>{busy ? "Anonymizing…" : "Anonymize"}</button>
           <button className="secondary" onClick={() => { invalidate(); setText(""); }}>Reset</button></div>
       </>}
-      {result?.records.map(record => <section className="c2-original-record" key={record.record_id}><h3>Original synthetic text</h3><p className="c2-text">{record.original_text || "(Empty content)"}</p></section>)}
-    </section>}
-    <section className="stack" aria-label="Live demonstration results">
-      <section className="card"><h2>Anonymization results</h2>
-      {result && <><p>Executed backend: <strong>{result.strategy === "gliner" ? "GLiNER v4 — experimental" : "Presidio — baseline"}</strong></p><details><summary>Executed configuration</summary><code>{result.anonymization_configuration ?? "Configuration metadata unavailable"}</code></details></>}
-      {!result?.records.length && <section><h3>Actual anonymized output</h3><p className="c2-text">{result ? "No anonymized records returned." : "Actual pipeline output will appear here."}</p></section>}
+    </section>
+    <section className="card c2-text-card" aria-labelledby="output-title" aria-busy={busy}>
+      <h2 id="output-title"><label htmlFor="anonymized-text">Anonymized text</label></h2>
+      <textarea id="anonymized-text" className="c2-editor" readOnly rows={10} value={result?.records.map(record => record.anonymized_text).join("\n\n") ?? ""} lang={result?.records[0]?.language_identification?.language === "sinhala" ? "si" : undefined} placeholder={busy ? "Waiting for the actual backend output…" : "Actual pipeline output will appear here."} />
+      {result && !result.records.length && <p>No anonymized records returned.</p>}
+      {!!result?.records.length && result.records.every(record => !record.anonymized_text) && <p className="hint">Empty content returned.</p>}
       {result && !result.records.length && <p><strong>Empty batch</strong> — no records returned; automated release is blocked.</p>}
-      {result?.records.map((record, index) => <article className="c2-record" key={record.record_id}><div className="detail-heading"><h3>Fictional record {index + 1}</h3><span className="status-badge">Quality: {record.quality_status}</span></div>
-        <h3>Actual anonymized output</h3><p className="c2-text" lang={record.language_identification?.language === "sinhala" ? "si" : undefined}>{record.anonymized_text || "(Empty content)"}</p>
-      </article>)}
-      </section>
     </section>
     </div>
-    <section className="card c2-full-width" aria-label="Language identification results"><h2>Language identification</h2>
-      {!result?.records.length && <p>No language results returned yet.</p>}
-      {result?.records.map(record => <div key={record.record_id}>
-        <h3>Language ID — after quality assessment</h3>
-        <p>Detected language: <strong>{record.language_identification ? readable(record.language_identification.language) : "Unknown — result unavailable"}</strong>{record.language_identification && <> ({record.language_identification.status}).</>}</p>
-        <details><summary>Language evidence and limitations</summary>{record.language_identification && <><p>{readable(record.language_identification.reason)}.</p><p>Method: {record.language_identification.method}. Uncertain: {record.language_identification.uncertain ? "Yes" : "No — provisional rule evidence, not calibrated confidence"}.</p></>}
-        <p>Provisional offline script and word evidence. Insufficient or ambiguous evidence remains unknown/uncertain. This result does not configure Presidio or establish multilingual anonymization.</p></details>
-      </div>)}
+    <section className="card c2-full-width c2-language" aria-label="Language identification results">
+      {!result?.records.length && <p className="c2-language-result"><span className="c2-language-label">Language ID:</span>{" "}<span className="c2-language-neutral">Not run</span></p>}
+      {result?.records.map(record => {
+        const language = record.language_identification?.language;
+        const label = language ? languageLabels[language] ?? "Unknown" : "Unknown";
+        return <p className="c2-language-result" key={record.record_id}><span className="c2-language-label">Language ID:</span>{" "}<strong className={["Unknown", "Uncertain"].includes(label) ? "c2-language-neutral" : "c2-language-value"}>{label}</strong></p>;
+      })}
     </section>
     <section className="card c2-full-width" aria-label="Normalized text and tokens"><h2>Normalized text and tokens</h2>
       {!result?.records.length && <p>Run fictional text to see actual normalized text and tokens.</p>}
@@ -185,34 +191,26 @@ export default function C2Demo() {
         <section className="c2-derived">
           <h3>Normalized text</h3><p data-testid="normalized-text" className="c2-normalized-text">{record.normalized_text == null ? "No normalization result returned." : record.normalized_text || "(Empty content)"}</p>
           <h3>Tokens</h3>{record.tokens == null ? <p>No tokenization result returned.</p> : record.tokens.length ? <ol className="c2-tokens" aria-label="Actual tokens">{record.tokens.map((token, tokenIndex) => <li key={tokenIndex}>{token}</li>)}</ol> : <p>No tokens — empty normalized content.</p>}
-          <details><summary>Normalization and token offsets</summary>
-            <p>NFC and collapsed whitespace only. Case, negation, punctuation, emoji, joiners and masking placeholders are preserved. Original anonymized text remains above.</p>
-            <p>Offsets: zero-based [start, end) Unicode code points in normalized text, not JavaScript UTF-16 units or UTF-8 bytes. Use Array.from(text) when slicing by these offsets in JavaScript.</p>
-            <p>Methods: {record.normalization_method ?? "Unavailable"}; {record.tokenization_method ?? "Unavailable"}. Tokenizer segments words and graphemes; it does not perform linguistic annotation.</p>
-            {!!record.tokens?.length && <div className="c2-table-scroll"><table><caption>Backend token offsets</caption><thead><tr><th scope="col">Token</th><th scope="col">Start</th><th scope="col">End</th></tr></thead><tbody>{record.tokens.map((token, tokenIndex) => <tr key={tokenIndex}><td>{token}</td><td>{record.token_offsets?.[tokenIndex]?.[0] ?? "Unavailable"}</td><td>{record.token_offsets?.[tokenIndex]?.[1] ?? "Unavailable"}</td></tr>)}</tbody></table></div>}
+          <details><summary>Token positions</summary>
+            {record.tokens?.length ? <div className="c2-table-scroll"><table><caption>Zero-based Unicode code-point offsets in normalized text; end is exclusive.</caption><thead><tr><th scope="col">Token</th><th scope="col">Start</th><th scope="col">End</th></tr></thead><tbody>{record.tokens.map((token, tokenIndex) => <tr key={tokenIndex}><td>{token}</td><td>{record.token_offsets?.[tokenIndex]?.[0] ?? "Unavailable"}</td><td>{record.token_offsets?.[tokenIndex]?.[1] ?? "Unavailable"}</td></tr>)}</tbody></table></div> : <p>{record.tokens == null ? "Token positions unavailable." : "No token positions — empty normalized content."}</p>}
           </details>
         </section>
       </div>)}
     </section>
     <section className="card c2-full-width" aria-label="Record quality and privacy"><h2>Record quality and privacy</h2>
-      {!result?.records.length && <p>No record-level quality or privacy results yet.</p>}
-      {result?.records.map(record => <div key={record.record_id}>
-        <details><summary>Transformation types</summary>{record.transformations.length ? <ul>{record.transformations.map(value => <li key={value}>{readable(value)}</li>)}</ul> : <p>No transformations returned.</p>}</details>
-        <h3>Quality issues</h3>{record.quality_issues.length ? <ul>{record.quality_issues.map(value => <li key={value}>{issueExplanation(value)}</li>)}</ul> : <p>No quality issues returned.</p>}
-        <p className="notice-inline"><strong>Privacy review: {record.requires_privacy_review ? "Required — quarantine pending human review" : "No automated review signal flagged"}.</strong></p>
-      </div>)}
-    </section>
-    <section className="card c2-full-width" aria-label="Quality and release summary">
-      <div className="detail-heading"><h2>Quality and release</h2><span className="status-badge">Automated gate: {result ? result.release_ready ? "Passed" : "Blocked" : "Not run"}</span></div>
-      {!result ? <p>No quality or privacy checks run yet.</p> : <>
-        <p><strong>Quality policy gate: {result.quality_summary.data_quality_gate}.</strong> <strong>Privacy gate: {result.privacy_summary.status}.</strong></p>
-        {result.records.length > 1 && <dl className="c2-counts"><div><dt>Records</dt><dd>{result.quality_summary.total_records}</dd></div>{["PASS", "REVIEW", "REJECT"].map(status => <div key={status}><dt>{status}</dt><dd>{result.quality_summary.status_counts[status] ?? 0}</dd></div>)}</dl>}
-        {!!result.blocking_reasons.length && <><h3>Blocking reasons</h3><ol className="c2-blocking-reasons">{result.blocking_reasons.map(reason => <li key={reason}>{readable(reason)}</li>)}</ol></>}
+      {result && <>
+        <p className="c2-gate-statuses"><strong className={`c2-status ${statusTone(result.quality_summary.data_quality_gate)}`}>Quality policy gate: {result.quality_summary.data_quality_gate ?? "Unavailable"}.</strong> <strong className={`c2-status ${statusTone(result.privacy_summary.status)}`}>Privacy gate: {result.privacy_summary.status ?? "Unavailable"}.</strong></p>
+        {result.records.length > 1 && <dl className="c2-counts"><div><dt>Records</dt><dd>{result.quality_summary.total_records ?? "Unavailable"}</dd></div>{["PASS", "REVIEW", "REJECT"].map(status => <div key={status}><dt>{status}</dt><dd>{result.quality_summary.status_counts[status] ?? "Unavailable"}</dd></div>)}</dl>}
         {!!result.privacy_summary.issues.length && <ul aria-label="Privacy gate issues">{result.privacy_summary.issues.map(issue => <li key={issue}>{issueExplanation(issue)}</li>)}</ul>}
       </>}
-      <p className="notice-inline"><strong>Human release approval required.</strong> Automated checks do not certify complete anonymization.</p>
+      {!result?.records.length && <p>No record-level quality or privacy results yet.</p>}
+      {result?.records.map(record => <div key={record.record_id}>
+        <p><strong className={`c2-status ${statusTone(record.quality_status)}`}>Quality: {record.quality_status ?? "Unavailable"}</strong></p>
+        <div className="c2-masked-types" role="group" aria-label="Masked types"><span>Masked types:</span>{maskedTypes(record.transformations).map(label => <span className="c2-entity-badge" key={label}>{label}</span>)}</div>
+        {!!record.quality_issues.length && <><h3>Quality issues</h3><ul>{record.quality_issues.map(value => <li key={value}>{issueExplanation(value)}</li>)}</ul></>}
+        {record.requires_privacy_review === true ? <p className="c2-review-notice"><strong>Privacy review: Required — quarantine pending human review.</strong></p> : record.requires_privacy_review !== false ? <p>Privacy review status unavailable.</p> : null}
+      </div>)}
     </section>
-    <RunValidation summary={result?.validation_summary} />
-    <footer>C2 pipeline demonstration · Authorized human release remains required · DEVELOPMENT ONLY</footer>
+    <RunValidation summary={result?.validation_summary} configuration={result?.anonymization_configuration} release={result ?? undefined} />
   </main>;
 }

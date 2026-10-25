@@ -1,0 +1,68 @@
+{
+  "$id": "https://j26.invalid/contracts/1.0.0/C2DemoResidualAssessment.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "development_only": {
+      "const": true,
+      "default": true,
+      "title": "Development Only",
+      "type": "boolean"
+    },
+    "method": {
+      "const": "c2-residual-output-v1",
+      "default": "c2-residual-output-v1",
+      "title": "Method",
+      "type": "string"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    },
+    "rule_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rule Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "FAIL",
+        "REVIEW",
+        "NO_SIGNAL",
+        "NOT_EVALUATED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "verification": {
+      "const": "NOT_VERIFIED",
+      "default": "NOT_VERIFIED",
+      "title": "Verification",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "rule_ids",
+    "reasons"
+  ],
+  "title": "C2DemoResidualAssessment",
+  "type": "object"
+}

@@ -1,53 +1,55 @@
 "use client";
 
-import type { C2DemoValidationSummary } from "@j26/common/contracts";
+import type { C2CustomDemoResponse, C2DemoValidationSummary } from "@j26/common/contracts";
 
 const labels: Record<string, string> = {
-  anonymization: "Anonymization checks", quality: "Data quality",
+  anonymization: "Residual PII checks", quality: "Data quality",
   language_id: "Language evidence", normalization: "Normalization integrity",
   tokenization: "Tokenization integrity",
 };
+const count = (value: unknown) => typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : "Unavailable";
 
-export default function RunValidation({ summary }: { summary?: C2DemoValidationSummary | null }) {
+export default function RunValidation({ summary, configuration, release }: { summary?: C2DemoValidationSummary | null; configuration?: string | null; release?: Pick<C2CustomDemoResponse, "release_ready" | "blocking_reasons" | "human_release_required"> }) {
+  const model = summary?.anonymization_strategy === "gliner" ? { id: "urchade/gliner_multi-v2.1", revision: "443d26d654e0324125a96bebd8e796c14ff2efe6" } : null;
+  const noSignal = summary?.records?.length === summary?.records_processed && summary?.records?.every(record => !!record.residual_assessment)
+    ? summary.records.filter(record => record.residual_assessment?.status === "NO_SIGNAL").length : null;
   function download() {
     if (!summary) return;
-    // Export only the backend's text-free validation object, never the demo response.
-    const url = URL.createObjectURL(new Blob([JSON.stringify(summary, null, 2)], { type: "application/json" }));
+    // Preserve backend diagnostics; add only text-free configuration provenance.
+    const report = { ...summary, ...(configuration ? { anonymization_configuration: configuration, ...(model ? { model } : {}) } : {}), ...(release ? { release_status: { release_ready: release.release_ready, blocking_reasons: release.blocking_reasons, human_release_required: release.human_release_required } } : {}) };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url; link.download = "c2-run-validation.json"; link.click();
     URL.revokeObjectURL(url);
   }
 
   return <section className="card c2-full-width c2-validation" aria-labelledby="run-validation-title">
-    <div className="detail-heading"><h2 id="run-validation-title">Run validation summary</h2>
+    <div className="detail-heading"><h2 id="run-validation-title">Automated checks</h2>
       {summary && <button className="secondary" onClick={download}>Download validation JSON</button>}</div>
-    <p>Actual backend policy and integrity checks. Pass rates are not anonymization or language accuracy.</p>
-    {!summary ? <p>No validation report returned. Run the updated backend; older saved snapshots may have no report.</p> : <>
-      <p><strong>Accuracy: Not measured for this run.</strong> Detection accuracy requires a separate labelled evaluation set.</p>
-      <p>Ruleset: <code>{summary.method}</code> · Strategy: {summary.anonymization_strategy} · Records processed: {summary.records_processed}</p>
-      <div className="c2-table-scroll" role="region" aria-label="Scrollable validation counts" tabIndex={0}><table className="c2-validation-counts">
+    {!summary ? <p>No validation report returned.</p> : <>
+      <div className="c2-validation-meta"><p>Records processed: {count(summary.records_processed)}</p></div>
+      {summary.records?.map(record => {
+        const assessment = record.residual_assessment;
+        const structured = record.checks.filter(check => ["anonymization.residual_email", "anonymization.residual_phone", "anonymization.residual_student_id"].includes(check.rule_id));
+        const status = assessment?.status;
+        return <div key={record.record_index} className="c2-residual-assessment" aria-label={`Residual assessment record ${record.record_index}`}>
+          <p><strong className={`c2-status ${status === "FAIL" ? "c2-status-fail" : status === "REVIEW" ? "c2-status-review" : "c2-status-unknown"}`}>Residual PII: {status === "NO_SIGNAL" ? "No residual signal detected" : status === "NOT_EVALUATED" ? "Not evaluated" : status ?? "Unavailable"}</strong></p>
+          {assessment && ["FAIL", "REVIEW"].includes(assessment.status) && <ul>{assessment.reasons.map(reason => <li key={reason}>{reason.replaceAll(/[-_:]/g, " ")}</li>)}</ul>}
+          <p className="hint">Structured PII pattern checks: {Object.entries({ residual_email: "Email", residual_phone: "Phone", residual_student_id: "Student ID" }).map(([rule, label], index) => {
+            const outcome = structured.find(check => check.rule_id === `anonymization.${rule}`)?.status;
+            return <span key={rule}>{index > 0 && " · "}{label}: {outcome === "PASS" ? "Pass" : outcome === "FAIL" ? "Fail" : outcome === "REVIEW" ? "Review" : outcome === "NOT_EVALUATED" ? "Not evaluated" : "Unavailable"}</span>;
+          })}</p>
+        </div>;
+      })}
+      {!summary.stages?.length ? <p>Stage counts unavailable.</p> : <div className="c2-table-scroll" role="region" aria-label="Scrollable validation counts" tabIndex={0}><table className="c2-validation-counts">
         <caption>Backend stage validation counts</caption>
-        <thead><tr><th scope="col">Stage</th><th scope="col">Checked</th><th scope="col">Pass</th><th scope="col">Fail</th><th scope="col">Review</th><th scope="col">Not evaluated</th><th scope="col">Check pass rate</th></tr></thead>
+        <thead><tr><th scope="col">Stage</th><th scope="col">Checked</th><th scope="col">Pass</th><th scope="col">Fail</th><th scope="col">Review</th><th scope="col">No signal</th><th scope="col">Not evaluated</th></tr></thead>
         <tbody>{summary.stages.map(stage => <tr key={stage.stage}>
-          <th scope="row">{labels[stage.stage]}</th><td>{stage.checked_records}</td><td>{stage.passed_records}</td>
-          <td>{stage.failed_records}</td><td>{stage.review_records}</td><td>{stage.not_evaluated_records}</td>
-          <td>{stage.pass_rate_percent == null ? "Not measured" : `${stage.pass_rate_percent.toFixed(2)}%`}</td>
+          <th scope="row">{labels[stage.stage] ?? "Unknown stage"}</th><td>{count(stage.stage === "anonymization" && noSignal !== null && typeof stage.checked_records === "number" ? stage.checked_records + noSignal : stage.checked_records)}</td><td>{count(stage.passed_records)}</td>
+          <td className={stage.failed_records > 0 ? "c2-count-fail" : undefined}>{count(stage.failed_records)}</td><td className={stage.review_records > 0 ? "c2-count-review" : undefined}>{count(stage.review_records)}</td><td>{stage.stage === "anonymization" ? noSignal ?? "Unavailable" : "—"}</td><td>{count(stage.stage === "anonymization" && noSignal !== null && typeof stage.not_evaluated_records === "number" ? stage.not_evaluated_records - noSignal : stage.not_evaluated_records)}</td>
         </tr>)}</tbody>
-      </table></div>
-      <p className="hint">Checked = pass + fail + review. Pass rate = records passing every stage rule ÷ checked records. Not-evaluated records are excluded and reported separately.</p>
-      <details><summary>Per-record rules, outcomes and code locations</summary>
-        {summary.records.map(record => <section key={record.record_index} aria-label={`Validation record ${record.record_index}`}>
-          <h3>Record {record.record_index}</h3><ul className="c2-validation-rules">{record.checks.map(check => {
-            const rule = summary.rules.find(candidate => candidate.rule_id === check.rule_id);
-            return <li key={check.rule_id}><strong>{check.status}</strong> · <code>{check.rule_id}</code>
-              <p>{rule?.description ?? "Rule definition unavailable."}</p>
-              {check.reasons.length > 0 && <p>Reasons: {check.reasons.join(", ")}</p>}
-              {rule && <p>Code location: <code>{rule.source_path}</code> → <code>{rule.source_function}()</code>. Open this path in your repository editor.</p>}
-            </li>;
-          })}</ul>
-        </section>)}
-      </details>
-      <p className="notice-inline"><strong>Residual FAIL and REVIEW signals block automated release.</strong> A passed check means no supported signal was found; it does not prove absence of all PII, semantic correctness or human release approval.</p>
+      </table></div>}
+
     </>}
   </section>;
 }

@@ -16,7 +16,7 @@ from preprocessing.text_processing import PLACEHOLDER
 if TYPE_CHECKING:
     from preprocessing.pipeline import PipelineOutput
 
-VERSION = "c2-output-validation-v1.1+residual-output-v1"
+VERSION = "c2-output-validation-v1.2+residual-output-v1"
 STAGES = ("anonymization", "quality", "language_id", "normalization", "tokenization")
 SOURCE = "services/preprocessing/validation.py"
 
@@ -177,8 +177,6 @@ def check_residual_output(record):
                 if any(s.status == "FAIL" for s in found)
                 else "REVIEW"
                 if found
-                else "PASS"
-                if record.anonymized_text.strip()
                 else "NOT_EVALUATED",
                 tuple(s.reason for s in found) if found else ("no_signal_not_verified_anonymity",),
             )
@@ -253,6 +251,35 @@ def check_tokens(record):
     ]
 
 
+def residual_assessment(record):
+    """No signal is an explicit abstention, not a passed open-ended NER test."""
+    signals = assess_output(record.anonymized_text)
+    status = (
+        "FAIL"
+        if any(s.status == "FAIL" for s in signals)
+        else "REVIEW"
+        if signals or record.requires_privacy_review is True
+        else "NO_SIGNAL"
+        if record.anonymized_text.strip()
+        else "NOT_EVALUATED"
+    )
+    reasons = list(dict.fromkeys(s.reason for s in signals))
+    if record.requires_privacy_review is True and "privacy_review_required" not in reasons:
+        reasons.append("privacy_review_required")
+    return {
+        "status": status,
+        "verification": "NOT_VERIFIED",
+        "method": "c2-residual-output-v1",
+        "rule_ids": list(dict.fromkeys(s.rule_id for s in signals)),
+        "reasons": reasons
+        or [
+            "no_signal_not_verified_anonymity"
+            if record.anonymized_text.strip()
+            else "no_usable_anonymized_text"
+        ],
+    }
+
+
 def build_validation_summary(records: tuple[PipelineOutput, ...], *, strategy: str):
     """Report ordinal positions, rule IDs and outcomes; never submitted text/values/IDs.
 
@@ -262,6 +289,7 @@ def build_validation_summary(records: tuple[PipelineOutput, ...], *, strategy: s
     rows = [
         {
             "record_index": index,
+            "residual_assessment": residual_assessment(record),
             "checks": [
                 check
                 for function in (
