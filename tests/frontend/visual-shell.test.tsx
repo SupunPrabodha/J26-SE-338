@@ -2,7 +2,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import { AccountMenu, SafetyNotice, StaffFrame } from "@j26/common/ui";
-import Dashboard from "../../apps/counsellor-dashboard/app/page";
+import Dashboard from "../../apps/counsellor-dashboard/components/counsellor-workspace";
 import AdminConsole from "../../apps/counsellor-dashboard/components/admin-console";
 
 afterEach(() => vi.unstubAllGlobals());

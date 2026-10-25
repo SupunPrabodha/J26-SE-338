@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@j26/common/api";
 import type { DemoEvidence as Evidence, DemoRunPage } from "@j26/common/contracts";
-import { AppDialog, AppNavigation, DemoHeader, Icon, SafetyNotice, StatusBadge, humanLabel } from "@j26/common/ui";
+import { AppDialog, DemoHeader, Icon, SafetyNotice, StatusBadge, humanLabel } from "@j26/common/ui";
 import { DemoEvidence, DemoOverview } from "./demo-panels";
 import { checklist, groupImplementation, groupSummaries, privacyGroups, secondaryIds, type Check } from "./checklist-rules";
 
@@ -51,7 +51,7 @@ export default function DemoChecklist() {
   const activeGroup = privacyGroups.find(group => group.id === dialog);
   const detailRows = activeGroup ? rows.filter(row => (activeGroup.ids as readonly string[]).includes(row.id)) : dialog === "reliability" ? rows.filter(row => secondaryIds.includes(row.id)) : [];
   function restart() { setDialog(null); setStale(true); setEvidence(null); setConnection("Checking owner session…"); setRefresh(n => n + 1); }
-  return <div className="student-application"><AppNavigation active="demo" /><main className="student-evidence-page">
+  return <main className="student-evidence-page">
     <div className="evidence-hero"><DemoHeader title="Infrastructure Privacy and Security — Component 1" subtitle="PP1 · Consent, access, routing, traceability and disposal" /><span className="evidence-hero-symbol" aria-hidden="true"><Icon name="shield" /></span></div>
     <SafetyNotice />
     <nav className="demo-nav" aria-label="Applications"><a href="/" target="_blank" rel="noopener noreferrer">Open student submission</a><a href="http://localhost:3001" target="_blank" rel="noopener noreferrer">Open counsellor application</a></nav>
@@ -82,7 +82,7 @@ export default function DemoChecklist() {
       {dialog === "receipts" ? <><p>Allowlisted event types and timestamps only. No raw text, review contents or audit payloads.</p>{evidence && !stale ? <><ul>{evidence.receipts.map((receipt,index) => <li key={index}>{receipt.event} · <time dateTime={receipt.occurred_at}>{new Date(receipt.occurred_at).toLocaleString()}</time></li>)}</ul>{evidence.receipts_truncated && <p>Latest 50 receipts shown; earlier events omitted.</p>}</> : <p className="empty">No current receipt evidence available. Select a run and refresh.</p>}</> : detailRows.map(row => <article className="control-evidence" key={row.id} data-check={row.id}><h3><span className="requirement-id">{row.id}</span>{row.title}</h3><dl><div><dt>Implementation</dt><dd><StatusBadge value={row.implementation} /></dd></div><div><dt>Evidence</dt><dd><span className="status-badge" data-result={row.result}>{row.result}</span></dd></div><div><dt>Source</dt><dd>{row.source}</dd></div>{row.approval && <div><dt>External approval</dt><dd>{row.approval}</dd></div>}{row.readiness && <div><dt>Deployment / integration readiness</dt><dd>{row.readiness}</dd></div>}{row.evaluation && <div><dt>Evaluation gap</dt><dd>{row.evaluation}</dd></div>}</dl><p>{row.detail}</p>{row.time && <p className="hint">Observation/event time: <time dateTime={row.time}>{new Date(row.time).toLocaleString()}</time></p>}<p className="notice-inline">{row.missing}</p></article>)}
     </AppDialog>}
     <footer>J26-SE-338 · Local research workspace</footer>
-  </main></div>;
+  </main>;
 }
 
 function EvidenceSummary({ rows }: { rows: Check[] }) {

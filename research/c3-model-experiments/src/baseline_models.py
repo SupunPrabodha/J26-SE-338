@@ -9,25 +9,22 @@ and evaluates on the 20% held-out test splits to establish the performance floor
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
-
-# Add current src directory to sys.path so imports resolve both in IDE and across execution CWDs
-CURRENT_DIR = Path(__file__).resolve().parent
-if str(CURRENT_DIR) not in sys.path:
-    sys.path.insert(0, str(CURRENT_DIR))
-
-import json
 from typing import Any
 
 import pandas as pd
-from data_loader import EKMAN_LABELS, load_dreaddit_dataset, load_goemotions_dataset  # type: ignore
-from metrics import evaluate_predictions, save_confusion_matrix_plot  # type: ignore
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
+
+# Add current src directory to sys.path so imports resolve both in IDE and across execution CWDs
+CURRENT_DIR = Path(__file__).resolve().parent
+if str(CURRENT_DIR) not in sys.path:
+    sys.path.insert(0, str(CURRENT_DIR))
 
 
 def train_and_eval_pipeline(
@@ -39,6 +36,8 @@ def train_and_eval_pipeline(
     output_dir: Path,
 ) -> dict[str, Any]:
     """Builds, trains, and evaluates a TF-IDF + Classifier pipeline."""
+    from metrics import evaluate_predictions, save_confusion_matrix_plot
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if classifier_name == "LogisticRegression":
@@ -92,6 +91,8 @@ def train_and_eval_pipeline(
 
 def run_all_baselines(output_dir: str = "results/baselines") -> dict[str, Any]:
     """Runs all TF-IDF baselines on Dreaddit and GoEmotions."""
+    from data_loader import EKMAN_LABELS, load_dreaddit_dataset, load_goemotions_dataset
+
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
 

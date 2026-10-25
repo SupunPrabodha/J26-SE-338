@@ -198,6 +198,51 @@ def test_queue_does_not_publish_expired_consent(ready):
     assert not reviewer.get("/api/v1/review-queue").json()["items"]
 
 
+def test_completed_queue_save_complete_reopen_withdraw_and_foreign_counsellor(ready):
+    import secrets
+
+    from orchestrator import auth
+    from research_common.database import Account
+
+    owner, reviewer, task, case, _ = ready
+    queue = "/api/v1/review-queue?state=COMPLETED"
+    record = f"/api/v1/review-tasks/{task}/record"
+    assert not reviewer.get(queue).json()["items"]  # Processing complete is not review complete.
+    assert action(reviewer, task, "START_REVIEW").status_code == 200
+    saved = reviewer.post(record, json=payload()).json()
+    assert not reviewer.get(queue).json()["items"]  # Saving alone does not complete the review.
+    assert action(reviewer, task, "COMPLETE_REVIEW").status_code == 200
+    for _ in range(2):
+        page = reviewer.get(queue).json()
+        assert [row["task_id"] for row in page["items"]] == [task]
+        assert page["items"][0]["review_completed_at"]
+        assert page["items"][0]["review_record_saved_at"] == saved["saved_at"]
+        assert reviewer.get(record).json() == saved
+        assert TEXT not in str(page)
+    name, password = str(uuid4()), secrets.token_urlsafe(36)
+    with Session(engine()) as db, db.begin():
+        db.add(
+            Account(role="COUNSELLOR", username=name, password_hash=auth.passwords.hash(password))
+        )
+    with TestClient(app, headers=owner.headers) as foreign:
+        assert (
+            foreign.post(
+                "/api/v1/auth/login", json={"username": name, "password": password}
+            ).status_code
+            == 200
+        )
+        assert not foreign.get(queue).json()["items"]
+        assert foreign.get(record).status_code == 404
+    assert (
+        owner.post(
+            f"/api/v1/cases/{case}/withdraw", json={"idempotency_key": str(uuid4())}
+        ).status_code
+        == 200
+    )
+    assert not reviewer.get(queue).json()["items"]
+    assert reviewer.get(record).status_code in {403, 404}
+
+
 def test_queue_pagination_and_inclusive_audit_date_filters(ready, accounts):
     from conftest import submit_fixture
     from orchestrator.workflow import claim_job, process_job

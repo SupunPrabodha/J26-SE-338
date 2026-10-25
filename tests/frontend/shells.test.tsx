@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import { ErrorMessage, SafetyNotice } from "@j26/common/ui";
 import StudentPortal from "../../apps/student-portal/app/page";
-import Dashboard from "../../apps/counsellor-dashboard/app/page";
+import Dashboard from "../../apps/counsellor-dashboard/components/counsellor-workspace";
 
 afterEach(() => vi.unstubAllGlobals());
 
