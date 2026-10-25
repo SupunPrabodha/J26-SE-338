@@ -1,6 +1,8 @@
 "use client";
 
-import { Component, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Component, createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function SafetyNotice() {
   const [open, setOpen] = useState(false);
@@ -97,7 +99,7 @@ export function AccountMenu({ role, busy = false, onSignOut, workspace }: { role
     }
   }}>
     <button ref={trigger} className="account-trigger" aria-label={`${roleLabel(role)} account`} aria-expanded={open} aria-haspopup="menu" aria-controls={open ? id : undefined} disabled={busy} onClick={() => setOpen(value => !value)}><span className="account-avatar"><Icon name="account" /></span><span>{roleLabel(role)}</span><Icon name="chevron" /></button>
-    {open && <div id={id} className="account-dropdown" role="menu" aria-label="Account menu"><p>Signed in as {roleLabel(role)}</p><a ref={item} role="menuitem" href={`/account?workspace=${workspace || (role === "ADMIN" ? "admin" : role === "RESEARCHER" ? "research" : "counsellor")}`} onClick={() => setOpen(false)}><Icon name="account" />Account profile</a><button role="menuitem" disabled={busy} onClick={() => { setOpen(false); onSignOut(); }}><Icon name="logout" />Sign out</button></div>}
+    {open && <div id={id} className="account-dropdown" role="menu" aria-label="Account menu"><p>Signed in as {roleLabel(role)}</p><Link ref={item} role="menuitem" prefetch={false} href={`/account?workspace=${workspace || (role === "ADMIN" ? "admin" : role === "RESEARCHER" ? "research" : "counsellor")}`} onClick={() => setOpen(false)}><Icon name="account" />Account profile</Link><button role="menuitem" disabled={busy} onClick={() => { setOpen(false); onSignOut(); }}><Icon name="logout" />Sign out</button></div>}
   </div>;
 }
 
@@ -105,11 +107,53 @@ export function AppNavigation({ active, role, children }: { active: "student" | 
   const links = active === "student" || active === "demo"
     ? [{ id: "student", label: "Your reflection", href: "/" }, { id: "demo", label: "C1 evidence", href: "/demo" }]
     : [{ id: "counsellor", label: "Case workspace", href: "/" }, { id: "admin", label: "Administration", href: "/admin/overview" }, { id: "research", label: "C2–C4 routes", href: "/research" }].filter(link => link.id === active || link.id === "research" || (role === "ADMIN" && link.id === "admin") || (role === "COUNSELLOR" && link.id === "counsellor"));
-  return <nav className="app-nav" aria-label="Main navigation"><a className="brand" href={active === "student" || active === "demo" ? "/" : "http://localhost:3000"}><span className="brand-mark" aria-hidden="true">W</span><span>Wellbeing<span className="brand-caption">Research workspace · J26-SE-338</span></span></a>
-    <div className="nav-links">{links.map(link => <a key={link.id} href={link.href} aria-current={link.id === active ? "page" : undefined}>{link.label}</a>)}</div>{children}</nav>;
+  const brand = <><span className="brand-mark" aria-hidden="true">W</span><span>Wellbeing<span className="brand-caption">Research workspace · J26-SE-338</span></span></>;
+  const home = active === "admin" ? "/admin/overview" : active === "research" ? "/research" : "/";
+  return <nav className="app-nav" aria-label="Main navigation"><Link className="brand" prefetch={false} href={home}>{brand}</Link>
+    <div className="nav-links">{links.map(link => <Link key={link.id} prefetch={false} href={link.href} aria-current={link.id === active ? "page" : undefined}>{link.label}</Link>)}</div>{children}</nav>;
 }
 
-export function StaffFrame({ area, current, authorized, role, busy, onSignOut, children }: { area: "admin" | "counsellor" | "research"; current: string; authorized: boolean; role?: string; busy?: boolean; onSignOut?: () => void; children: ReactNode }) {
+type FrameOptions = { area: "admin" | "counsellor" | "research"; current: string; authorized: boolean; role?: string; busy?: boolean; checking?: boolean; onSignOut?: () => void };
+type FrameRegistration = { publish: (owner: string, options: FrameOptions) => void; release: (owner: string) => void };
+const FrameContext = createContext<FrameRegistration | null>(null);
+
+// The root layout owns one shell. Pages publish chrome metadata, never protected data.
+// Page authorization, API reads and cleanup remain independent of this presentation state.
+export function StaffWorkspace({ children }: { children: ReactNode }) {
+  const pathname = usePathname() || "/";
+  const [frame, setFrame] = useState<FrameOptions & { owner?: string }>({ area: pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/research") ? "research" : "counsellor", current: "", authorized: false });
+  const publish = useCallback((owner: string, options: FrameOptions) => {
+    setFrame(previous => ({ ...options, owner, busy: options.busy || options.checking,
+      // Keep only same-realm navigation visible while the new page checks its session.
+      // This flag never authorizes page contents or an API request.
+      authorized: options.checking && previous.area === options.area ? previous.authorized || options.authorized : options.authorized,
+      role: options.role || (options.checking && previous.area === options.area ? previous.role : undefined),
+    }));
+  }, []);
+  const release = useCallback((owner: string) => {
+    // Do not leave an unmounted page's logout callback interactive during a transition.
+    setFrame(previous => previous.owner === owner ? { ...previous, busy: true } : previous);
+  }, []);
+  const registration = useMemo(() => ({ publish, release }), [publish, release]);
+  return <FrameContext.Provider value={registration}><StaffChrome {...frame}>{children}</StaffChrome></FrameContext.Provider>;
+}
+
+export function StudentWorkspace({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return <div className="student-application"><AppNavigation active={pathname === "/demo" ? "demo" : "student"} />{children}</div>;
+}
+
+export function StaffFrame({ children, ...options }: FrameOptions & { children: ReactNode }) {
+  const registration = useContext(FrameContext), owner = useId();
+  const { area, current, authorized, role, busy, checking, onSignOut } = options;
+  useLayoutEffect(() => {
+    registration?.publish(owner, { area, current, authorized, role, busy, checking, onSignOut });
+  }, [registration, owner, area, current, authorized, role, busy, checking, onSignOut]);
+  useLayoutEffect(() => () => registration?.release(owner), [registration, owner]);
+  return registration ? children : <StaffChrome {...options}>{children}</StaffChrome>;
+}
+
+function StaffChrome({ area, current, authorized, role, busy, onSignOut, children }: FrameOptions & { children: ReactNode }) {
   const [drawer, setDrawer] = useState(false);
   useEffect(() => { if (!authorized) void Promise.resolve().then(() => setDrawer(false)); }, [authorized]);
   useEffect(() => {
@@ -126,7 +170,7 @@ export function StaffFrame({ area, current, authorized, role, busy, onSignOut, c
     ["operations", "Workflow / services", "/admin/operations"], ["retention", "Retention overview", "/admin/retention"],
   ] : resolvedRole === "COUNSELLOR" ? [["queue", "Assigned cases", "/"], ["completed", "Completed reviews", "/?state=COMPLETED"]] : [["research", "Research directory", "/research"]];
   links.push(["profile", "Account profile", `/account?workspace=${area}`]);
-  const navigation = <div className="sidebar-content"><p className="eyebrow">{resolvedRole === "ADMIN" ? "Administration" : resolvedRole === "COUNSELLOR" ? "Review workspace" : "Research workspace"}</p><nav aria-label="Workspace sections">{links.map(([id, label, href]) => <a key={id} href={href} onClick={() => setDrawer(false)} aria-current={id === current ? "page" : undefined}><Icon name={id} />{label}</a>)}</nav><div className="sidebar-boundary"><p className="eyebrow">Integrations</p><a href="/research" aria-current={current === "research" ? "page" : undefined} onClick={() => setDrawer(false)}><Icon name="research" />Component directory</a></div><p className="sidebar-footnote">J26-SE-338<span>Local research workspace</span></p></div>;
+  const navigation = <div className="sidebar-content"><p className="eyebrow">{resolvedRole === "ADMIN" ? "Administration" : resolvedRole === "COUNSELLOR" ? "Review workspace" : "Research workspace"}</p><nav aria-label="Workspace sections">{links.map(([id, label, href]) => <Link key={id} prefetch={false} href={href} onClick={() => setDrawer(false)} aria-current={id === current ? "page" : undefined}><Icon name={id} />{label}</Link>)}</nav><div className="sidebar-boundary"><p className="eyebrow">Integrations</p><Link prefetch={false} href="/research" aria-current={current === "research" ? "page" : undefined} onClick={() => setDrawer(false)}><Icon name="research" />Component directory</Link></div><p className="sidebar-footnote">J26-SE-338<span>Local research workspace</span></p></div>;
   return <div className={`staff-application ${authorized ? "has-sidebar" : ""}`} data-area={area}><header className="staff-topbar"><AppNavigation active={area} role={authorized ? resolvedRole : undefined}>{authorized && onSignOut && <AccountMenu key={resolvedRole} role={resolvedRole} busy={busy} onSignOut={onSignOut} workspace={area} />}</AppNavigation>{authorized && <button className="drawer-toggle secondary" aria-label="Open workspace navigation" aria-expanded={drawer} aria-haspopup="dialog" onClick={() => setDrawer(true)}><Icon name="menu" />Menu</button>}</header>
     <div className="workspace-shell">{authorized && <aside className="staff-sidebar" aria-label={`${area} workspace navigation`}>{navigation}</aside>}<div className="workspace-main">{children}</div></div>
     {authorized && drawer && <AppDialog title="Workspace navigation" className="navigation-drawer" onClose={() => setDrawer(false)}>{navigation}</AppDialog>}

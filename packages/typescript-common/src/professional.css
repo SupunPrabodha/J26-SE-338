@@ -168,3 +168,14 @@ tbody tr:nth-child(even) { background: #fafcf8; }tbody tr:hover { background: #f
 }
 @media (max-width: 420px) { .student-application > .app-nav { gap: 12px; }.student-application > .app-nav .nav-links { border-top: 0; padding: 0; width: auto; margin-left: auto; }.student-application > .app-nav .nav-links a { font-size: .69rem; padding: 8px; }.student-application .brand { font-size: .92rem; gap: 8px; }.student-application .brand-caption { font-size: .5rem; }.reflection-hero h1 { font-size: 2.7rem; }.hero-secondary { font-size: .78rem; }.reflection-hero-copy { padding: 26px 20px 12px; }.hero-kicker { font-size: .62rem; }.hero-footnote { font-size: .63rem; }.reflection-art { height: 205px; }.student-home .steps span { display: inline-grid; }.student-home .section-heading { gap: 9px; }.student-home .section-heading > .ui-icon { width: 17px; height: 17px; flex-basis: 17px; }.admin-welcome .button-link { width: 100%; }.admin-welcome .hero-actions { gap: 16px; }.evidence-tabs button { font-size: .7rem; padding: 10px; }.evidence-hero { padding: 22px 20px; } }
 @media (prefers-reduced-motion: no-preference) { .button-link,.metric-card { transition: background-color 160ms ease,box-shadow 160ms ease; }.metric-card:hover { box-shadow: 0 8px 24px #193b280c; } }
+
+/* Only the route outlet loads; the root layout keeps the navigation mounted. */
+.route-loading { min-height: 60vh; }
+.route-loading > p[role="status"] { color: var(--muted, #62756b); }
+.route-skeleton { display: grid; gap: 18px; margin-top: 28px; }
+.route-skeleton span { display: block; height: 84px; border: 1px solid #dce5df; border-radius: 16px; background: #edf1eb; }
+.route-skeleton span:first-child { height: 180px; }
+@media (prefers-reduced-motion: no-preference) {
+  .route-skeleton span { animation: route-loading-pulse 1.4s ease-in-out infinite alternate; }
+  @keyframes route-loading-pulse { to { opacity: .45; } }
+}

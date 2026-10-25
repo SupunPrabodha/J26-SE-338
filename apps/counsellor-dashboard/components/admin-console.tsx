@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { adminApi, ApiError } from "@j26/common/api";
 import { AppDialog, ChangeConfirmation, useDialogAccess, DemoHeader, ErrorMessage, SafetyNotice, StaffFrame, StaffSignIn, humanLabel, StatusBadge } from "@j26/common/ui";
 import type { AccountResponse, AdminCasePage, AdminCaseSummary, AdminOverview, StaffPage, StaffSummary, StaffUpdateRequest } from "@j26/common/contracts";
@@ -86,7 +87,7 @@ export default function AdminConsole({ section }: { section: AdminSection }) {
   }
   const next = section === "staff" ? staff?.next_offset : cases?.next_offset;
   const observedAt = section === "staff" ? staff?.observed_at : section === "overview" ? overview?.observed_at : cases?.observed_at;
-  return <StaffFrame area="admin" current={section} authorized={authorized} busy={busy} onSignOut={() => act(async () => { clear(); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
+  return <StaffFrame area="admin" current={section} authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { clear(); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
     <DemoHeader title={titles[section]} subtitle="Authorized staff administration and metadata-only operations." /><SafetyNotice />{!selectedStaff && !selectedCase && !metadata && <ErrorMessage message={error} />}
     {checking ? <section className="card empty" role="status">Checking administrative access…</section> : !authorized ? <StaffSignIn kind="admin" busy={busy} onSubmit={login} /> : <>
       <div className="toolbar"><div><h2>{section === "overview" ? "Current system snapshot" : "Records"}</h2><p className="hint">{observedAt ? `Observed ${stamp(observedAt)}` : "Refresh to load current evidence."}</p></div><button className="secondary" disabled={busy} onClick={() => act(() => read())}>Refresh view</button></div>
@@ -103,7 +104,7 @@ export default function AdminConsole({ section }: { section: AdminSection }) {
 
       {section !== "overview" && <div className="pagination"><button className="secondary" disabled={busy || offset === 0} onClick={() => { const page = Math.max(0, offset - 20); setOffset(page); void act(() => read(filters, page)); }}>Previous page</button><span className="hint">20 records per page · bounded filters</span><button className="secondary" disabled={busy || next == null} onClick={() => { const page = next!; setOffset(page); void act(() => read(filters, page)); }}>Next page</button></div>}
       {section === "retention" && <section className="card boundaries"><h2>Development retention policy</h2><p>Derived evidence and review contents are disposed on withdrawal or after the configured {overview?.retention_hours ?? "server-defined"} hours. Minimal permitted receipts remain. Consent expiry blocks review independently of the retention deadline.</p><p className="hint">This screen cannot change policy or delete records. The period is a development configuration, not institutional approval. Times above are case deadlines and last-case-update times, not invented disposal times.</p></section>}
-      {section === "operations" && <section className="card boundaries"><h2>Service boundaries</h2><p>Current C2 preprocessing, C3 inference and C4 explanation providers are development mocks. No arbitrary retry, job execution or database control is provided.</p><a href="/research">Inspect the protected route directory ↗</a></section>}
+      {section === "operations" && <section className="card boundaries"><h2>Service boundaries</h2><p>Current C2 preprocessing, C3 inference and C4 explanation providers are development mocks. No arbitrary retry, job execution or database control is provided.</p><Link prefetch={false} href="/research">Inspect the protected route directory ↗</Link></section>}
     </>}
     {(selectedStaff || selectedCase || metadata) && <AppDialog title={pending?.title || (selectedStaff ? `Manage staff ${selectedStaff.account_id.slice(0,8)}` : selectedCase ? `Assign case ${selectedCase.case_id.slice(0,8)}` : "Case metadata")} busy={busy} dirty={!!selectedStaff && (role !== selectedStaff.role || enabled !== selectedStaff.enabled) || !!selectedCase && recipient !== (selectedCase.assignment_count === 1 ? selectedCase.counsellors[0]?.account_id || "" : "")} onClose={() => { setSelectedStaff(null); setSelectedCase(null); setMetadata(null); setPending(null); setCounsellors([]); }}>
       {pending ? <ChangeConfirmation description={pending.description} busy={busy} error={error} onCancel={() => setPending(null)} onConfirm={() => act(async () => { await pending.execute(); setPending(null); })} /> : <>

@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
-import Dashboard from "../../apps/counsellor-dashboard/app/page";
+import Dashboard from "../../apps/counsellor-dashboard/components/counsellor-workspace";
 import { checklist } from "../../apps/student-portal/components/checklist-rules";
 import type { DemoEvidence } from "@j26/common/contracts";
 

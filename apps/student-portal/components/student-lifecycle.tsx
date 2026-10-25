@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@j26/common/api";
-import { AppNavigation, ReflectionHero, ReflectionPrinciples, Icon, ErrorMessage, SafetyNotice, WithdrawalDialog, processingLabel, reviewLabel } from "@j26/common/ui";
+import { ReflectionHero, ReflectionPrinciples, Icon, ErrorMessage, SafetyNotice, WithdrawalDialog, processingLabel, reviewLabel } from "@j26/common/ui";
 import type { ConsentLifecycle, ConsentRecord, FixturesResponse, PseudonymousCase } from "@j26/common/contracts";
 
 export default function StudentLifecycle() {
@@ -88,7 +88,7 @@ export default function StudentLifecycle() {
 
   const progressLabel = operation === "consent" ? "Recording consent…" : operation === "submission" ? "Submitting text…" : operation === "withdrawal" ? "Recording withdrawal…" : "Refreshing status…";
 
-  return <div className="student-application"><AppNavigation active="student" /><main className="student-home">
+  return <main className="student-home">
     <ReflectionHero />
     <SafetyNotice />
     <ReflectionPrinciples />
@@ -165,5 +165,5 @@ export default function StudentLifecycle() {
       setConfirming(false); setMessage("Withdrawal recorded. Further processing and review are blocked.");
     })} />}
     <footer className="student-footer"><span className="footer-brand"><Icon name="leaf" />Wellbeing</span><span>Screening support · Authorized human interpretation</span><span>J26-SE-338 · Synthetic research workspace</span></footer>
-  </main></div>;
+  </main>;
 }
