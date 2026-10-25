@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Set
 
 # Ensure UTF-8 output on Windows
 if hasattr(sys.stdout, "reconfigure"):
@@ -37,15 +36,15 @@ def unify_youtube_corpus(
         return
 
     txt_files = list(vid_path.glob("*.txt"))
-    print(f"\n=======================================================")
+    print("\n=======================================================")
     print(f" UNIFYING YOUTUBE CORPUS ({len(txt_files)} files found)")
-    print(f"=======================================================")
+    print("=======================================================")
 
-    unique_youtube: Set[str] = set()
+    unique_youtube: set[str] = set()
     total_raw_lines = 0
 
     for file_path in txt_files:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             for line in f:
                 total_raw_lines += 1
                 cleaned = line.strip()
@@ -64,10 +63,10 @@ def unify_youtube_corpus(
     print(f"✓ Saved YouTube unified corpus to: '{out_yt.resolve()}'")
 
     # 2. Merge into master adaptation corpus (combining with UOM if present)
-    master_set: Set[str] = set(unique_youtube)
+    master_set: set[str] = set(unique_youtube)
 
     if uom_path.exists():
-        with open(uom_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(uom_path, encoding="utf-8", errors="ignore") as f:
             for line in f:
                 cleaned = line.strip()
                 if cleaned and not cleaned.startswith("#"):
@@ -80,7 +79,7 @@ def unify_youtube_corpus(
 
     print(f"✓ Final Master Adaptation Corpus:  {len(master_set):,} total unique sentences!")
     print(f"✓ Saved Master Corpus to:          '{out_master.resolve()}'")
-    print(f"=======================================================\n")
+    print("=======================================================\n")
 
 
 if __name__ == "__main__":
