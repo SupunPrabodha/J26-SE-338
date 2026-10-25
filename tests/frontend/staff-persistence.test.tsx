@@ -2,7 +2,7 @@ import React from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import ResearchDirectory from "../../apps/counsellor-dashboard/app/research/page";
-import Dashboard from "../../apps/counsellor-dashboard/app/page";
+import Dashboard from "../../apps/counsellor-dashboard/components/counsellor-workspace";
 import AdminConsole from "../../apps/counsellor-dashboard/components/admin-console";
 import AccountProfile from "../../apps/counsellor-dashboard/components/account-profile";
 import { AccountMenu } from "@j26/common/ui";

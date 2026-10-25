@@ -66,7 +66,7 @@ export default function Operations() {
       setAuthorized(true); setCursor(null); setHistory([]); await read(initial, null);
     });
   }
-  return <StaffFrame area="admin" current="audit" authorized={authorized} busy={busy} onSignOut={() => act(async () => { setPage(null); setDetail(null); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
+  return <StaffFrame area="admin" current="audit" authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { setPage(null); setDetail(null); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
     <DemoHeader title="Operational evidence" subtitle="Restricted lifecycle receipts, policy outcomes and service provenance." />
     <SafetyNotice /><ErrorMessage message={error} />
     {checking ? <section className="card empty" role="status">Checking administrative access…</section> : !authorized ? <StaffSignIn kind="admin" busy={busy} onSubmit={login} /> : <>

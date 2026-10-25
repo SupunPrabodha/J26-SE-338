@@ -12,18 +12,17 @@ Computes:
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import (
     accuracy_score,
-    precision_recall_fscore_support,
+    brier_score_loss,
     classification_report,
     confusion_matrix,
-    brier_score_loss,
+    precision_recall_fscore_support,
 )
 
 
@@ -34,7 +33,7 @@ def compute_expected_calibration_error(
 ) -> float:
     """
     Computes Expected Calibration Error (ECE).
-    
+
     Args:
         y_true: Ground truth class indices of shape (N,).
         y_prob: Predicted class probabilities of shape (N, num_classes).
@@ -61,11 +60,11 @@ def compute_expected_calibration_error(
 
 
 def evaluate_predictions(
-    y_true: np.ndarray | List[int],
-    y_pred: np.ndarray | List[int],
-    y_prob: Optional[np.ndarray] = None,
-    target_names: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    y_true: np.ndarray | list[int],
+    y_pred: np.ndarray | list[int],
+    y_prob: np.ndarray | None = None,
+    target_names: list[str] | None = None,
+) -> dict[str, Any]:
     """
     Computes full evaluation suite for classification models.
     """
@@ -80,7 +79,7 @@ def evaluate_predictions(
         y_true_arr, y_pred_arr, average="weighted", zero_division=0
     )
 
-    metrics: Dict[str, Any] = {
+    metrics: dict[str, Any] = {
         "accuracy": round(float(acc), 4),
         "f1_macro": round(float(f1_macro), 4),
         "precision_macro": round(float(p_macro), 4),
@@ -108,19 +107,19 @@ def evaluate_predictions(
 
 
 def save_confusion_matrix_plot(
-    y_true: np.ndarray | List[int],
-    y_pred: np.ndarray | List[int],
-    labels: List[str],
+    y_true: np.ndarray | list[int],
+    y_pred: np.ndarray | list[int],
+    labels: list[str],
     output_path: Path | str,
     title: str = "Confusion Matrix",
 ) -> None:
     """Renders and saves a confusion matrix visualization."""
     cm = confusion_matrix(y_true, y_pred)
-    
+
     fig, ax = plt.subplots(figsize=(6, 5))
     im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
     ax.figure.colorbar(im, ax=ax)
-    
+
     ax.set(
         xticks=np.arange(cm.shape[1]),
         yticks=np.arange(cm.shape[0]),
@@ -137,11 +136,14 @@ def save_confusion_matrix_plot(
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             ax.text(
-                j, i, format(cm[i, j], "d"),
-                ha="center", va="center",
-                color="white" if cm[i, j] > thresh else "black"
+                j,
+                i,
+                format(cm[i, j], "d"),
+                ha="center",
+                va="center",
+                color="white" if cm[i, j] > thresh else "black",
             )
-            
+
     fig.tight_layout()
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)

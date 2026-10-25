@@ -8,27 +8,22 @@ and evaluates on the 20% held-out test splits to establish the performance floor
 
 from __future__ import annotations
 
-import os
+import json
 import sys
 from pathlib import Path
+from typing import Any
+
+import pandas as pd
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.svm import LinearSVC
 
 # Add current src directory to sys.path so imports resolve both in IDE and across execution CWDs
 CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_DIR))
-
-import json
-from typing import Dict, Any
-
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import LinearSVC
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.pipeline import Pipeline
-
-from data_loader import load_dreaddit_dataset, load_goemotions_dataset, EKMAN_LABELS  # type: ignore
-from metrics import evaluate_predictions, save_confusion_matrix_plot  # type: ignore
 
 
 def train_and_eval_pipeline(
@@ -38,10 +33,12 @@ def train_and_eval_pipeline(
     target_names: list[str],
     dataset_name: str,
     output_dir: Path,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Builds, trains, and evaluates a TF-IDF + Classifier pipeline."""
+    from metrics import evaluate_predictions, save_confusion_matrix_plot
+
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     if classifier_name == "LogisticRegression":
         clf = LogisticRegression(max_iter=1000, C=1.0, random_state=42)
     elif classifier_name == "SVM":
@@ -50,10 +47,12 @@ def train_and_eval_pipeline(
     else:
         raise ValueError(f"Unknown classifier: {classifier_name}")
 
-    pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(ngram_range=(1, 2), max_features=10000, sublinear_tf=True)),
-        ("clf", clf),
-    ])
+    pipeline = Pipeline(
+        [
+            ("tfidf", TfidfVectorizer(ngram_range=(1, 2), max_features=10000, sublinear_tf=True)),
+            ("clf", clf),
+        ]
+    )
 
     print(f"Training {classifier_name} on {dataset_name} ({len(train_df)} samples)...")
     pipeline.fit(train_df["text"], train_df["label"])
@@ -85,16 +84,18 @@ def train_and_eval_pipeline(
     if "expected_calibration_error" in metrics:
         print(f"  ECE:         {metrics['expected_calibration_error']:.4f}")
     print("-" * 50)
-    
+
     return metrics
 
 
-def run_all_baselines(output_dir: str = "results/baselines") -> Dict[str, Any]:
+def run_all_baselines(output_dir: str = "results/baselines") -> dict[str, Any]:
     """Runs all TF-IDF baselines on Dreaddit and GoEmotions."""
+    from data_loader import EKMAN_LABELS, load_dreaddit_dataset, load_goemotions_dataset
+
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
-    
-    all_results: Dict[str, Any] = {}
+
+    all_results: dict[str, Any] = {}
 
     # 1. Dreaddit Benchmarks
     print("\n==========================================")

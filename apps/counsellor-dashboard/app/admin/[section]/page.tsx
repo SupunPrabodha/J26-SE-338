@@ -5,5 +5,5 @@ const sections: AdminSection[] = ["overview", "staff", "assignments", "operation
 export default async function Page({ params }: { params: Promise<{ section: string }> }) {
   const { section } = await params;
   if (!sections.includes(section as AdminSection)) notFound();
-  return <AdminConsole section={section as AdminSection} />;
+  return <AdminConsole key={section} section={section as AdminSection} />;
 }

@@ -31,6 +31,15 @@ startup/demo sequence and remaining research gaps.
 
 ## Quick start
 
+Workspace navigation uses persistent headers/sidebars and client-side internal links.
+Only the page content changes; protected pages still recheck access. See
+[the navigation change and actual browser verification](docs/evidence/c1-persistent-navigation.md).
+
+For completed-review access, researcher sign-in and current dependency/Ruff checks, see
+[the focused repair and verification record](docs/evidence/c1-completed-reviews-ci.md).
+Completed reviews require an explicit human completion action and current assignment,
+consent and retention eligibility; Remember me does not extend consent.
+
 Prerequisites: Python 3.12, Node.js 22 LTS (22.22.2+ for host tooling; tested with 22.23.3), npm, Git, Docker and Compose with Linux containers. Container bases are pinned by digest. Dependencies are pinned in `pyproject.toml`, `uv.lock`, `requirements.lock`, `package.json` and `package-lock.json`.
 
 PowerShell:
