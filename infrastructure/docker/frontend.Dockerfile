@@ -18,6 +18,7 @@ ARG APP
 ENV APP=${APP}
 COPY --from=build --chown=node:node /app/apps/${APP}/.next/standalone ./
 COPY --from=build --chown=node:node /app/apps/${APP}/.next/static ./apps/${APP}/.next/static
+COPY --from=build --chown=node:node /app/apps/${APP}/public ./apps/${APP}/public
 USER node
 EXPOSE 3000 3001
 CMD ["sh", "-c", "exec node apps/$APP/server.js"]

@@ -47,6 +47,16 @@ docker compose up --build
 
 Bootstrap creates gitignored `.env` with random development credentials and preserves existing files. Privately read `DEV_COUNSELLOR_USERNAME` and `DEV_COUNSELLOR_PASSWORD` for dashboard login. Application cookies are isolated; separate browser profiles remain recommended for clear student/counsellor demo roles. Sign in again after upgrading from the legacy shared-cookie proxy.
 
+Staff sign-in now offers **Remember me on this device**, unchecked by default. Checked
+sessions have a configurable seven-day absolute deadline (`REMEMBERED_SESSION_SECONDS=604800`);
+access tokens still expire after five minutes. Unchecked preserves the existing one-hour
+rolling session. Student consent remains limited to its original one-hour deadline.
+The protected researcher landing page is `http://localhost:3001/research`, with directory
+metadata only and an account profile menu. Create a private local researcher only when
+needed with `.venv/Scripts/python.exe scripts/provision_staff.py --role RESEARCHER`;
+the helper prints an ignored credential-file path, never its contents. See
+[mapping, session policy, permissions and actual verification](docs/evidence/c1-remembered-sessions-status.md).
+
 For the **manual-assignment PP1 demo**, explicitly override both API and worker policy:
 
 ```powershell
@@ -89,6 +99,16 @@ case references are stored in browser storage. Recorded tests and configuration 
 separately from live evidence. See the [checklist mapping and verification](docs/evidence/c1-demo-checklist.md).
 
 ## Verification
+
+The [professional student and administration redesign](docs/evidence/c1-professional-interface.md)
+adds original local artwork, a guided student reflection layout, an illustrated staff sign-in,
+an API-backed admin overview and responsive tables. It records actual production browser,
+frontend and Docker verification while preserving the existing consent/role boundaries.
+
+The [final C1 PP1 readiness audit](docs/evidence/c1-final-pp1-audit.md) maps every proposed
+FR/NFR and research objective to implementation, scoped evidence, gap ownership and next
+acceptance checks. It includes a concise demonstration script, safe claims and the investigated
+headless re-enable input limitation. It does not declare PP1 approval or a completion percentage.
 
 The [current visual design evidence](docs/evidence/c1-visual-design.md) documents the shared
 forest-green staff shell, compact account/disclosure controls, clearer tables/statuses and

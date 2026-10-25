@@ -39,12 +39,25 @@ def digest(value):
     return hashlib.sha256(value.encode()).hexdigest()
 
 
-def issue(db, account, response, family=None):
+def issue(db, account, response, family=None, remembered=False, absolute_expires_at=None):
     access_jti, refresh = str(uuid4()), secrets.token_urlsafe(48)
-    expires = (
-        min(now() + timedelta(seconds=settings().refresh_seconds), account.expires_at)
-        if account.expires_at
-        else now() + timedelta(seconds=settings().refresh_seconds)
+    # Only credentialled staff can opt in. Never extend student ownership or consent.
+    remembered = bool(remembered and account.role in {"ADMIN", "COUNSELLOR", "RESEARCHER"})
+    instant = now()
+    if remembered:
+        absolute_expires_at = absolute_expires_at or instant + timedelta(
+            seconds=settings().remembered_session_seconds
+        )
+        expires = absolute_expires_at
+    else:
+        absolute_expires_at = None
+        expires = instant + timedelta(seconds=settings().refresh_seconds)
+    if account.expires_at:
+        expires = min(expires, account.expires_at)
+    refresh_age = (
+        max(0, int((expires - instant).total_seconds()))
+        if remembered
+        else settings().refresh_seconds
     )
     db.add(
         AuthSession(
@@ -53,6 +66,8 @@ def issue(db, account, response, family=None):
             refresh_hash=digest(refresh),
             family_id=family or str(uuid4()),
             expires_at=expires,
+            remembered=remembered,
+            absolute_expires_at=absolute_expires_at,
         )
     )
     access = jwt.encode(
@@ -60,7 +75,7 @@ def issue(db, account, response, family=None):
     )
     for name, value, age in [
         ("j26_access", access, settings().access_seconds),
-        ("j26_refresh", refresh, settings().refresh_seconds),
+        ("j26_refresh", refresh, refresh_age),
     ]:
         response.set_cookie(
             name,
@@ -115,6 +130,10 @@ def lock_valid_account(db, account, request, role):
             or record.account_id != fresh.id
             or record.revoked
             or record.expires_at <= now()
+            or (
+                record.remembered
+                and (record.absolute_expires_at is None or record.absolute_expires_at <= now())
+            )
         ):
             raise SafeError(ErrorCode.AUTH_INVALID, 401)
     return fresh
@@ -141,6 +160,10 @@ def current_account(request: Request, db: Session = Depends(session), token=Depe
             not record
             or record.revoked
             or record.expires_at <= now()
+            or (
+                record.remembered
+                and (record.absolute_expires_at is None or record.absolute_expires_at <= now())
+            )
             or record.account_id != data["sub"]
             or not account_valid(account)
             or account.role != data["role"]
@@ -188,7 +211,7 @@ def login(body, request, response, db):
         audit(db, request, "AUTH_FAILURE", "DENIED")
         db.commit()
         raise SafeError(ErrorCode.AUTH_INVALID, 401)
-    issue(db, account, response)
+    issue(db, account, response, remembered=body.remember_me)
     audit(db, request, "AUTH_LOGIN", "SUCCESS")
     db.commit()
     return account
@@ -217,7 +240,15 @@ def refresh(request, response, db):
         .with_for_update()
         .execution_options(populate_existing=True)
     )
-    if record.revoked or record.expires_at <= now() or not account_valid(account):
+    if (
+        record.revoked
+        or record.expires_at <= now()
+        or (
+            record.remembered
+            and (record.absolute_expires_at is None or record.absolute_expires_at <= now())
+        )
+        or not account_valid(account)
+    ):
         db.execute(
             update(AuthSession)
             .where(AuthSession.family_id == record.family_id)
@@ -227,7 +258,14 @@ def refresh(request, response, db):
         db.commit()
         raise SafeError(ErrorCode.AUTH_INVALID, 401)
     record.revoked = True
-    issue(db, account, response, record.family_id)
+    issue(
+        db,
+        account,
+        response,
+        record.family_id,
+        remembered=record.remembered,
+        absolute_expires_at=record.absolute_expires_at,
+    )
     audit(db, request, "AUTH_REFRESH", "ROTATED")
     db.commit()
     return account

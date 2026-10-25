@@ -78,3 +78,38 @@ refresh lock account before session, serializing with staff revocation; direct c
 refresh replay still revokes the family. No token/consent lifetimes were extended.
 Private generated account provisioning: `scripts/provision_staff.py --role COUNSELLOR`.
 See [actual tests and browser evidence](../evidence/c1-role-assignment.md).
+
+## Opt-in remembered staff sessions (2026-10-25)
+
+The counsellor, administrator and researcher sign-in forms now offer an accessible,
+unchecked-by-default **Remember me on this device** checkbox. `LoginRequest.remember_me`
+is an optional strict boolean defaulting to false. Access JWTs/cookies still last 300 seconds.
+Unchecked staff sessions preserve the existing rolling 3600-second server session and
+persistent refresh-cookie policy, including its existing restart behaviour within that
+window. Unchecked is not a new browser-session-only cookie policy.
+
+Checked staff sessions use `REMEMBERED_SESSION_SECONDS`, default **604800 seconds (7 days)**,
+validated between 3600 and 2592000 seconds (1 hour–30 days). The initial issuance records
+an absolute family deadline; rotation retains that deadline and cookies receive only its
+remaining lifetime. Account expiry can shorten it. Refresh does not start another seven
+days. The server rejects missing/elapsed remembered deadlines, revoked/expired rows and
+disabled/expired accounts. Existing staff role/enable changes and credential revocation
+still revoke relevant sessions. Logout revokes the family and deletes both cookies.
+
+The existing HttpOnly, host-only, `/api/v1`, SameSite=Strict, CSRF, namespace, Web Lock,
+single-retry and replay protections remain. `COOKIE_SECURE=true` is still required for
+future HTTPS; local HTTP uses false and does not establish production TLS. No password,
+token or account profile is persisted by application code in browser storage.
+
+Student issuance ignores this staff option. Student accounts and consent retain their
+original fixed one-hour deadline. Successful staff refresh cannot restore withdrawn,
+expired, disposed or unassigned case access.
+
+`GET /api/v1/auth/profile` returns only the authenticated staff account's ID, role, enabled
+flag, creation/account-expiry dates and current session deadline/remembered flag. It returns
+no handle, password, token, refresh identifier, student identity or case contents. The
+`/account?workspace=admin|counsellor|research` shell uses the corresponding existing proxy
+realm. RESEARCHER still has component-directory metadata only. Provision privately with
+`scripts/provision_staff.py --role RESEARCHER`; public privileged registration is not added.
+
+See [mapping, session, researcher and actual restart evidence](../evidence/c1-remembered-sessions-status.md).

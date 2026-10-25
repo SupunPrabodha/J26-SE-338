@@ -60,7 +60,7 @@ export default function Dashboard() {
     event.preventDefault(); const form = event.currentTarget, values = new FormData(form);
     await act(async () => {
       let account: AccountResponse;
-      try { account = await api<AccountResponse>("/auth/login", { username: values.get("username"), password: values.get("password") }); }
+      try { account = await api<AccountResponse>("/auth/login", { username: values.get("username"), password: values.get("password"), remember_me: values.get("remember_me") === "on" }); }
       finally { form.reset(); }
       if (account.role !== "COUNSELLOR") { await api("/auth/logout", {}); throw new Error("This development shell requires an authorized counsellor account."); }
       setAuthorized(true); setOffset(0); setFilter(""); await load("", 0);

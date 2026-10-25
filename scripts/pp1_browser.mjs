@@ -69,10 +69,11 @@ async function click(page, label) {
   const position = await evaluate(page, async name => { const b = [...document.querySelectorAll("button")].find(e => e.textContent.trim() === name); b.scrollIntoView({block:'center',behavior:'instant'}); await new Promise(resolve=>window.requestAnimationFrame(resolve)); const r=b.getBoundingClientRect(), point={x:r.x+r.width/2,y:r.y+r.height/2}; window.__lastClickHit=b.contains(document.elementFromPoint(point.x,point.y)); window.__lastClickEvents=[]; for(const type of ['pointerdown','mousedown','mouseup','click'])b.addEventListener(type,()=>window.__lastClickEvents.push(type),{once:true}); return point; }, label);
   assert(await evaluate(page,()=>window.__lastClickHit),'Pointer target obscured');
   await pointerClick(page,position);
-  // Headless Windows Edge can drop native pointer delivery after another context's
-  // modal closes on revocation. No event means no action occurred: activate the
-  // same enabled visible control with CDP's user-gesture context, never a second POST.
+  // Observed in this headless multi-context run after a revocation closes a modal:
+  // no native events reach this control. This fallback is automation evidence,
+  // not verification of an ordinary physical click. Never bypass the UI or API.
   if(stage.startsWith('staff_reenable')&&!await evaluate(page,()=>window.__lastClickEvents.includes('click'))){
+    if(process.argv.includes('--diagnose-input')) checks.push({name:'staff_reenable_input_delivery',state:await evaluate(page,()=>({focused:document.hasFocus(),visible:document.visibilityState==='visible',target_hit:window.__lastClickHit,events:window.__lastClickEvents,open_dialogs:document.querySelectorAll('dialog[open]').length}))});
     await evaluate(page,name=>{const button=[...document.querySelectorAll('button')].find(item=>item.textContent.trim()===name&&!item.disabled);button.focus();button.click();},label,true);
     checks.push('headless_staff_reenable_user_gesture_activation');
   }
@@ -108,6 +109,7 @@ async function page(url, mobile = false, shareWith) {
   return sessionId;
 }
 async function screenshot(page, name) {
+  await send('Page.bringToFront',{},page);
   assert(await evaluate(page, () => ![...document.querySelectorAll('input[name="username"], input[type="password"]')].some(e => e.value)), "Credential field must be empty before capture");
   assert(await evaluate(page, () => document.documentElement.scrollWidth <= innerWidth), "Horizontal overflow");
   // Review contents are withheld from retained screenshots, even for fictional fixtures.
@@ -291,6 +293,9 @@ try {
     assert((await checkResult(observer,'FR02.a','Not exercised')) === 'Not exercised', "Consent acceptance invented denial");
     await screenshot(observer, "demo-consent-observed");
     if(privacy){
+      await showCheck(observer,'NFR05');
+      assert(await evaluate(observer,()=>document.querySelector('[data-check="NFR05"] dl dd')?.textContent==='Implemented' && document.querySelector('[data-check="NFR05"]')?.textContent.includes('awaits joint integration')),'Mock contracts presented as complete real-provider compatibility');
+      await closeDetails(observer);
       await send('Page.bringToFront',{},observer);
       await showCheck(observer,'FR01.a');
       assert(await evaluate(observer,()=>document.querySelector('dialog .dialog-body').scrollHeight>document.querySelector('dialog .dialog-body').clientHeight),'Evidence dialog is not internally scrollable');
@@ -380,6 +385,7 @@ try {
     assert((await checkResult(observer,'FR09.b','Not exercised')) === 'Not exercised', "Workflow invented review action");
     await screenshot(observer, "demo-workflow-observed");
   }
+  await send('Page.bringToFront',{},owner);
   await wait(owner, () => document.querySelector('.status-list')?.textContent.includes("Awaiting human review"));
   await screenshot(owner, "student-processing-complete");
   const createdCase = await evaluate(owner, () => window.__demoCase);

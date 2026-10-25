@@ -124,7 +124,7 @@ test("HTTP, mocks, recorded tests and compound requirements never inherit a work
   const result = (id: string) => rows.find(r => r.id === id)!;
   expect(result("FR04.b").result).toBe("Recorded configuration evidence");
   expect(result("NFR02.b").result).toBe("Recorded configuration evidence");
-  expect(result("NFR02.c").result).toBe("Recorded configuration evidence");
+  expect(result("NFR02.c").result).toBe("Unverified");
   expect(result("FR03.b").source).toBe("Recorded test evidence");
   for (const id of ["FR02.a", "FR06.a", "FR06.b", "FR09.b"]) expect(result(id).result).toBe("Not exercised");
 });

@@ -30,11 +30,16 @@ test("implementation mapping is explicit, exhaustive and independent of absent r
   for (const id of ["FR12", "FR09.d", "FR02.b", "FR08.b"]) {
     const row = rows.find(value => value.id === id)!;
     expect(row.implementation).toBe("Implemented");
-    expect(row.result).toBe("Recorded configuration evidence");
+    expect(row.result).toBe(row.source === "Recorded test evidence" ? "Recorded test evidence" : "Recorded configuration evidence");
   }
-  expect(rows.find(row => row.id === "FR01.b")?.implementation).toBe("External approval dependency");
+  expect(rows.find(row => row.id === "FR01.b")?.implementation).toBe("Not applicable");
   expect(rows.find(row => row.id === "NFR02.b")?.implementation).toBe("Missing");
-  expect(rows.find(row => row.id === "NFR08")?.implementation).toBe("Missing");
+  expect(rows.find(row => row.id === "NFR08")?.implementation).toBe("Not applicable");
+  const compatibility = rows.find(row => row.id === "NFR05")!;
+  expect(compatibility.implementation).toBe("Implemented");
+  expect(compatibility.source).toBe("Recorded test evidence");
+  expect(compatibility.detail).toContain("development mocks");
+  expect(compatibility.readiness).toContain("awaits joint integration");
   expect(rows.find(row => row.id === "FR07")?.result).toBe("Not exercised");
 });
 

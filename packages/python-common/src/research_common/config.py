@@ -22,10 +22,18 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     access_seconds: int = 300
     refresh_seconds: int = 3600
+    remembered_session_seconds: int = 604800
     retention_hours: int = 24
     dev_counsellor_username: str = ""
     assignment_policy: Literal["DESIGNATED_DEVELOPMENT", "MANUAL"] = "DESIGNATED_DEVELOPMENT"
     service_timeout_seconds: float = 5.0
+
+    @field_validator("remembered_session_seconds")
+    @classmethod
+    def bounded_remembered_session(cls, value):
+        if not 3600 <= value <= 2592000:
+            raise ValueError("Remembered sessions must be between one hour and 30 days")
+        return value
 
     @field_validator("environment")
     @classmethod

@@ -1,5 +1,25 @@
 # C1 live requirements checklist
 
+Status/session correction (2026-10-25): [all 39 subchecks, exact remaining gaps and
+actual remembered-session/researcher verification](c1-remembered-sessions-status.md).
+Implementation is independent of selected-run events and stale evidence. Logical identity
+separation is implemented; independent store isolation/evaluation remains pending. NFR05
+now identifies implemented **mock-contract** compatibility with real-provider integration
+separately pending at FR04.b/readiness. TLS stays Missing; storage encryption is Unverified.
+Audit logging stays implemented while expanded coverage remains unmeasured. The earlier
+NFR05 Partial classification below describes the preceding audit, superseded by this more
+precise decomposition; its historical test results are unchanged.
+
+Presentation update (2026-10-25): [professional interface and actual verification](c1-professional-interface.md).
+The illustrated student shell and coordinated evidence header preserve all requirement,
+selected-run and historical-evidence distinctions below; no research status is upgraded.
+
+Final readiness audit (2026-10-24, baseline `15f4a81`):
+[all C1 requirements, evidence, remaining owners and PP1 claims](c1-final-pp1-audit.md).
+That audit classified NFR05 Partial: shared mock contracts are verified; real C2–C4 compatibility awaits
+integration. This is independent of selected-run receipts and does not change historical
+test results below. The re-enable input workaround is investigated in that audit.
+
 Privacy presentation correction (2026-10-24): [current increment and verification](c1-privacy-ui.md).
 The default view now has six privacy groups with independent implementation and selected-run
 evidence columns. Details and safe receipts use accessible dialogs. Reliability and dated

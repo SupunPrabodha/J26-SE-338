@@ -14,6 +14,7 @@ from sqlalchemy import (
     UniqueConstraint,
     create_engine,
     event,
+    false,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 from sqlalchemy.types import TypeDecorator
@@ -59,6 +60,8 @@ class AuthSession(Entity, Base):
     family_id: Mapped[str] = mapped_column(String(36), index=True)
     expires_at: Mapped[object] = mapped_column(UTCDateTime)
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+    remembered: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    absolute_expires_at: Mapped[object | None] = mapped_column(UTCDateTime)
 
 
 class Consent(Entity, Base):

@@ -1,21 +1,21 @@
 import type { DemoEvidence } from "@j26/common/contracts";
 
-export type Result = "Verified in selected run" | "Not exercised" | "Failed" | "Unavailable or stale" | "Recorded configuration evidence";
-export type Implementation = "Implemented" | "Partial" | "Missing" | "External approval dependency";
+export type Result = "Verified in selected run" | "Not exercised" | "Failed" | "Unavailable or stale" | "Recorded configuration evidence" | "Recorded test evidence" | "Unverified";
+export type Implementation = "Implemented" | "Partial" | "Missing" | "Unverified" | "Not applicable";
 export const implementations: Record<string, Implementation> = {
-  "FR01.a": "Implemented", "FR01.b": "External approval dependency",
-  "FR02.a": "Implemented", "FR02.b": "Implemented", "FR03.a": "Implemented", "FR03.b": "Partial",
+  "FR01.a": "Implemented", "FR01.b": "Not applicable",
+  "FR02.a": "Implemented", "FR02.b": "Implemented", "FR03.a": "Implemented", "FR03.b": "Implemented",
   "FR04.a": "Implemented", "FR04.b": "Partial", "FR05": "Implemented",
   "FR06.a": "Implemented", "FR06.b": "Implemented", "FR06.c": "Implemented", "FR07": "Implemented",
   "FR08.a": "Implemented", "FR08.b": "Implemented",
   "FR09.a": "Implemented", "FR09.b": "Implemented", "FR09.c": "Implemented", "FR09.d": "Implemented", "FR09.e": "Implemented",
   "FR10.a": "Implemented", "FR10.b": "Implemented", "FR10.c": "Implemented",
   "FR11.a": "Implemented", "FR11.b": "Implemented", "FR12": "Implemented",
-  "NFR01": "Partial", "NFR02.a": "Implemented", "NFR02.b": "Missing", "NFR02.c": "External approval dependency",
-  "NFR03": "Implemented", "NFR04": "Partial", "NFR05": "Implemented", "NFR06": "Implemented",
-  "NFR07": "Partial", "NFR08": "Missing", "NFR09": "Partial", "NFR10.a": "Implemented", "NFR10.b": "Partial",
+  "NFR01": "Implemented", "NFR02.a": "Implemented", "NFR02.b": "Missing", "NFR02.c": "Unverified",
+  "NFR03": "Implemented", "NFR04": "Implemented", "NFR05": "Implemented", "NFR06": "Implemented",
+  "NFR07": "Partial", "NFR08": "Not applicable", "NFR09": "Implemented", "NFR10.a": "Implemented", "NFR10.b": "Implemented",
 };
-export type Check = { id: string; implementation: Implementation; title: string; result: Result; source: "Live event" | "Configuration evidence" | "Recorded test evidence"; detail: string; missing: string; time?: string | null };
+export type Check = { id: string; implementation: Implementation; title: string; result: Result; source: "Live event" | "Configuration evidence" | "Recorded test evidence"; detail: string; missing: string; time?: string | null; approval?: string; readiness?: string; evaluation?: string };
 
 export const privacyGroups = [
   { id: "consent", title: "Consent and purpose", description: "Purpose, notice version and expiry gate each operation.", ids: ["FR01.a", "FR01.b", "FR02.a", "FR02.b", "NFR03"] },
@@ -27,10 +27,34 @@ export const privacyGroups = [
 ] as const;
 export const secondaryIds = ["FR06.a", "FR06.b", "FR06.c", "NFR06", "NFR07", "NFR08", "NFR09", "NFR10.a", "NFR10.b"];
 
-export function groupImplementation(rows: Check[]): Implementation {
-  const states = new Set(rows.map(row => row.implementation));
-  if (states.size === 1) return rows[0].implementation;
-  return "Partial";
+export const scopeNotes: Record<string, Pick<Check, "approval" | "readiness" | "evaluation">> = {
+  "FR01.b": { approval: "Institutional notice and purpose approval pending; this is not executable application functionality." },
+  "FR03.b": { readiness: "Logical identity/linkage tables are implemented. They share a database owner; independent store privileges are not deployed.", evaluation: "Real-data privacy evaluation is pending; C2 owns text anonymization." },
+  "NFR01": { evaluation: "Synthetic identity/log exclusions are tested; real-provider data-flow and text privacy evaluation remain pending." },
+  "FR04.b": { readiness: "Real C2–C4 APIs are not connected. The current service implementations are development mocks." },
+  "NFR05": { readiness: "Current mock schemas are tested. Real C2–C4 provider/version compatibility awaits joint integration." },
+  "NFR02.b": { readiness: "TLS is missing from the current localhost HTTP deployment, including downstream service transport." },
+  "NFR02.c": { readiness: "Storage encryption is unverified. No retained host/storage/key-management evidence establishes it; approval alone would not establish encryption." },
+  "FR10.a": { approval: "Institutional retention/withdrawal policy approval remains pending." },
+  "FR10.b": { readiness: "Local derived-evidence disposal is implemented; remote provider and backup deletion assurance awaits integration/deployment." },
+  "NFR04": { evaluation: "Expanded audit coverage is unmeasured. The historical 29-observation catalogue excludes later staff, assignment, admin-access and review-save additions." },
+  "NFR07": { evaluation: "The retained core proxy excludes HTTP/authentication/queue overhead. Full-boundary measurement tooling and repeated target evaluation remain incomplete." },
+  "NFR08": { evaluation: "Controlled service-version change/ATAM experiment is missing; shared contracts and adapters already exist." },
+  "NFR09": { readiness: "A reviewed institutional private deployment is not established.", evaluation: "The proposed clean deployment within 30 minutes has not been timed on a fresh environment." },
+  "NFR10.b": { evaluation: "Approved human task/suitability evaluation has not been performed; the non-diagnostic UI boundary is implemented." },
+};
+export const groupSummaries: Record<string, string> = {
+  consent: "Consent controls implemented · Notice approval pending.",
+  identity: "Logical identity separation implemented · Independent storage isolation and real-data evaluation pending.",
+  access: "Role, owner and assignment checks implemented · Deployment TLS missing · Storage encryption unverified.",
+  routing: "C1 mock-contract orchestration implemented · Real C2–C4 integration incomplete.",
+  withdrawal: "Local withdrawal and disposal implemented · Institutional policy and remote deletion assurance pending.",
+  audit: "Audit logging and protected review records implemented · Expanded audit coverage unmeasured.",
+};
+export function groupImplementation(rows: Check[]): Implementation | "Mixed" {
+  const states = new Set(rows.map(row => row.implementation).filter(value => value !== "Not applicable"));
+  if (states.size === 1) return [...states][0];
+  return states.size ? "Mixed" : "Not applicable";
 }
 
 // Proposal IT23187450 section 5: subchecks never roll up to a requirement-wide pass.
@@ -39,7 +63,7 @@ export function checklist(e: DemoEvidence | null, stale: boolean): Check[] {
   const live = (id: string, title: string, fact: unknown, detail: string, missing: string, time?: string | null, withheld = false) => rows.push({ id, implementation: implementations[id], title,
     result: stale || withheld ? "Unavailable or stale" : fact ? "Verified in selected run" : "Not exercised",
     source: "Live event", detail: fact && !stale && !withheld ? detail : "No current supporting observation.", missing, time: stale ? null : time || e?.observed_at });
-  const recorded = (id: string, title: string, detail: string, missing: string) => rows.push({ id, implementation: implementations[id], title, result: "Recorded configuration evidence", source: "Recorded test evidence", detail, missing });
+  const recorded = (id: string, title: string, detail: string, missing: string) => rows.push({ id, implementation: implementations[id], title, result: "Recorded test evidence", source: "Recorded test evidence", detail, missing });
   const config = (id: string, title: string, result: Result, detail: string, missing: string) => rows.push({ id, implementation: implementations[id], title, result, source: "Configuration evidence", detail, missing });
   live("FR01.a", "Versioned consent decision", e?.consent_recorded, `A consent decision is recorded; current status: ${e?.run.consent_status}. The development notice is dev-notice-1.`, "This does not establish approval of the notice or consent validity at every operation.", e?.run.created_at);
   config("FR01.b", "Approved purpose and notice", "Recorded configuration evidence", "Configuration uses a synthetic development purpose and notice.", "Research approval and finalized operational notice are not evidenced here.");
@@ -74,15 +98,15 @@ export function checklist(e: DemoEvidence | null, stale: boolean): Check[] {
   recorded("NFR01", "Privacy and identity exclusion", "Adapter boundary and privacy tests; C2 research remains separate.", "No live proof of real anonymization or complete log review.");
   live("NFR02.a", "Authenticated resource access", e, "The evidence endpoint requires an active student session and owner match.", "Does not establish least privilege across every deployment resource.");
   config("NFR02.b", "Transport encryption", "Recorded configuration evidence", "Documented development deployment uses HTTP localhost.", "No trusted TLS deployment evidence is available. HTTPS on a page alone would not prove downstream TLS.");
-  config("NFR02.c", "Encryption at rest (supporting control)", "Recorded configuration evidence", "No specific storage-encryption evidence retained.", "Do not infer encryption from PostgreSQL, Docker or application authentication.");
+  config("NFR02.c", "Encryption at rest (supporting control)", "Unverified", "No specific storage-encryption evidence retained.", "Do not infer encryption from PostgreSQL, Docker or application authentication.");
   recorded("NFR03", "Consent enforcement coverage", "Consent state and submission recovery regression tests.", "Full scenario coverage is separate from this run's decision.");
   recorded("NFR04", "Audit coverage and reconstruction", "Historical trace catalog: see dated retained evidence below.", "No live coverage percentage or completeness claim.");
-  recorded("NFR05", "Contract compatibility", "Shared schema drift and negative contract tests.", "This page does not execute all malformed/version-mismatch scenarios.");
+  recorded("NFR05", "Contract compatibility", "Shared schema drift and negative contract tests cover the connected development mocks.", "Real C2–C4 provider compatibility remains awaiting integration. This page does not execute malformed/version-mismatch scenarios.");
   recorded("NFR06", "Reliable terminal outcomes", "Reliability and concurrency regression tests.", "All failure modes are not exercised by a normal submission.");
   recorded("NFR07", "C1 latency target", "Recorded performance proxy below; excludes HTTP/authentication and AI work.", "No new benchmark or current-run latency measurement; proxy is not the full proposal metric.");
   config("NFR08", "Modifiability evaluation", "Recorded configuration evidence", "Shared contracts and adapters exist; no completed change experiment claimed.", "A measured version-change/architecture scenario is still required.");
   recorded("NFR09", "Deployment and external secrets", "Bootstrap and health evidence retained separately.", "No timed clean private-deployment evaluation is established here.");
   live("NFR10.a", "Human review action", e?.review_completed_at, "Authorized review completion receipt exists.", "This does not establish usability, clinical validity or appropriate interpretation.", e?.review_completed_at);
   config("NFR10.b", "Screening-support boundary", "Recorded configuration evidence", "Synthetic, non-diagnostic screening support with counsellor-assisted interpretation.", "The system does not replace professional counselling. Human task evaluation remains separate.");
-  return rows;
+  return rows.map(row => ({ ...row, ...scopeNotes[row.id] }));
 }
