@@ -20,7 +20,7 @@ import re
 import sys
 import unicodedata
 from pathlib import Path
-from typing import Dict, Any, List, Set, Tuple
+from typing import Any
 
 # Ensure UTF-8 stdout on Windows
 if hasattr(sys.stdout, "reconfigure"):
@@ -42,7 +42,7 @@ LINGUISTIC_CHAR_PATTERN = re.compile(r"[a-zA-Z\u0D80-\u0DFF]")
 ZWSP_ORPHAN_PATTERN = re.compile(r"[\u200B\uFEFF]|\u200D\s|\s\u200D")
 
 
-def clean_sentence(raw_text: str) -> Tuple[str, Dict[str, bool]]:
+def clean_sentence(raw_text: str) -> tuple[str, dict[str, bool]]:
     """
     Applies the conservative, affect-preserving cleaning pipeline to a single text line.
     Returns:
@@ -116,7 +116,7 @@ def process_corpus(
     input_file: Path | str,
     output_clean_file: Path | str,
     output_audit_file: Path | str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Executes conservative preprocessing across the entire unified corpus file.
     """
@@ -127,18 +127,18 @@ def process_corpus(
     if not in_path.exists():
         raise FileNotFoundError(f"Input corpus not found at: {in_path.resolve()}")
 
-    print(f"\n=======================================================")
+    print("\n=======================================================")
     print(f" PREPROCESSING CORPUS: {in_path.name}")
-    print(f"=======================================================")
+    print("=======================================================")
 
-    with open(in_path, "r", encoding="utf-8", errors="ignore") as f:
+    with open(in_path, encoding="utf-8", errors="ignore") as f:
         raw_lines = [line.strip() for line in f if line.strip()]
 
     total_input_lines = len(raw_lines)
     print(f"Total Raw Lines In: {total_input_lines:,}")
 
-    seen_sentences: Set[str] = set()
-    cleaned_sentences: List[str] = []
+    seen_sentences: set[str] = set()
+    cleaned_sentences: list[str] = []
 
     stats = {
         "total_input_lines": total_input_lines,
@@ -154,7 +154,7 @@ def process_corpus(
         "final_cleaned_lines": 0,
     }
 
-    sample_diffs: List[Dict[str, str]] = []
+    sample_diffs: list[dict[str, str]] = []
 
     for orig_line in raw_lines:
         cleaned, flags = clean_sentence(orig_line)
@@ -182,10 +182,7 @@ def process_corpus(
 
         # Record diff samples for inspection
         if cleaned != orig_line and len(sample_diffs) < 10:
-            sample_diffs.append({
-                "original": orig_line,
-                "cleaned": cleaned
-            })
+            sample_diffs.append({"original": orig_line, "cleaned": cleaned})
 
         # Exact Deduplication
         if cleaned in seen_sentences:

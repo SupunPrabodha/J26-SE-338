@@ -40,6 +40,9 @@ For completed-review access, researcher sign-in and current dependency/Ruff chec
 Completed reviews require an explicit human completion action and current assignment,
 consent and retention eligibility; Remember me does not extend consent.
 
+For the newly merged C3 files that reproduced 185 Ruff errors, see the
+[current lint repair, preservation checks and backend verification](docs/evidence/c1-ruff-ci-185.md).
+
 Prerequisites: Python 3.12, Node.js 22 LTS (22.22.2+ for host tooling; tested with 22.23.3), npm, Git, Docker and Compose with Linux containers. Container bases are pinned by digest. Dependencies are pinned in `pyproject.toml`, `uv.lock`, `requirements.lock`, `package.json` and `package-lock.json`.
 
 PowerShell:

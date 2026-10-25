@@ -17,11 +17,9 @@ Features:
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Set, Optional
 
 import yt_dlp
 
@@ -48,7 +46,7 @@ def clean_comment_text(raw_text: str) -> str:
     return text
 
 
-def segment_into_sentences(text: str, min_len: int = 15, max_len: int = 400) -> List[str]:
+def segment_into_sentences(text: str, min_len: int = 15, max_len: int = 400) -> list[str]:
     """
     Splits long comment blocks into coherent sentence units suitable for
     Masked Language Modeling (MLM).
@@ -73,10 +71,6 @@ def segment_into_sentences(text: str, min_len: int = 15, max_len: int = 400) -> 
     return clean_sentences
 
 
-def extract_comments_from_url(video_url: str) -> List[str]:
-    """
-    Extracts all public comments and replies from a YouTube video URL using yt-dlp.
-    """
 def sanitize_filename(title: str, max_length: int = 50) -> str:
     """Sanitizes video title for safe filesystem filenames on Windows."""
     # Strip illegal Windows characters: \ / : * ? " < > |
@@ -85,7 +79,7 @@ def sanitize_filename(title: str, max_length: int = 50) -> str:
     return safe_name[:max_length] if safe_name else "video"
 
 
-def extract_comments_from_url(video_url: str) -> tuple[str, str, List[str]]:
+def extract_comments_from_url(video_url: str) -> tuple[str, str, list[str]]:
     """
     Extracts all public comments and replies from a YouTube video URL using yt-dlp.
     Returns:
@@ -110,7 +104,7 @@ def extract_comments_from_url(video_url: str) -> tuple[str, str, List[str]]:
         },
     }
 
-    sentences: List[str] = []
+    sentences: list[str] = []
     video_id = ""
     video_title = "Unknown_Title"
 
@@ -120,7 +114,7 @@ def extract_comments_from_url(video_url: str) -> tuple[str, str, List[str]]:
             video_id = info.get("id", "")
             video_title = info.get("title", "Unknown Title")
             raw_comments = info.get("comments", [])
-            print(f"[Scraper] Video Title: \"{video_title}\" (ID: {video_id})")
+            print(f'[Scraper] Video Title: "{video_title}" (ID: {video_id})')
             print(f"[Scraper] Retrieved {len(raw_comments)} raw comments/replies.")
 
             for item in raw_comments:
@@ -138,7 +132,7 @@ def extract_comments_from_url(video_url: str) -> tuple[str, str, List[str]]:
 def save_separate_video_file(
     video_id: str,
     video_title: str,
-    sentences: List[str],
+    sentences: list[str],
     video_dir: Path,
 ) -> Path:
     """Saves this video's extracted sentences into its own dedicated separate file."""
@@ -161,19 +155,21 @@ def save_separate_video_file(
 
 
 def save_and_merge_sentences(
-    new_sentences: List[str],
+    new_sentences: list[str],
     comments_file: Path,
-    unified_corpus_file: Optional[Path] = None,
+    unified_corpus_file: Path | None = None,
 ) -> int:
     """
     Deduplicates and appends new sentences to target accumulated corpus files.
     """
     comments_file.parent.mkdir(parents=True, exist_ok=True)
 
-    existing_lines: Set[str] = set()
+    existing_lines: set[str] = set()
     if comments_file.exists():
-        with open(comments_file, "r", encoding="utf-8") as f:
-            existing_lines = {line.strip() for line in f if line.strip() and not line.startswith("#")}
+        with open(comments_file, encoding="utf-8") as f:
+            existing_lines = {
+                line.strip() for line in f if line.strip() and not line.startswith("#")
+            }
 
     added_count = 0
     with open(comments_file, "a", encoding="utf-8") as f:
@@ -185,8 +181,10 @@ def save_and_merge_sentences(
 
     # Also append directly into the unified adaptation corpus
     if unified_corpus_file and unified_corpus_file.exists():
-        with open(unified_corpus_file, "r", encoding="utf-8") as f:
-            unified_lines = {line.strip() for line in f if line.strip() and not line.startswith("#")}
+        with open(unified_corpus_file, encoding="utf-8") as f:
+            unified_lines = {
+                line.strip() for line in f if line.strip() and not line.startswith("#")
+            }
         with open(unified_corpus_file, "a", encoding="utf-8") as f:
             for s in new_sentences:
                 if s not in unified_lines and not s.startswith("#"):
@@ -197,7 +195,7 @@ def save_and_merge_sentences(
 
 
 def scrape_youtube_videos(
-    urls: List[str],
+    urls: list[str],
     output_dir: Path | str = "data/adaptation",
 ) -> None:
     """Main routine to process a list of YouTube URLs."""
@@ -206,13 +204,13 @@ def scrape_youtube_videos(
     comments_out = out_dir / "student_video_comments.txt"
     unified_out = out_dir / "unlabeled_adaptation_corpus.txt"
 
-    all_extracted_sentences: List[str] = []
-    saved_separate_files: List[Path] = []
+    all_extracted_sentences: list[str] = []
+    saved_separate_files: list[Path] = []
 
     for idx, url in enumerate(urls, 1):
-        print(f"\n=======================================================")
+        print("\n=======================================================")
         print(f" Processing URL [{idx}/{len(urls)}]")
-        print(f"=======================================================")
+        print("=======================================================")
         vid_id, title, sents = extract_comments_from_url(url)
         all_extracted_sentences.extend(sents)
 
@@ -236,7 +234,7 @@ def scrape_youtube_videos(
 
     total_in_master = 0
     if comments_out.exists():
-        with open(comments_out, "r", encoding="utf-8") as f:
+        with open(comments_out, encoding="utf-8") as f:
             total_in_master = sum(1 for line in f if line.strip() and not line.startswith("#"))
 
     print("\n=======================================================")
@@ -272,15 +270,17 @@ def main() -> None:
 
     project_data_dir = Path(__file__).resolve().parent.parent / "data" / "adaptation"
 
-    urls_to_scrape: List[str] = []
+    urls_to_scrape: list[str] = []
 
     if args.url:
         urls_to_scrape.append(args.url.strip())
     elif args.file:
         file_path = Path(args.file)
         if file_path.exists():
-            with open(file_path, "r", encoding="utf-8") as f:
-                urls_to_scrape = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+            with open(file_path, encoding="utf-8") as f:
+                urls_to_scrape = [
+                    line.strip() for line in f if line.strip() and not line.startswith("#")
+                ]
         else:
             print(f"Error: File not found: {file_path}")
             sys.exit(1)
