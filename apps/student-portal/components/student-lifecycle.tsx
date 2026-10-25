@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@j26/common/api";
-import { AppNavigation, DemoHeader, ErrorMessage, SafetyNotice, WithdrawalDialog, processingLabel, reviewLabel } from "@j26/common/ui";
+import { AppNavigation, ReflectionHero, ReflectionPrinciples, Icon, ErrorMessage, SafetyNotice, WithdrawalDialog, processingLabel, reviewLabel } from "@j26/common/ui";
 import type { ConsentLifecycle, ConsentRecord, FixturesResponse, PseudonymousCase } from "@j26/common/contracts";
 
 export default function StudentLifecycle() {
@@ -88,17 +88,19 @@ export default function StudentLifecycle() {
 
   const progressLabel = operation === "consent" ? "Recording consent…" : operation === "submission" ? "Submitting text…" : operation === "withdrawal" ? "Recording withdrawal…" : "Refreshing status…";
 
-  return <><AppNavigation active="student" /><main>
-    <DemoHeader title="Your wellbeing reflection" subtitle="A voluntary, fictional walkthrough of consent and counsellor-assisted review." />
+  return <div className="student-application"><AppNavigation active="student" /><main className="student-home">
+    <ReflectionHero />
     <SafetyNotice />
+    <ReflectionPrinciples />
+    <div className="reflection-workspace-heading"><div><p className="eyebrow">A guided demonstration</p><h2>Your reflection space</h2></div><span className="workspace-label"><Icon name="leaf" />Built around your choices</span></div>
     <section className="student-session" aria-label="Student session"><div><strong>{sessionEnded ? "Session ended" : ownerVerified ? "Student · owner session verified" : "Your private demonstration"}</strong><span>{ownerVerified ? "Your consent and case controls use an authenticated pseudonymous owner session." : "A pseudonymous owner session is checked when you record a decision. No identity details are requested."}</span></div></section>
     <p className="demo-nav"><Link href="/demo" target="_blank" rel="noopener noreferrer">Open the Component 1 PP1 demo</Link><span className="hint">The checklist observes your runs in another tab using this browser's student session.</span></p>
-    <ol className="steps" aria-label="Demonstration steps"><li><span>1</span> Consent</li><li><span>2</span> Submission</li><li><span>3</span> Status & withdrawal</li></ol>
+    <ol className="steps" id="reflection-guide" aria-label="Demonstration steps"><li><span>1</span><div>Consent<small>Read the notice. Make your choice.</small></div></li><li><span>2</span><div>Submission<small>Explore a built-in fictional example.</small></div></li><li><span>3</span><div>Status & withdrawal<small>Check progress and stay in control.</small></div></li></ol>
     {!confirming && <ErrorMessage message={error} />}
     <p className="feedback" role="status" aria-live="polite">{busy ? progressLabel : message}</p>
     {busy && <div className="request-progress" role="progressbar" aria-label={progressLabel} aria-valuetext="Request pending; progress cannot be measured"><span /></div>}
     <div className="student-grid"><div className="stack">
-      <section className="card" aria-labelledby="consent-title" aria-busy={operation === "consent"}><div className="section-heading"><span className="step-number">1</span><h2 id="consent-title">Your consent</h2></div>
+      <section className="card consent-card" aria-labelledby="consent-title" aria-busy={operation === "consent"}><div className="section-heading"><span className="step-number">1</span><h2 id="consent-title" tabIndex={-1}>Your consent</h2><Icon name="heart" /></div>
         <p>Choose whether fictional text may be processed by mock services and shared with an authorized counsellor for this demonstration. Participation is optional.</p>
         <p className="privacy-summary">No identity details are requested. You can withdraw before or after submission while your temporary session is active.</p>
         <details className="consent-notice"><summary>Read the full consent and privacy notice</summary>
@@ -129,7 +131,7 @@ export default function StudentLifecycle() {
           setMessage(value.consent_status === "ACTIVE" ? "Consent recorded—accepted. You may submit or withdraw." : "Consent recorded—declined. Text submission remains blocked. Open a fresh page for another fictional walkthrough.");
         })}>Record consent decision</button>
       </section>
-      <section className="card" aria-labelledby="submission-title" aria-busy={operation === "submission"}><div className="section-heading"><span className="step-number">2</span><h2 id="submission-title">A fictional reflection</h2></div>
+      <section className="card submission-card" aria-labelledby="submission-title" aria-busy={operation === "submission"}><div className="section-heading"><span className="step-number">2</span><h2 id="submission-title">A fictional reflection</h2><Icon name="book" /></div>
         <p>Choose a built-in example. The text is fixed; do not enter personal or student information.</p>
         <label htmlFor="language">Fixture language</label>
         <select id="language" value={choice} disabled={busy || !!result || sessionEnded || submissionOutcome === "unconfirmed"} onChange={e => { setChoice(e.target.value); setIdempotency(crypto.randomUUID()); }}>
@@ -141,7 +143,7 @@ export default function StudentLifecycle() {
         {!active && !result && <p className="hint">Submission is available only after the server confirms active consent.</p>}
       </section>
     </div>
-    <section className="card status-card" aria-labelledby="lifecycle-heading"><div className="section-heading"><span className="step-number">3</span><h2 id="lifecycle-heading" tabIndex={-1}>Status & withdrawal</h2></div>
+    <section className="card status-card" aria-labelledby="lifecycle-heading"><div className="section-heading"><span className="step-number">3</span><h2 id="lifecycle-heading" tabIndex={-1}>Status & withdrawal</h2><Icon name="shield" /></div>
       <p className="hint">Refresh for the latest server status. Processing completion is not a completed human review.</p>
       <details className="access-path"><summary>Who can access this case?</summary><p>Your owner session controls consent, status and withdrawal. Mock services process the fixed fixture through C1. Only the assigned, signed-in counsellor can open review evidence while consent remains valid. Administrators see safe operational metadata, never counselling content.</p></details>
       <dl className="status-list"><div><dt>Consent</dt><dd><span className="status-badge" data-status={consentStatus}>{consentStatus}</span></dd></div>
@@ -162,6 +164,6 @@ export default function StudentLifecycle() {
       observe(await api<ConsentLifecycle>(`/consents/${consent.consent_id}/withdraw`, { idempotency_key: withdrawKey }));
       setConfirming(false); setMessage("Withdrawal recorded. Further processing and review are blocked.");
     })} />}
-    <footer>J26-SE-338 · Local research workspace</footer>
-  </main></>;
+    <footer className="student-footer"><span className="footer-brand"><Icon name="leaf" />Wellbeing</span><span>Screening support · Authorized human interpretation</span><span>J26-SE-338 · Synthetic research workspace</span></footer>
+  </main></div>;
 }

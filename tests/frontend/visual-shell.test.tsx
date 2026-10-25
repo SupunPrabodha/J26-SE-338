@@ -27,11 +27,11 @@ test("account dropdown supports keyboard dismissal and restores focus", () => {
   const logout = vi.fn(); render(<AccountMenu role="COUNSELLOR" onSignOut={logout} />);
   const trigger = screen.getByRole("button", { name: "Counsellor account" });
   trigger.focus(); fireEvent.keyDown(trigger, { key: "ArrowDown" });
-  expect(screen.getByRole("menuitem", { name: "Sign out" })).toHaveFocus();
-  fireEvent.keyDown(screen.getByRole("menuitem"), { key: "Escape" });
+  expect(screen.getByRole("menuitem", { name: "Account profile" })).toHaveFocus();
+  fireEvent.keyDown(screen.getByRole("menuitem", { name: "Account profile" }), { key: "Escape" });
   expect(screen.queryByRole("menu")).not.toBeInTheDocument(); expect(trigger).toHaveFocus();
   expect(logout).not.toHaveBeenCalled();
-  fireEvent.click(trigger); fireEvent.click(screen.getByRole("menuitem"));
+  fireEvent.click(trigger); fireEvent.click(screen.getByRole("menuitem", { name: "Sign out" }));
   expect(logout).toHaveBeenCalledOnce();
 });
 
