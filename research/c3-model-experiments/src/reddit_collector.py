@@ -9,12 +9,9 @@ Strictly adheres to privacy rules: strips all usernames, URLs, and personal meta
 
 from __future__ import annotations
 
-import os
 import re
-import sys
 import time
 from pathlib import Path
-from typing import List, Set
 
 import requests
 
@@ -53,12 +50,12 @@ def sanitize_text(text: str) -> str:
 
 def fetch_subreddit_posts(
     subreddit: str = "srilanka",
-    queries: List[str] = TARGET_QUERIES,
+    queries: list[str] = TARGET_QUERIES,
     max_per_query: int = 50,
-) -> List[str]:
+) -> list[str]:
     """Fetches public posts and comments matching target queries via Reddit JSON API."""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AcademicResearchBot/1.0"}
-    collected_texts: Set[str] = set()
+    collected_texts: set[str] = set()
 
     print(f"\n[Collector] Searching r/{subreddit} for student and wellbeing discussions...")
 
@@ -107,13 +104,15 @@ def fetch_subreddit_posts(
 
 def run_collection(
     output_path: Path | str = "data/adaptation/unlabeled_adaptation_corpus.txt",
-    subreddits: List[str] = ["srilanka"],
+    subreddits: list[str] | None = None,
 ) -> None:
     """Executes collection and saves clean line-by-line sentences for MLM pretraining."""
+    if subreddits is None:
+        subreddits = ["srilanka"]
     out_file = Path(output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
-    all_sentences: Set[str] = set()
+    all_sentences: set[str] = set()
     for sub in subreddits:
         sub_sentences = fetch_subreddit_posts(subreddit=sub)
         all_sentences.update(sub_sentences)
@@ -123,9 +122,9 @@ def run_collection(
         return
 
     # Append to existing file or write new
-    existing_lines: Set[str] = set()
+    existing_lines: set[str] = set()
     if out_file.exists():
-        with open(out_file, "r", encoding="utf-8") as f:
+        with open(out_file, encoding="utf-8") as f:
             existing_lines = {line.strip() for line in f if line.strip()}
 
     combined = existing_lines.union(all_sentences)
@@ -134,13 +133,18 @@ def run_collection(
         for sentence in sorted(combined):
             f.write(sentence + "\n")
 
-    print(f"\n=======================================================")
+    print("\n=======================================================")
     print(f"[Collector] Successfully collected {len(all_sentences)} new sentences!")
     print(f"[Collector] Total corpus size: {len(combined)} sentences saved to:")
     print(f"            {out_file.resolve()}")
-    print(f"=======================================================\n")
+    print("=======================================================\n")
 
 
 if __name__ == "__main__":
-    target_out = Path(__file__).resolve().parent.parent / "data" / "adaptation" / "unlabeled_adaptation_corpus.txt"
+    target_out = (
+        Path(__file__).resolve().parent.parent
+        / "data"
+        / "adaptation"
+        / "unlabeled_adaptation_corpus.txt"
+    )
     run_collection(output_path=target_out)

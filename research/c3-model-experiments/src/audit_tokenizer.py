@@ -17,29 +17,28 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 import re
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any
 
 # Configure UTF-8 stdout for Windows console
-if sys.platform.startswith('win') and hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if sys.platform.startswith("win") and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # Regex to classify script modality
-SINHALA_SCRIPT_RE = re.compile(r'[඀-෿]')
-LATIN_SCRIPT_RE = re.compile(r'[a-zA-Z]')
+SINHALA_SCRIPT_RE = re.compile(r"[඀-෿]")
+LATIN_SCRIPT_RE = re.compile(r"[a-zA-Z]")
 
 
 def profile_corpus_tokenization(
     input_file: Path | str,
     output_report_file: Path | str,
-    model_name: str = 'xlm-roberta-base',
+    model_name: str = "xlm-roberta-base",
     batch_size: int = 2000,
     sample_count: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Performs high-throughput tokenization audit on the cleaned corpus using XLM-RoBERTa.
     """
@@ -60,6 +59,7 @@ def profile_corpus_tokenization(
     # 1. Load HuggingFace Tokenizer
     print(f"[*] Loading pretrained tokenizer '{model_name}'...")
     from transformers import AutoTokenizer
+
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     vocab_size = tokenizer.vocab_size
     unk_token_id = tokenizer.unk_token_id
@@ -67,19 +67,21 @@ def profile_corpus_tokenization(
     eos_token_id = tokenizer.eos_token_id
     pad_token_id = tokenizer.pad_token_id
 
-    print(f"[+] Tokenizer loaded successfully. Fast backend: {tokenizer.is_fast}, Vocab size: {vocab_size:,}")
+    print(
+        f"[+] Tokenizer loaded successfully. Fast backend: {tokenizer.is_fast}, Vocab size: {vocab_size:,}"
+    )
 
     # 2. Read Cleaned Corpus
-    with open(in_path, 'r', encoding='utf-8', errors='replace') as f:
+    with open(in_path, encoding="utf-8", errors="replace") as f:
         lines = [line.strip() for line in f if line.strip()]
 
     total_lines = len(lines)
     print(f"[*] Total sentences to profile: {total_lines:,}")
 
     # Data collectors
-    token_lengths_with_special: List[int] = []
-    token_lengths_subwords_only: List[int] = []
-    word_counts: List[int] = []
+    token_lengths_with_special: list[int] = []
+    token_lengths_subwords_only: list[int] = []
+    word_counts: list[int] = []
 
     total_subwords = 0
     total_words = 0
@@ -89,13 +91,13 @@ def profile_corpus_tokenization(
 
     # Script modality tracking
     modality_stats = {
-        'pure_latin_singlish': {'sentences': 0, 'words': 0, 'subwords': 0},
-        'mixed_sinhala_latin': {'sentences': 0, 'words': 0, 'subwords': 0},
-        'pure_sinhala_script': {'sentences': 0, 'words': 0, 'subwords': 0},
+        "pure_latin_singlish": {"sentences": 0, "words": 0, "subwords": 0},
+        "mixed_sinhala_latin": {"sentences": 0, "words": 0, "subwords": 0},
+        "pure_sinhala_script": {"sentences": 0, "words": 0, "subwords": 0},
     }
 
     # Samples collection
-    samples_data: List[Dict[str, Any]] = []
+    samples_data: list[dict[str, Any]] = []
 
     # 3. Batch Tokenization Loop
     total_batches = math.ceil(total_lines / batch_size)
@@ -114,7 +116,7 @@ def profile_corpus_tokenization(
             return_token_type_ids=False,
         )
 
-        for i, input_ids in enumerate(encoded_batch['input_ids']):
+        for i, input_ids in enumerate(encoded_batch["input_ids"]):
             line_text = batch_lines[i]
             words = line_text.split()
             n_words = len(words)
@@ -141,28 +143,30 @@ def profile_corpus_tokenization(
             has_lat = bool(LATIN_SCRIPT_RE.search(line_text))
 
             if has_sin and has_lat:
-                m_key = 'mixed_sinhala_latin'
+                m_key = "mixed_sinhala_latin"
             elif has_lat and not has_sin:
-                m_key = 'pure_latin_singlish'
+                m_key = "pure_latin_singlish"
             else:
-                m_key = 'pure_sinhala_script'
+                m_key = "pure_sinhala_script"
 
-            modality_stats[m_key]['sentences'] += 1
-            modality_stats[m_key]['words'] += n_words
-            modality_stats[m_key]['subwords'] += n_subwords
+            modality_stats[m_key]["sentences"] += 1
+            modality_stats[m_key]["words"] += n_words
+            modality_stats[m_key]["subwords"] += n_subwords
 
             # Save detailed samples from the first batch
             if len(samples_data) < sample_count:
                 decoded_tokens = tokenizer.convert_ids_to_tokens(input_ids)
-                samples_data.append({
-                    'index': len(samples_data) + 1,
-                    'text': line_text,
-                    'words_count': n_words,
-                    'tokens_count': n_tokens,
-                    'subwords': decoded_tokens,
-                    'token_ids': input_ids,
-                    'modality': m_key,
-                })
+                samples_data.append(
+                    {
+                        "index": len(samples_data) + 1,
+                        "text": line_text,
+                        "words_count": n_words,
+                        "tokens_count": n_tokens,
+                        "subwords": decoded_tokens,
+                        "token_ids": input_ids,
+                        "modality": m_key,
+                    }
+                )
 
         if (b_idx + 1) % 15 == 0 or (b_idx + 1) == total_batches:
             progress_pct = (end_idx / total_lines) * 100
@@ -191,26 +195,34 @@ def profile_corpus_tokenization(
 
     # Fragmentation ratios
     overall_ratio = total_subwords / total_words if total_words > 0 else 0
-    unk_rate = (total_unk_tokens / (total_subwords + total_unk_tokens)) * 100 if total_subwords > 0 else 0
+    unk_rate = (
+        (total_unk_tokens / (total_subwords + total_unk_tokens)) * 100 if total_subwords > 0 else 0
+    )
 
     latin_ratio = (
-        modality_stats['pure_latin_singlish']['subwords'] / modality_stats['pure_latin_singlish']['words']
-        if modality_stats['pure_latin_singlish']['words'] > 0 else 0
+        modality_stats["pure_latin_singlish"]["subwords"]
+        / modality_stats["pure_latin_singlish"]["words"]
+        if modality_stats["pure_latin_singlish"]["words"] > 0
+        else 0
     )
     mixed_ratio = (
-        modality_stats['mixed_sinhala_latin']['subwords'] / modality_stats['mixed_sinhala_latin']['words']
-        if modality_stats['mixed_sinhala_latin']['words'] > 0 else 0
+        modality_stats["mixed_sinhala_latin"]["subwords"]
+        / modality_stats["mixed_sinhala_latin"]["words"]
+        if modality_stats["mixed_sinhala_latin"]["words"] > 0
+        else 0
     )
 
     # Top Subwords
     top_subwords_list = []
     for tid, count in subword_frequency.most_common(40):
         token_str = tokenizer.convert_ids_to_tokens(tid)
-        top_subwords_list.append({
-            'token_id': tid,
-            'token_str': token_str,
-            'count': count,
-        })
+        top_subwords_list.append(
+            {
+                "token_id": tid,
+                "token_str": token_str,
+                "count": count,
+            }
+        )
 
     # Recommended max sequence length decision
     recommended_seq_len = 128 if cov_128 >= 95.0 else 256
@@ -218,64 +230,64 @@ def profile_corpus_tokenization(
         f"{cov_128:.2f}% of sentences fit completely within 128 tokens. "
         f"Setting max_seq_length=128 avoids quadratic O(N^2) attention memory waste "
         f"and speeds up training by ~3.5x compared to 256."
-        if recommended_seq_len == 128 else
-        f"Only {cov_128:.2f}% of sentences fit in 128 tokens, but {cov_256:.2f}% fit in 256 tokens. "
+        if recommended_seq_len == 128
+        else f"Only {cov_128:.2f}% of sentences fit in 128 tokens, but {cov_256:.2f}% fit in 256 tokens. "
         f"Setting max_seq_length=256 preserves long conversational paragraphs."
     )
 
     # 5. Build Audit Payload
     report = {
-        'metadata': {
-            'project': 'J26-SE-338 / c3-model-experiments',
-            'phase': 'Phase 2: XLM-R Tokenizer Audit & Sequence Length Profiling',
-            'model_target': model_name,
-            'vocab_size': vocab_size,
-            'source_corpus': str(in_path),
-            'total_sentences_audited': total_lines,
+        "metadata": {
+            "project": "J26-SE-338 / c3-model-experiments",
+            "phase": "Phase 2: XLM-R Tokenizer Audit & Sequence Length Profiling",
+            "model_target": model_name,
+            "vocab_size": vocab_size,
+            "source_corpus": str(in_path),
+            "total_sentences_audited": total_lines,
         },
-        'tokenization_metrics': {
-            'total_whitespace_words': total_words,
-            'total_subword_tokens': total_subwords,
-            'total_tokens_with_special': sum(token_lengths_with_special),
-            'subword_fragmentation_ratio': round(overall_ratio, 3),
-            'singlish_fragmentation_ratio': round(latin_ratio, 3),
-            'mixed_script_fragmentation_ratio': round(mixed_ratio, 3),
-            'unk_token_count': total_unk_tokens,
-            'unk_token_rate_pct': round(unk_rate, 5),
-            'distinct_subwords_observed': len(subword_frequency),
-            'vocab_utilization_pct': round(len(subword_frequency) / vocab_size * 100, 2),
+        "tokenization_metrics": {
+            "total_whitespace_words": total_words,
+            "total_subword_tokens": total_subwords,
+            "total_tokens_with_special": sum(token_lengths_with_special),
+            "subword_fragmentation_ratio": round(overall_ratio, 3),
+            "singlish_fragmentation_ratio": round(latin_ratio, 3),
+            "mixed_script_fragmentation_ratio": round(mixed_ratio, 3),
+            "unk_token_count": total_unk_tokens,
+            "unk_token_rate_pct": round(unk_rate, 5),
+            "distinct_subwords_observed": len(subword_frequency),
+            "vocab_utilization_pct": round(len(subword_frequency) / vocab_size * 100, 2),
         },
-        'sequence_length_distribution': {
-            'min': min_len,
-            'max': max_len,
-            'mean': round(mean_len, 2),
-            'p25': p25,
-            'p50_median': p50,
-            'p75': p75,
-            'p90': p90,
-            'p95': p95,
-            'p98': p98,
-            'p99': p99,
+        "sequence_length_distribution": {
+            "min": min_len,
+            "max": max_len,
+            "mean": round(mean_len, 2),
+            "p25": p25,
+            "p50_median": p50,
+            "p75": p75,
+            "p90": p90,
+            "p95": p95,
+            "p98": p98,
+            "p99": p99,
         },
-        'cumulative_length_coverage': {
-            'pct_within_64_tokens': round(cov_64, 2),
-            'pct_within_128_tokens': round(cov_128, 2),
-            'pct_within_256_tokens': round(cov_256, 2),
-            'pct_within_512_tokens': round(cov_512, 2),
+        "cumulative_length_coverage": {
+            "pct_within_64_tokens": round(cov_64, 2),
+            "pct_within_128_tokens": round(cov_128, 2),
+            "pct_within_256_tokens": round(cov_256, 2),
+            "pct_within_512_tokens": round(cov_512, 2),
         },
-        'pretraining_recommendation': {
-            'recommended_max_seq_length': recommended_seq_len,
-            'rationale': recommendation_rationale,
-            'estimated_dapt_tokens': total_subwords,
+        "pretraining_recommendation": {
+            "recommended_max_seq_length": recommended_seq_len,
+            "rationale": recommendation_rationale,
+            "estimated_dapt_tokens": total_subwords,
         },
-        'script_modality_breakdown': modality_stats,
-        'top_40_frequent_subwords': top_subwords_list,
-        'sample_tokenizations': samples_data,
+        "script_modality_breakdown": modality_stats,
+        "top_40_frequent_subwords": top_subwords_list,
+        "sample_tokenizations": samples_data,
     }
 
     # 6. Save JSON Report
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, 'w', encoding='utf-8') as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
 
     # 7. Print Terminal Summary Report
@@ -288,8 +300,12 @@ def profile_corpus_tokenization(
     print(f"  Subword / Word Ratio (Overall) : {overall_ratio:.2f}x (Expected: 1.3 - 1.8x)")
     print(f"  - Pure Latin Singlish Ratio    : {latin_ratio:.2f}x")
     print(f"  - Mixed Sinhala/Latin Ratio    : {mixed_ratio:.2f}x")
-    print(f"  Unknown Tokens (<unk>) Count   : {total_unk_tokens:,} ({unk_rate:.5f}%) [Threshold < 0.05%]")
-    print(f"  Vocabulary Utilization         : {len(subword_frequency):,} / {vocab_size:,} ({len(subword_frequency)/vocab_size*100:.2f}%)")
+    print(
+        f"  Unknown Tokens (<unk>) Count   : {total_unk_tokens:,} ({unk_rate:.5f}%) [Threshold < 0.05%]"
+    )
+    print(
+        f"  Vocabulary Utilization         : {len(subword_frequency):,} / {vocab_size:,} ({len(subword_frequency) / vocab_size * 100:.2f}%)"
+    )
     print("-" * 70)
     print(" SEQUENCE LENGTH PERCENTILES (Includes <s> and </s>)")
     print("-" * 70)
@@ -320,25 +336,25 @@ def main():
     base_dir = Path(__file__).resolve().parent.parent / "data" / "adaptation"
 
     parser.add_argument(
-        '--input',
+        "--input",
         type=str,
         default=str(base_dir / "clean_corpus.txt"),
         help="Path to cleaned corpus (default: data/adaptation/clean_corpus.txt)",
     )
     parser.add_argument(
-        '--output-report',
+        "--output-report",
         type=str,
         default=str(base_dir / "tokenizer_audit_report.json"),
         help="Path to JSON output report (default: data/adaptation/tokenizer_audit_report.json)",
     )
     parser.add_argument(
-        '--model-name',
+        "--model-name",
         type=str,
-        default='xlm-roberta-base',
+        default="xlm-roberta-base",
         help="Hugging Face model identifier (default: xlm-roberta-base)",
     )
     parser.add_argument(
-        '--batch-size',
+        "--batch-size",
         type=int,
         default=2000,
         help="Batch size for tokenization (default: 2000)",
@@ -354,5 +370,5 @@ def main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -939,10 +939,10 @@ I have updated [scrapers/elakiri_scraper.py](file:///C:/Users/Lenovo/.gemini/ant
 
 ```python
 # Remove quoted parent messages & forum aside blocks before extracting text
-for quote in body_tag.find_all(['blockquote', 'aside']):
+for quote in body_tag.find_all(["blockquote", "aside"]):
     quote.decompose()
 
-raw_text = body_tag.get_text('\n', strip=True)
+raw_text = body_tag.get_text("\n", strip=True)
 ```
 
 Now, BeautifulSoup **deletes all `<blockquote>` elements completely** before reading the text. 
@@ -1172,15 +1172,18 @@ Here is the exact Python script you can run on `data/texts.txt` to produce a pri
 import re
 import html
 
+
 def clean_for_dapt(input_path="data/texts.txt", output_path="data/dapt_train.txt"):
     # Regex to collapse 3+ repeated characters to 2 (e.g., 'neeeeeee' -> 'nee')
-    repeat_re = re.compile(r'(.)\1{2,}', re.IGNORECASE)
+    repeat_re = re.compile(r"(.)\1{2,}", re.IGNORECASE)
     # Regex to collapse repeated punctuation (e.g., '.....' -> '..')
-    punct_repeat_re = re.compile(r'([.!?,-])\1{2,}')
+    punct_repeat_re = re.compile(r"([.!?,-])\1{2,}")
     # Remove artificial redaction tags
-    redaction_re = re.compile(r'\[(URL_REDACTED|USER|PHONE_REDACTED|EMAIL_REDACTED)\]', re.IGNORECASE)
+    redaction_re = re.compile(
+        r"\[(URL_REDACTED|USER|PHONE_REDACTED|EMAIL_REDACTED)\]", re.IGNORECASE
+    )
     # Remove leftover forum smilies like :sorry:, :D, :p
-    smilie_re = re.compile(r':([a-z_]+):', re.IGNORECASE)
+    smilie_re = re.compile(r":([a-z_]+):", re.IGNORECASE)
 
     clean_lines = []
     seen = set()
@@ -1195,17 +1198,17 @@ def clean_for_dapt(input_path="data/texts.txt", output_path="data/dapt_train.txt
             text = html.unescape(text)
 
             # 2. Strip artificial redaction tokens
-            text = redaction_re.sub(' ', text)
+            text = redaction_re.sub(" ", text)
 
             # 3. Strip forum smilie codes
-            text = smilie_re.sub(' ', text)
+            text = smilie_re.sub(" ", text)
 
             # 4. Normalize character and punctuation elongations
-            text = repeat_re.sub(r'\1\1', text)
-            text = punct_repeat_re.sub(r'\1\1', text)
+            text = repeat_re.sub(r"\1\1", text)
+            text = punct_repeat_re.sub(r"\1\1", text)
 
             # 5. Clean whitespace
-            text = ' '.join(text.split())
+            text = " ".join(text.split())
 
             # 6. Filter out uninformative micro-sentences (less than 5 words)
             if len(text.split()) < 5:
@@ -1223,6 +1226,7 @@ def clean_for_dapt(input_path="data/texts.txt", output_path="data/dapt_train.txt
     print(f"Original lines: {sum(1 for _ in open(input_path, encoding='utf-8'))}")
     print(f"Pristine DAPT lines: {len(clean_lines)}")
     print(f"Saved to: {output_path}")
+
 
 if __name__ == "__main__":
     clean_for_dapt()
@@ -1371,7 +1375,7 @@ When you search in the browser, ElaKiri search returns a link that points **dire
 
 In [elakiri_scraper.py](file:///C:/Users/Lenovo/.gemini/antigravity-ide/scratch/sinhala_code_mixed_scraper/scrapers/elakiri_scraper.py#L220-L223), however:
 ```python
-clean_url = full_url.split('/post-')[0].rstrip('/') + '/'
+clean_url = full_url.split("/post-")[0].rstrip("/") + "/"
 ```
 The scraper **discards the specific post anchor** and only keeps the base thread URL (`.../threads/elakiri-programmers-club.1585896/`).
 
