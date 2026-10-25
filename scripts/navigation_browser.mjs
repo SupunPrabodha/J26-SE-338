@@ -63,12 +63,12 @@ async function login(target,credentials,remember=false) {
   assert(await evaluate(target,()=>!document.querySelector('[name="remember_me"]').checked),'Checkbox not unchecked by default');
   if(remember)await click(target,'[name="remember_me"]');
   await evaluate(target,credentials=>{for(const [selector,value] of [['#username',credentials.STAFF_USERNAME],['#password',credentials.STAFF_PASSWORD]]){const e=document.querySelector(selector);Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,value);e.dispatchEvent(new Event('input',{bubbles:true}));}},credentials);
-  await click(target,'form button[type="submit"], .sign-in form button');
+  await click(target,'.sign-in form button[type="submit"]');
   await wait(target,()=>!!document.querySelector('.account-trigger')&&!document.querySelector('#password'));
 }
 async function signOut(target) {await click(target,'.account-trigger');await click(target,'button[role="menuitem"]');await wait(target,()=>!!document.querySelector('#username')||!document.querySelector('.account-trigger'));}
 async function capture(target,name) {
-  assert(await evaluate(target,()=>![...document.querySelectorAll('input[name="username"],input[type="password"]')].some(input=>input.value)),'Credential fields not empty');
+  assert(await evaluate(target,()=>![...document.querySelectorAll('input[name="username"],input[name="password"],input[type="password"]')].some(input=>input.value)),'Credential fields not empty');
   const {data}=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true},target);await writeFile(join(directory,name+'.png'),Buffer.from(data,'base64'));screenshots.push(name+'.png');
 }
 
@@ -125,10 +125,10 @@ try {
   await send('Page.bringToFront',{},admin);await evaluate(admin,()=>document.querySelector('.staff-sidebar a[href="/admin"]').focus());
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r'},admin);await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13},admin);
   await staffReady(admin,'Operational evidence');await stable(admin,'keyboard_enter_client_navigation');
-  stage='profile_menu_navigation';await click(admin,'.account-trigger');await click(admin,'a[role="menuitem"]');await staffReady(admin,'Account profile');await wait(admin,()=>!!document.querySelector('.account-profile'));await stable(admin,'admin_profile_link');
-  await click(admin,'main .demo-nav a');await staffReady(admin,'Administration overview');await stable(admin,'admin_profile_return');
+  stage='profile_menu_navigation';await click(admin,'.account-trigger');await click(admin,'a[role="menuitem"]');await staffReady(admin,'Account profile');await wait(admin,()=>!!document.querySelector('.profile-grid'));await stable(admin,'admin_profile_link');
+  await click(admin,'main .profile-actions a');await staffReady(admin,'Administration overview');await stable(admin,'admin_profile_return');
   stage='admin_logout_back';await signOut(admin);await wait(admin,()=>!!document.querySelector('#username'));
-  await evaluate(admin,()=>window.history.back());await wait(admin,()=>document.querySelector('main h1')?.textContent==='Account profile'&&!document.querySelector('.account-profile'));
+  await evaluate(admin,()=>window.history.back());await wait(admin,()=>document.querySelector('main h1')?.textContent==='Account profile'&&!document.querySelector('.profile-grid'));
   assert(await evaluate(admin,()=>!document.querySelector('.staff-sidebar')&&!document.querySelector('.account-trigger')),'Logout/back restored protected shell');
   assert(await evaluate(admin,()=>window.__navigationProbe.origin===window.performance.timeOrigin),'Logout replaced document');checks.push('logout_and_history_do_not_restore_protected_profile_or_navigation');
   stage='counsellor_query_navigation';const counsellor=await page('/');
@@ -141,9 +141,9 @@ try {
   if(process.argv.includes('--staff-file')){
     stage='researcher_navigation';const credentials=parse(await readFile(process.argv[process.argv.indexOf('--staff-file')+1],'utf8'));
     assert(credentials.STAFF_ROLE==='RESEARCHER','Researcher fixture required');const research=await page('/research');await login(research,credentials,true);await staffReady(research,'Component directory');await mark(research);
-    await click(research,'.staff-sidebar a[href="/account?workspace=research"]');await staffReady(research,'Account profile');await wait(research,()=>!!document.querySelector('.account-profile'));await stable(research,'researcher_profile');
+    await click(research,'.staff-sidebar a[href="/account?workspace=research"]');await staffReady(research,'Account profile');await wait(research,()=>!!document.querySelector('.profile-grid'));await stable(research,'researcher_profile');
     assert(await evaluate(research,()=>!document.querySelector('a[href^="/admin"]')&&!document.querySelector('.staff-sidebar a[href="/"]')),'Researcher role navigation expanded');
-    await click(research,'main .demo-nav a');await staffReady(research,'Component directory');await stable(research,'researcher_profile_return');await signOut(research);
+    await click(research,'main .profile-actions a');await staffReady(research,'Component directory');await stable(research,'researcher_profile_return');await signOut(research);
   }
   stage='student_navigation';const student=await page('http://localhost:3000');await mark(student,true);await click(student,'.consent-card > button');await wait(student,()=>document.body.textContent.includes('owner session verified'));
   await click(student,'.app-nav a[href="/demo"]');await wait(student,()=>document.querySelectorAll('[data-group]').length===6&&document.body.textContent.includes('Connected'));

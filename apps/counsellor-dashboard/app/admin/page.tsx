@@ -66,10 +66,10 @@ export default function Operations() {
       setAuthorized(true); setCursor(null); setHistory([]); await read(initial, null);
     });
   }
-  return <StaffFrame area="admin" current="audit" authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { setPage(null); setDetail(null); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
+  return <StaffFrame area="admin" current="audit" authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { setPage(null); setDetail(null); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main className={authorized ? undefined : "staff-entry-page"}>
     <DemoHeader title="Operational evidence" subtitle="Restricted lifecycle receipts, policy outcomes and service provenance." />
-    <SafetyNotice /><ErrorMessage message={error} />
-    {checking ? <section className="card empty" role="status">Checking administrative access…</section> : !authorized ? <StaffSignIn kind="admin" busy={busy} onSubmit={login} /> : <>
+    <SafetyNotice />{authorized && <ErrorMessage message={error} />}
+    {checking ? <section className="card empty" role="status">Checking administrative access…</section> : !authorized ? <StaffSignIn kind="admin" busy={busy} onSubmit={login} error={error} /> : <>
       <section className="card audit-filters filter-toolbar" aria-labelledby="filter-title"><div className="detail-heading"><div><p className="eyebrow">Evidence explorer</p><h2 id="filter-title">Find lifecycle events</h2></div><span className="tag">25 events per page</span></div>
         <form onSubmit={event => { event.preventDefault(); if (draft.since && draft.until && new Date(draft.since) > new Date(draft.until)) { setError("From time must be before or equal to Until time."); return; } setFilters({ ...draft }); setCursor(null); setHistory([]); void act(() => read(draft, null)); }}>
           <div className="filter-grid"><div><label htmlFor="audit-case">Case reference</label><input id="audit-case" value={draft.case_id} placeholder="Optional pseudonymous UUID" onChange={event => setDraft({ ...draft, case_id: event.target.value })} pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" /></div>

@@ -63,12 +63,12 @@ async function login(target,credentials,remember=false) {
   assert(await evaluate(target,()=>!document.querySelector('[name="remember_me"]').checked),'Checkbox not unchecked by default');
   if(remember)await click(target,'[name="remember_me"]');
   await evaluate(target,credentials=>{for(const [selector,value] of [['#username',credentials.STAFF_USERNAME],['#password',credentials.STAFF_PASSWORD]]){const e=document.querySelector(selector);Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,value);e.dispatchEvent(new Event('input',{bubbles:true}));}},credentials);
-  await click(target,'form button[type="submit"], .sign-in form button');
+  await click(target,'.sign-in form button[type="submit"]');
   await wait(target,()=>!!document.querySelector('.account-trigger')&&!document.querySelector('#password'));
 }
 async function signOut(target) {await click(target,'.account-trigger');await click(target,'button[role="menuitem"]');await wait(target,()=>!!document.querySelector('#username')||!document.querySelector('.account-trigger'));}
 async function capture(target,name) {
-  assert(await evaluate(target,()=>![...document.querySelectorAll('input[name="username"],input[type="password"]')].some(input=>input.value)),'Credential fields not empty');
+  assert(await evaluate(target,()=>![...document.querySelectorAll('input[name="username"],input[name="password"],input[type="password"]')].some(input=>input.value)),'Credential fields not empty');
   const {data}=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true},target);await writeFile(join(directory,name+'.png'),Buffer.from(data,'base64'));screenshots.push(name+'.png');
 }
 async function profile(target,remember) {
@@ -94,7 +94,7 @@ try {
   await send('Network.deleteCookies',{name:'j26_research_access',url:'http://localhost:3001/api/v1/research-auth/profile'},target);
   await click(target,'.toolbar button');await wait(target,()=>!!document.querySelector('.component-grid')&&!document.querySelector('.toolbar button')?.disabled);
   await profile(target,true);checks.push('access_cookie_removal_renews_via_rotating_refresh');
-  await click(target,'.account-trigger');await click(target,'a[role="menuitem"]');await wait(target,()=>!!document.querySelector('.account-profile'));
+  await click(target,'.account-trigger');await click(target,'a[role="menuitem"]');await wait(target,()=>!!document.querySelector('.profile-grid'));
   assert(await evaluate(target,()=>!document.querySelector('a[href^="/admin"]')&&!document.querySelector('a[href="/"]')),'Researcher navigation escalates role');
   await capture(target,'researcher-account-profile');checks.push('authorized_profile_and_role_navigation');
   for(const path of ['/api/v1/admin/overview','/api/v1/review-queue']){const status=await evaluate(target,async path=>(await fetch(path)).status,path);assert([401,403].includes(status),'Cross-realm access allowed');checks.push({name:'cross_realm_denied',endpoint:path,status});}

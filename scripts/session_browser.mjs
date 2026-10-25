@@ -86,7 +86,7 @@ async function page(url, mobile = false, shareWith) {
   return sessionId;
 }
 async function screenshot(page, name) {
-  assert(await evaluate(page, () => ![...document.querySelectorAll('input[name="username"], input[type="password"]')].some(e => e.value)), "Credential field must be empty before capture");
+  assert(await evaluate(page, () => ![...document.querySelectorAll('input[name="username"], input[name="password"],input[type="password"]')].some(e => e.value)), "Credential field must be empty before capture");
   assert(await evaluate(page, () => document.documentElement.scrollWidth <= innerWidth), "Horizontal overflow");
   const { data } = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true }, page);
   await writeFile(join(directory, name + ".png"), Buffer.from(data, "base64"));

@@ -63,7 +63,7 @@ async function login(target,credentials,remember=false) {
   assert(await evaluate(target,()=>!document.querySelector('[name="remember_me"]').checked),'Checkbox not unchecked by default');
   if(remember)await click(target,'[name="remember_me"]');
   await evaluate(target,credentials=>{for(const [selector,value] of [['#username',credentials.STAFF_USERNAME],['#password',credentials.STAFF_PASSWORD]]){const e=document.querySelector(selector);Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,value);e.dispatchEvent(new Event('input',{bubbles:true}));}},credentials);
-  await click(target,'form button[type="submit"], .sign-in form button');
+  await click(target,'.sign-in form button[type="submit"]');
   await wait(target,()=>!!document.querySelector('.account-trigger')&&!document.querySelector('#password'));
 }
 async function signOut(target) {await click(target,'.account-trigger');await click(target,'button[role="menuitem"]');await wait(target,()=>!!document.querySelector('#username')||!document.querySelector('.account-trigger'));}

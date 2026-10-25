@@ -87,9 +87,9 @@ export default function AdminConsole({ section }: { section: AdminSection }) {
   }
   const next = section === "staff" ? staff?.next_offset : cases?.next_offset;
   const observedAt = section === "staff" ? staff?.observed_at : section === "overview" ? overview?.observed_at : cases?.observed_at;
-  return <StaffFrame area="admin" current={section} authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { clear(); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
-    <DemoHeader title={titles[section]} subtitle="Authorized staff administration and metadata-only operations." /><SafetyNotice />{!selectedStaff && !selectedCase && !metadata && <ErrorMessage message={error} />}
-    {checking ? <section className="card empty" role="status">Checking administrative access…</section> : !authorized ? <StaffSignIn kind="admin" busy={busy} onSubmit={login} /> : <>
+  return <StaffFrame area="admin" current={section} authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { clear(); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main className={authorized ? undefined : "staff-entry-page"}>
+    <DemoHeader title={titles[section]} subtitle="Authorized staff administration and metadata-only operations." /><SafetyNotice />{authorized && !selectedStaff && !selectedCase && !metadata && <ErrorMessage message={error} />}
+    {checking ? <section className="card empty" role="status">Checking administrative access…</section> : !authorized ? <StaffSignIn kind="admin" busy={busy} onSubmit={login} error={error} /> : <>
       <div className="toolbar"><div><h2>{section === "overview" ? "Current system snapshot" : "Records"}</h2><p className="hint">{observedAt ? `Observed ${stamp(observedAt)}` : "Refresh to load current evidence."}</p></div><button className="secondary" disabled={busy} onClick={() => act(() => read())}>Refresh view</button></div>
       <p className="feedback" role="status" aria-live="polite">{busy ? "Loading records…" : message || "Operational metadata only."}</p>
       {section === "overview" && overview && <AdminOverviewPanel overview={overview} onSessionEnded={() => { clear(); setAuthorized(false); }} />}

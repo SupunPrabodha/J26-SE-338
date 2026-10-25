@@ -63,14 +63,14 @@ export default function Dashboard({ initialState = "" }: { initialState?: "" | "
       let account: AccountResponse;
       try { account = await api<AccountResponse>("/auth/login", { username: values.get("username"), password: values.get("password"), remember_me: values.get("remember_me") === "on" }); }
       finally { form.reset(); }
-      if (account.role !== "COUNSELLOR") { await api("/auth/logout", {}); throw new Error("This development shell requires an authorized counsellor account."); }
+      if (account.role !== "COUNSELLOR") { await api("/auth/logout", {}); throw new Error("This workspace requires an authorized counsellor account. Use the matching workspace sign-in."); }
       setAuthorized(true); setOffset(0); setFilter(initialState); await load(initialState, 0);
     });
   }
-  return <StaffFrame area="counsellor" current={filter === "COMPLETED" ? "completed" : "queue"} authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { setAuthorized(false); setQueue(null); clearSelection(); await api("/auth/logout", {}); })}><main>
+  return <StaffFrame area="counsellor" current={filter === "COMPLETED" ? "completed" : "queue"} authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { setAuthorized(false); setQueue(null); clearSelection(); await api("/auth/logout", {}); })}><main className={authorized ? undefined : "staff-entry-page"}>
     <DemoHeader title={completedView ? "Completed reviews" : "Case workspace"} subtitle={completedView ? "Explicitly completed human reviews, with read-only saved records where available." : "Your assigned cases, human review and saved interpretations."} />
-    <SafetyNotice /><ErrorMessage message={error} />
-    {checking ? <section className="card empty" role="status">Checking your session…</section> : !authorized ? <StaffSignIn kind="counsellor" busy={busy} onSubmit={login} /> : <>
+    <SafetyNotice />{authorized && <ErrorMessage message={error} />}
+    {checking ? <section className="card empty" role="status">Checking your session…</section> : !authorized ? <StaffSignIn kind="counsellor" busy={busy} onSubmit={login} error={error} /> : <>
       <div className="toolbar"><div><h2>{completedView ? "Completed human reviews" : "Assigned cases"}</h2><p className="hint">{completedView ? "Only explicitly completed reviews still assigned to you with valid consent and retention are listed. Processing completion or saving a record alone does not complete human review." : "Only processed, assigned cases with current consent are listed. Consent alone does not grant access."}</p></div><button className="secondary" disabled={busy} onClick={() => act(() => load())}>{completedView ? "Refresh completed reviews" : "Refresh assigned tasks"}</button></div>
       <p className="feedback" role="status" aria-live="polite">{busy ? "Loading cases…" : message || `${queue?.items.length ?? 0} case(s) on this page · Last checked ${time(checkedAt)}`}</p>
       <div className="review-grid"><section className="card task-list" aria-label="Assigned synthetic cases">

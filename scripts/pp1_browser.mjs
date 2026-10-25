@@ -110,7 +110,7 @@ async function page(url, mobile = false, shareWith) {
 }
 async function screenshot(page, name) {
   await send('Page.bringToFront',{},page);
-  assert(await evaluate(page, () => ![...document.querySelectorAll('input[name="username"], input[type="password"]')].some(e => e.value)), "Credential field must be empty before capture");
+  assert(await evaluate(page, () => ![...document.querySelectorAll('input[name="username"], input[name="password"],input[type="password"]')].some(e => e.value)), "Credential field must be empty before capture");
   assert(await evaluate(page, () => document.documentElement.scrollWidth <= innerWidth), "Horizontal overflow");
   // Review contents are withheld from retained screenshots, even for fictional fixtures.
   await evaluate(page, () => { document.querySelectorAll('.interpretation-text').forEach(e => { e.style.visibility = 'hidden'; }); });
