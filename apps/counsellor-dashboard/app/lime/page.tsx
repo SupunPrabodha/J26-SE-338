@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Sidebar } from "../components/Sidebar";
 import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
+import { useC4Workspace, type SentimentClass } from "../context/C4WorkspaceContext";
 import { SentimentProbabilityChart, LocalProbabilityChart } from "../components/SentimentProbabilityChart";
 import { api } from "@j26/common/api";
 import type { C4ExplanationResponse, C4PredictionResponse, FeatureContribution } from "@j26/common/contracts";
@@ -20,27 +21,29 @@ export default function LimePage() {
     devInput,
   } = useReviewCase();
 
-  const [isBusy, setIsBusy] = useState(false);
-  const [isPredicting, setIsPredicting] = useState(false);
-  const [error, setError] = useState("");
-  const [statusMessage, setStatusMessage] = useState("");
-  const [explanation, setExplanation] = useState<C4ExplanationResponse | null>(null);
-  const [prediction, setPrediction] = useState<C4PredictionResponse | null>(null);
-  const [isClassifierConnected, setIsClassifierConnected] = useState(false);
-
-  // Ignore late responses across case/model changes
-  const activeRequestRef = useRef(0);
-  const isRestoringRef = useRef(false);
-  const restoredIdRef = useRef<string | null>(null);
+  const {
+    lime,
+    prediction: workspacePrediction,
+    isPredicting: workspaceIsPredicting,
+    isClassifierConnected: workspaceIsConnected,
+    computeLime,
+    restoreExplanation,
+  } = useC4Workspace();
 
   const snapshot = devInput && devInput.text ? devInput : null;
   const submissionText = snapshot ? snapshot.text : (selectedTask?.preprocessing?.anonymized_text || null);
   const caseLanguage = snapshot ? (snapshot.language || "English") : (selectedTask?.preprocessing?.language || "English");
-  const targetClass = selectedSentimentClass || snapshot?.targetClass || "Negative";
+  const targetClass: SentimentClass = (selectedSentimentClass as SentimentClass) || (snapshot?.targetClass as SentimentClass) || "Negative";
 
-  const prevSubmissionTextRef = useRef<string | null>(submissionText);
-  const prevTaskIdRef = useRef<string | null>(selectedTaskId);
-  const prevTargetClassRef = useRef<string>(targetClass);
+  const explanation = lime.response;
+  const isBusy = lime.status === "IN_FLIGHT";
+  const error = lime.error;
+  const statusMessage = lime.statusMessage;
+  const prediction = workspacePrediction;
+  const isPredicting = workspaceIsPredicting;
+  const isClassifierConnected = workspaceIsConnected;
+
+  const restoredIdRef = useRef<string | null>(null);
 
   // Restore saved explanation from URL parameter (?id=...) once auth is ready
   useEffect(() => {
@@ -51,235 +54,12 @@ export default function LimePage() {
     const savedId = urlParams.get("id");
     if (!savedId || savedId === restoredIdRef.current) return;
 
-    let mounted = true;
-    isRestoringRef.current = true;
-    const currentReqId = ++activeRequestRef.current;
-    setIsBusy(true);
-
-    api<C4ExplanationResponse>(`/c4/explanations/${savedId}`)
-      .then((data) => {
-        if (!mounted || currentReqId !== activeRequestRef.current) return;
-        if (data.method !== "LIME") {
-          setError(`Explanation method mismatch: this record is a ${data.method} explanation, not LIME.`);
-          setExplanation(null);
-          const url = new URL(window.location.href);
-          url.searchParams.delete("id");
-          window.history.replaceState(null, "", url.pathname);
-          return;
-        }
-        restoredIdRef.current = savedId;
-        setExplanation(data);
-
-        if (data.status === "AWAITING_CLASSIFIER_CONNECTION") {
-          setIsClassifierConnected(false);
-          setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
-        } else if (data.status === "UNAVAILABLE") {
-          setIsClassifierConnected(true);
-          setStatusMessage(data.status_message || "Saved LIME explanation is unavailable.");
-        } else {
-          setIsClassifierConnected(true);
-          setStatusMessage(`Restored saved LIME explanation (${data.target_class}).`);
-        }
-
-        if (data.target_class) {
-          prevTargetClassRef.current = data.target_class;
-          setSelectedSentimentClass(data.target_class as "Negative" | "Neutral" | "Positive");
-        }
-        if (data.probabilities && data.predicted_class) {
-          setPrediction({
-            model_id: data.model_id || "cardiffnlp/twitter-xlm-roberta-base-sentiment",
-            model_version: data.model_version || "",
-            model_revision: data.model_revision || null,
-            predicted_sentiment: data.predicted_class as "Negative" | "Neutral" | "Positive",
-            confidence:
-              data.probabilities[data.predicted_class] ?? (data.target_class_probability ?? 0),
-            probabilities: data.probabilities,
-            token_count: data.token_count ?? 0,
-            truncated: data.truncated ?? false,
-            max_sequence_length: 512,
-            status: "READY",
-            status_message: "Restored from saved explanation record.",
-          });
-        }
-      })
-      .catch((err) => {
-        if (!mounted || currentReqId !== activeRequestRef.current) return;
-        setError(err.message || "Failed to retrieve saved explanation.");
-        const url = new URL(window.location.href);
-        url.searchParams.delete("id");
-        window.history.replaceState(null, "", url.pathname);
-      })
-      .finally(() => {
-        isRestoringRef.current = false;
-        if (mounted && currentReqId === activeRequestRef.current) {
-          setIsBusy(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-      isRestoringRef.current = false;
-    };
-  }, [checking, authorized, setSelectedSentimentClass]);
-
-  // Clear previous results whenever new input is provided or target class changes
-  useEffect(() => {
-    if (!authorized) {
-      queueMicrotask(() => {
-        setExplanation(null);
-        setPrediction(null);
-        setError("");
-        setStatusMessage("");
-        restoredIdRef.current = null;
-      });
-      return;
-    }
-
-    if (isRestoringRef.current) return;
-
-    const textChanged = submissionText !== prevSubmissionTextRef.current;
-    const taskChanged = selectedTaskId !== prevTaskIdRef.current;
-    const classChanged = selectedSentimentClass !== prevTargetClassRef.current;
-
-    prevSubmissionTextRef.current = submissionText;
-    prevTaskIdRef.current = selectedTaskId;
-    prevTargetClassRef.current = selectedSentimentClass;
-
-    if (textChanged || taskChanged || classChanged) {
-      activeRequestRef.current += 1;
-      restoredIdRef.current = null;
-      queueMicrotask(() => {
-        setExplanation(null);
-        setError("");
-        setStatusMessage("");
-      });
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has("id")) {
-          url.searchParams.delete("id");
-          window.history.replaceState(null, "", url.pathname);
-        }
-      }
-    }
-  }, [authorized, submissionText, selectedTaskId, selectedSentimentClass]);
-
-  // Set prediction from snapshot or fetch if text is present
-  useEffect(() => {
-    let mounted = true;
-    if (!submissionText) {
-      queueMicrotask(() => {
-        setPrediction(null);
-        setIsClassifierConnected(false);
-      });
-      return;
-    }
-
-    if (snapshot && snapshot.prediction) {
-      const snapPred = snapshot.prediction;
-      queueMicrotask(() => {
-        setPrediction(snapPred);
-        setIsClassifierConnected(true);
-      });
-      return;
-    }
-
-    const currentReqId = ++activeRequestRef.current;
-    queueMicrotask(() => {
-      setIsPredicting(true);
-    });
-
-    fetch("/api/c4-predict", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: submissionText,
-        language: caseLanguage,
-      }),
-    })
-      .then(async (res) => {
-        if (!mounted || currentReqId !== activeRequestRef.current) return;
-        if (res.ok) {
-          const data = (await res.json()) as C4PredictionResponse;
-          setPrediction(data);
-          setIsClassifierConnected(true);
-        } else {
-          const errJson = await res.json().catch(() => ({}));
-          setError(errJson.error || `Prediction check failed (${res.status})`);
-          setIsClassifierConnected(false);
-        }
-      })
-      .catch((err) => {
-        if (!mounted || currentReqId !== activeRequestRef.current) return;
-        setError(err.message || "Could not connect to sentiment classifier");
-        setIsClassifierConnected(false);
-      })
-      .finally(() => {
-        if (mounted && currentReqId === activeRequestRef.current) {
-          setIsPredicting(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [submissionText, caseLanguage, snapshot]);
+    restoredIdRef.current = savedId;
+    void restoreExplanation(savedId, "LIME");
+  }, [checking, authorized, restoreExplanation]);
 
   async function handleRunLime() {
-    if (!submissionText) {
-      setError("Submit text first on the Development Input page before computing explanations.");
-      return;
-    }
-
-    const currentReqId = ++activeRequestRef.current;
-    setIsBusy(true);
-    setError("");
-    setStatusMessage(`Running LIME explanation for "${targetClass}" with whitespace Unicode preservation...`);
-
-    try {
-      const data = await api<C4ExplanationResponse>("/c4/explanations", {
-        text: submissionText,
-        method: "LIME",
-        target_class: targetClass,
-        language: caseLanguage,
-        idempotency_key: crypto.randomUUID(),
-      });
-
-      if (currentReqId !== activeRequestRef.current) {
-        // Stale response: a new case or class was selected while this was computing
-        return;
-      }
-
-      setExplanation(data);
-
-      if (data.explanation_id && typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        url.searchParams.set("id", String(data.explanation_id));
-        window.history.replaceState(null, "", url.toString());
-      }
-
-      if (data.status === "AWAITING_CLASSIFIER_CONNECTION") {
-        setIsClassifierConnected(false);
-        setStatusMessage("Awaiting classifier connection — C3 model integration pending.");
-      } else if (data.status === "UNAVAILABLE") {
-        setIsClassifierConnected(true);
-        setStatusMessage(data.status_message || "LIME explanation unavailable.");
-      } else if (data.status === "READY") {
-        setIsClassifierConnected(true);
-        if (data.explanation_id) {
-          setStatusMessage(`LIME explanation for "${targetClass}" computed and saved successfully.`);
-        } else {
-          setStatusMessage("LIME explanation computed successfully.");
-        }
-      }
-    } catch (err) {
-      if (currentReqId === activeRequestRef.current) {
-        setError((err as Error).message || "Could not retrieve LIME explanation from services.");
-      }
-    } finally {
-      if (currentReqId === activeRequestRef.current) {
-        setIsBusy(false);
-      }
-    }
+    await computeLime(targetClass);
   }
 
   const hasResults = Boolean(

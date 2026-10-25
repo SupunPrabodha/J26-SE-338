@@ -75,43 +75,18 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [selectedSentimentClass, setSelectedSentimentClass] = useState<"Negative" | "Neutral" | "Positive">("Negative");
   const [devInput, setDevInputState] = useState<DevelopmentInputSnapshot | null>(null);
 
-  // Restore devInput from sessionStorage on client-side mount
+  // Ensure legacy persisted text is removed from browser storage; devInput stays in memory only
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const saved = sessionStorage.getItem("j26_dev_input");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.text) {
-          setTimeout(() => {
-            setDevInputState(parsed);
-            if (parsed.targetClass) {
-              setSelectedSentimentClass(parsed.targetClass);
-            }
-          }, 0);
-        }
-      }
+      sessionStorage.removeItem("j26_dev_input");
     } catch {
-      // Ignore storage read errors
+      // Ignore storage errors
     }
   }, []);
 
   const setDevInput = useCallback((action: React.SetStateAction<DevelopmentInputSnapshot | null>) => {
-    setDevInputState((prev) => {
-      const next = typeof action === "function" ? action(prev) : action;
-      if (typeof window !== "undefined") {
-        try {
-          if (next) {
-            sessionStorage.setItem("j26_dev_input", JSON.stringify(next));
-          } else {
-            sessionStorage.removeItem("j26_dev_input");
-          }
-        } catch {
-          // Ignore storage write errors
-        }
-      }
-      return next;
-    });
+    setDevInputState(action);
   }, []);
 
   const loadTasks = useCallback(async () => {
@@ -128,6 +103,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     } catch (cause) {
       if (cause instanceof ApiError && cause.status === 401) {
         setAuthorized(false);
+        if (typeof window !== "undefined") {
+          try {
+            sessionStorage.removeItem("j26_c4_manifest");
+            sessionStorage.removeItem("j26_dev_input");
+          } catch {}
+        }
       }
       setTasks([]);
       setSelectedTaskId(null);
@@ -187,6 +168,11 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSelectedSentimentClass("Negative");
     setDevInput(null);
     if (typeof window !== "undefined") {
+      try {
+        sessionStorage.removeItem("j26_dev_input");
+        sessionStorage.removeItem("j26_c4_manifest");
+        localStorage.setItem("j26_auth_sync", JSON.stringify({ event: "logout", time: Date.now() }));
+      } catch {}
       const url = new URL(window.location.href);
       url.search = "";
       window.history.replaceState(null, "", url.pathname);
@@ -196,6 +182,31 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore network errors during logout
     }
+  }, [setDevInput]);
+
+  // Synchronize logout across open tabs via local storage event
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "j26_auth_sync" && event.newValue) {
+        try {
+          const parsed = JSON.parse(event.newValue);
+          if (parsed?.event === "logout") {
+            setAuthorized(false);
+            setTasks([]);
+            setSelectedTaskId(null);
+            setDevInput(null);
+            sessionStorage.removeItem("j26_dev_input");
+            sessionStorage.removeItem("j26_c4_manifest");
+            const url = new URL(window.location.href);
+            url.search = "";
+            window.history.replaceState(null, "", url.pathname);
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [setDevInput]);
 
   const login = useCallback(

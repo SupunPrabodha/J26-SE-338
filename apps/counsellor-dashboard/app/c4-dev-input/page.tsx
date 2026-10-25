@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "../components/Sidebar";
 import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase, type DevelopmentInputData } from "../context/CaseContext";
+import { useC4Workspace } from "../context/C4WorkspaceContext";
 import type { C4PredictionResponse } from "@j26/common/contracts";
 
 export const MAX_CHAR_LIMIT = 2000;
@@ -42,6 +43,7 @@ function C4DevInputContent() {
     selectedSentimentClass,
     setSelectedSentimentClass,
   } = useReviewCase();
+  const { commitNewSource, clearActiveWorkspace } = useC4Workspace();
 
   const [text, setText] = useState(devInput?.text || "");
   const [language, setLanguage] = useState(devInput?.language || "English");
@@ -87,13 +89,14 @@ function C4DevInputContent() {
             submittedAt: Date.now(),
           });
           setDevInput(snapshot);
+          commitNewSource(snapshot);
           if (dest === "lime") router.push("/lime");
           else if (dest === "shap") router.push("/shap");
           else if (dest === "counterfactuals") router.push("/counterfactuals");
         }
       })
       .catch(() => {});
-  }, [router, setDevInput, setSelectedSentimentClass]);
+  }, [router, setDevInput, setSelectedSentimentClass, commitNewSource]);
 
   const isOutdated =
     submittedText !== null &&
@@ -113,6 +116,7 @@ function C4DevInputContent() {
     setErrorMessage("");
     setStatusMessage("");
     setDevInput(null);
+    clearActiveWorkspace();
   }
 
   async function handleAnalyse(event?: FormEvent) {
@@ -164,6 +168,7 @@ function C4DevInputContent() {
           submittedAt: Date.now(),
         });
         setDevInput(snapshot);
+        commitNewSource(snapshot);
       } else {
         const errJson = await response.json().catch(() => ({}));
         if (response.status === 401) {

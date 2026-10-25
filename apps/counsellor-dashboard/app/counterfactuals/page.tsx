@@ -14,6 +14,7 @@ import {
 import { Sidebar } from "../components/Sidebar";
 import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
+import { useC4Workspace } from "../context/C4WorkspaceContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
   C4CounterfactualRequest,
@@ -68,19 +69,44 @@ export default function CounterfactualsPage() {
     setDevInput,
   } = useReviewCase();
 
-  const [isBusy, setIsBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [statusMessage, setStatusMessage] = useState("");
-  const [result, setResult] = useState<C4CounterfactualResponse | null>(null);
-  const [restoredTextUnavailable, setRestoredTextUnavailable] = useState(false);
-  const [isClassifierConnected, setIsClassifierConnected] = useState(true);
+  const {
+    counterfactual,
+    computeCounterfactuals,
+    restoreCounterfactual,
+    setSelectedCandidateId,
+    setCounterfactualSettings,
+    setManualText: setWorkspaceManualText,
+    runManualEvaluation,
+    resetManualEvaluation,
+    updateCounterfactualFeedback,
+  } = useC4Workspace();
 
-  // Active candidate selection (defaults to best_candidate or rank 1)
-  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const isBusy = counterfactual.status === "IN_FLIGHT";
+  const [localError, setLocalError] = useState<string>("");
+  const error = localError || counterfactual.error;
+  const setError = setLocalError;
+  const statusMessage = counterfactual.statusMessage;
+  const result = counterfactual.response;
+  const restoredTextUnavailable = counterfactual.restoredTextUnavailable;
+  const isClassifierConnected = true;
 
-  // Active request ref to ignore late responses
-  const activeRequestRef = useRef(0);
-  const isRestoringRef = useRef(false);
+  const selectedCandidateId = counterfactual.selectedCandidateId;
+  const maxEdits = counterfactual.maxEdits;
+  const setMaxEdits = (v: number | ((prev: number) => number)) => {
+    const next = typeof v === "function" ? v(maxEdits) : v;
+    setCounterfactualSettings({ maxEdits: next });
+  };
+  const editMode = counterfactual.editMode;
+  const setEditMode = (m: "both" | "replace_only" | "delete_only" | ((prev: "both" | "replace_only" | "delete_only") => "both" | "replace_only" | "delete_only")) => {
+    const next = typeof m === "function" ? m(editMode) : m;
+    setCounterfactualSettings({ editMode: next });
+  };
+  const lockedSpans = counterfactual.lockedSpans;
+  const setLockedSpans = (s: TextSpanLock[] | ((prev: TextSpanLock[]) => TextSpanLock[])) => {
+    const next = typeof s === "function" ? s(lockedSpans) : s;
+    setCounterfactualSettings({ lockedSpans: next });
+  };
+
   const restoredIdRef = useRef<string | null>(null);
 
   // Read original submission text from shared context
@@ -107,11 +133,6 @@ export default function CounterfactualsPage() {
   const [targetClass, setTargetClass] = useState<"Negative" | "Neutral" | "Positive">(
     selectedSentimentClass || "Neutral"
   );
-  const [maxEdits, setMaxEdits] = useState<number>(2); // Advertise only implemented depths (1 or 2)
-  const [editMode, setEditMode] = useState<"both" | "replace_only" | "delete_only">("both");
-
-  // Word locks (offsets)
-  const [lockedSpans, setLockedSpans] = useState<TextSpanLock[]>([]);
 
   // Auto-switch target class away from baselineClass when baseline becomes known
   const prevBaselineRef = useRef<string | undefined>(undefined);
@@ -127,22 +148,13 @@ export default function CounterfactualsPage() {
     }
   }, [baselineClass, targetClass, setSelectedSentimentClass]);
 
-  // Manual "What if?" exploration state
-  const [manualText, setManualText] = useState<string>(submissionText || "");
-  const [manualResult, setManualResult] = useState<C4ManualEvaluationResponse | null>(null);
-  const [isManualBusy, setIsManualBusy] = useState<boolean>(false);
+  // Manual "What if?" exploration state (from shared workspace)
+  const manualText = counterfactual.manualText || submissionText || "";
+  const setManualText = setWorkspaceManualText;
+  const manualResult = counterfactual.manualResult;
+  const isManualBusy = counterfactual.isManualBusy;
+  const manualError = counterfactual.manualError;
   const [manualStale, setManualStale] = useState<boolean>(false);
-  const [manualError, setManualError] = useState<string>("");
-  const [prevSyncedText, setPrevSyncedText] = useState<string | null>(submissionText);
-
-  // Synchronize manual text during rendering when submissionText changes
-  if (submissionText !== prevSyncedText) {
-    setPrevSyncedText(submissionText);
-    setManualText(submissionText || "");
-    setManualResult(null);
-    setManualStale(false);
-    setManualError("");
-  }
 
   // Reviewer feedback drafts per candidate
   const [feedbackDrafts, setFeedbackDrafts] = useState<Record<string, CandidateFeedbackState>>({});
@@ -204,55 +216,6 @@ export default function CounterfactualsPage() {
     setLockedSpans([]);
   };
 
-  // Clear stale results and URL IDs when input, case, locks, or controls change
-  const prevInputRef = useRef({
-    submissionText,
-    selectedTaskId,
-    targetClass,
-    maxEdits,
-    editMode,
-    lockedCount: lockedSpans.length,
-  });
-
-  useEffect(() => {
-    if (isRestoringRef.current) return;
-    const prev = prevInputRef.current;
-    if (
-      prev.submissionText !== submissionText ||
-      prev.selectedTaskId !== selectedTaskId ||
-      prev.targetClass !== targetClass ||
-      prev.maxEdits !== maxEdits ||
-      prev.editMode !== editMode ||
-      prev.lockedCount !== lockedSpans.length
-    ) {
-      prevInputRef.current = {
-        submissionText,
-        selectedTaskId,
-        targetClass,
-        maxEdits,
-        editMode,
-        lockedCount: lockedSpans.length,
-      };
-
-      setResult(null);
-      setSelectedCandidateId(null);
-      setError("");
-      setStatusMessage("");
-      setFeedbackDrafts({});
-      setRestoredTextUnavailable(false);
-      activeRequestRef.current++;
-
-      // Clear ?id= from URL
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has("id")) {
-          url.searchParams.delete("id");
-          window.history.replaceState(null, "", url.pathname + (url.search || ""));
-        }
-      }
-    }
-  }, [submissionText, selectedTaskId, targetClass, maxEdits, editMode, lockedSpans]);
-
   // Restore saved counterfactual by record ID (?id=...) once auth is ready
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -262,57 +225,9 @@ export default function CounterfactualsPage() {
     const savedId = urlParams.get("id");
     if (!savedId || savedId === restoredIdRef.current) return;
 
-    let mounted = true;
-    isRestoringRef.current = true;
-    const currentReqId = ++activeRequestRef.current;
-    setIsBusy(true);
-
-    api<C4CounterfactualResponse>(`/c4/counterfactuals/${savedId}`)
-      .then((data) => {
-        if (!mounted || currentReqId !== activeRequestRef.current) return;
-        restoredIdRef.current = savedId;
-        setResult(data);
-        if (
-          data.target_class === "Negative" ||
-          data.target_class === "Neutral" ||
-          data.target_class === "Positive"
-        ) {
-          setTargetClass(data.target_class);
-        }
-
-        // Verify source identity/content before displaying current context as original text
-        const matchesContext = Boolean(
-          submissionText &&
-            (data.source_reference === (selectedTaskId || snapshot?.id || "development-input"))
-        );
-
-        if (!matchesContext) {
-          setRestoredTextUnavailable(true);
-        } else {
-          setRestoredTextUnavailable(false);
-        }
-
-        setStatusMessage("Saved counterfactual explanation record restored successfully.");
-      })
-      .catch((err) => {
-        if (!mounted || currentReqId !== activeRequestRef.current) return;
-        setError(
-          err instanceof ApiError && err.status === 404
-            ? "Saved counterfactual record not found or has expired under the retention policy."
-            : "Could not restore the saved counterfactual explanation record."
-        );
-      })
-      .finally(() => {
-        if (mounted) {
-          setIsBusy(false);
-          isRestoringRef.current = false;
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [checking, authorized, submissionText, selectedTaskId, snapshot?.id]);
+    restoredIdRef.current = savedId;
+    void restoreCounterfactual(savedId);
+  }, [checking, authorized, restoreCounterfactual]);
 
   // Active selected candidate (defaults to best_candidate)
   const activeCandidate: CounterfactualCandidate | null = useMemo(() => {
@@ -363,98 +278,17 @@ export default function CounterfactualsPage() {
       return;
     }
 
-    setError("");
-    setStatusMessage("");
-    setIsBusy(true);
-    const currentReqId = ++activeRequestRef.current;
-    const idempotencyKey = crypto.randomUUID();
-
-    try {
-      const payload: C4CounterfactualRequest = {
-        text: submissionText.trim(),
-        target_class: targetClass,
-        language:
-          (caseLanguage as "English" | "Sinhala" | "Romanized Sinhala" | "Code-mixed") || "English",
-        idempotency_key: idempotencyKey,
-        source_reference: selectedTaskId || snapshot?.id || "development-input",
-        max_edits: maxEdits,
-        max_candidates: 40,
-        edit_mode: editMode,
-        locked_spans: lockedSpans,
-      };
-
-      const data = await api<C4CounterfactualResponse>("/c4/counterfactuals", payload);
-
-      if (currentReqId !== activeRequestRef.current) return; // Ignore late responses
-
-      setResult(data);
-      setSelectedCandidateId(data.best_candidate?.candidate_id || null);
-      setRestoredTextUnavailable(false);
-
-      if (data.outcome === "UNAVAILABLE_MODEL") {
-        setIsClassifierConnected(false);
-        setError("Classifier service unavailable. Please ensure model service is connected.");
-      } else {
-        setIsClassifierConnected(true);
-      }
-
-      // Update URL with saved record ID
-      if (data.counterfactual_id && typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        url.searchParams.set("id", data.counterfactual_id);
-        window.history.replaceState(null, "", url.pathname + url.search);
-      }
-    } catch (err) {
-      if (currentReqId !== activeRequestRef.current) return;
-      if (err instanceof ApiError) {
-        if (err.status === 401) {
-          setError("Your session has expired. Please log in again.");
-        } else if (err.status === 403) {
-          setError("Access forbidden. You do not have permissions to generate counterfactuals.");
-        } else {
-          setError("Failed to generate counterfactuals. Please check backend services.");
-        }
-      } else {
-        setError("A connection error occurred while contacting the counterfactual service.");
-      }
-    } finally {
-      if (currentReqId === activeRequestRef.current) {
-        setIsBusy(false);
-      }
-    }
+    await computeCounterfactuals({
+      targetClass,
+      maxEdits,
+      editMode,
+      lockedSpans,
+    });
   }
 
   // Handle Manual "What If?" evaluation
   async function handleEvaluateManual() {
-    if (!submissionText || !manualText.trim()) {
-      setManualError("Original or edited text is empty.");
-      return;
-    }
-
-    setManualError("");
-    setIsManualBusy(true);
-
-    try {
-      const payload: C4ManualEvaluationRequest = {
-        original_text: submissionText.trim(),
-        edited_text: manualText.trim(),
-        target_class: targetClass,
-        language:
-          (caseLanguage as "English" | "Sinhala" | "Romanized Sinhala" | "Code-mixed") || "English",
-      };
-
-      const data = await api<C4ManualEvaluationResponse>("/c4/counterfactuals/manual", payload);
-      setManualResult(data);
-      setManualStale(false);
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 403) {
-        setManualError("Access forbidden. Reviewer authentication required.");
-      } else {
-        setManualError("Manual evaluation failed. Check classifier connection.");
-      }
-    } finally {
-      setIsManualBusy(false);
-    }
+    await runManualEvaluation(manualText);
   }
 
   // Handle Reviewer Feedback saving
@@ -497,22 +331,8 @@ export default function CounterfactualsPage() {
         },
       }));
 
-      // Update candidate feedback in result state immutably
-      setResult((prev) => {
-        if (!prev) return null;
-        let updatedBest = prev.best_candidate;
-        if (prev.best_candidate?.candidate_id === targetCandId) {
-          updatedBest = { ...prev.best_candidate, feedback: saved };
-        }
-        const updatedList = (prev.candidates || []).map((c) =>
-          c.candidate_id === targetCandId ? { ...c, feedback: saved } : c
-        );
-        return {
-          ...prev,
-          best_candidate: updatedBest,
-          candidates: updatedList,
-        };
-      });
+      // Update candidate feedback in shared workspace state immutably
+      updateCounterfactualFeedback(targetCandId, saved);
     } catch (_err) {
       setError("Failed to save reviewer feedback to database. Please retry.");
     } finally {
@@ -1301,10 +1121,8 @@ export default function CounterfactualsPage() {
               type="button"
               className="cf-btn-secondary-sm"
               onClick={() => {
-                setManualText(submissionText || "");
+                resetManualEvaluation();
                 setManualStale(false);
-                setManualResult(null);
-                setManualError("");
               }}
               disabled={isManualBusy || !submissionText}
             >

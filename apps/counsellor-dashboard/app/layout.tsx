@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ErrorBoundary } from "@j26/common/ui";
 import { CaseProvider } from "./context/CaseContext";
+import { C4WorkspaceProvider } from "./context/C4WorkspaceContext";
 import "./globals.css";
 
 export const metadata = {
@@ -17,7 +18,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         </a>
         <div className="app-shell-root">
           <ErrorBoundary>
-            <CaseProvider>{children}</CaseProvider>
+            <CaseProvider>
+              <C4WorkspaceProvider>{children}</C4WorkspaceProvider>
+            </CaseProvider>
           </ErrorBoundary>
         </div>
       </body>

@@ -15,6 +15,7 @@ import {
 import { Sidebar } from "../components/Sidebar";
 import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
+import { useC4Workspace } from "../context/C4WorkspaceContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
   C4ExplanationListResponse,
@@ -44,37 +45,51 @@ interface ChartPoint {
 export default function StabilityPage() {
   const {
     authorized,
+    checking,
     selectedTask,
     selectedTaskId,
     selectedSentimentClass,
     devInput,
   } = useReviewCase();
 
-  // State
-  const [isBusy, setIsBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [statusMessage, setStatusMessage] = useState("");
-  const [savedNotice, setSavedNotice] = useState("");
+  const {
+    stability,
+    computeStability,
+    restoreStability,
+    setSelectedStabilityExpId,
+    setSelectedStabilityRunIndex,
+    setStabilitySettings,
+    resetStabilityAnalysis,
+  } = useC4Workspace();
 
-  // Saved explanations list & selected explanation
+  const isBusy = stability.status === "IN_FLIGHT";
+  const error = stability.error;
+  const statusMessage = stability.statusMessage;
+  const savedNotice = stability.savedNotice;
+
   const [explanations, setExplanations] = useState<C4ExplanationSummary[]>([]);
-  const [selectedExpId, setSelectedExpId] = useState<string>("");
+  const selectedExpId = stability.selectedExpId;
+  const setSelectedExpId = setSelectedStabilityExpId;
   const [selectedExplanation, setSelectedExplanation] = useState<C4ExplanationResponse | null>(null);
 
-  // Settings
-  const [runCount, setRunCount] = useState<number>(5);
-  const [topK, setTopK] = useState<number>(5);
-  const [baseSeed, setBaseSeed] = useState<number>(42);
-  const [explainerEvals, setExplainerEvals] = useState<number>(100);
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+  const runCount = stability.runCount;
+  const setRunCount = (r: number) => setStabilitySettings({ runCount: r });
+  const topK = stability.topK;
+  const setTopK = (k: number) => setStabilitySettings({ topK: k });
+  const baseSeed = stability.baseSeed;
+  const setBaseSeed = (s: number) => setStabilitySettings({ baseSeed: s });
+  const explainerEvals = stability.explainerEvals;
+  const setExplainerEvals = (e: number) => setStabilitySettings({ explainerEvals: e });
+  const showAdvanced = stability.showAdvanced;
+  const setShowAdvanced = (a: boolean | ((prev: boolean) => boolean)) => {
+    const next = typeof a === "function" ? a(showAdvanced) : a;
+    setStabilitySettings({ showAdvanced: next });
+  };
 
-  // Evaluation results & Selected run for comparison
-  const [result, setResult] = useState<C4StabilityResponse | null>(null);
-  const [selectedRunIndex, setSelectedRunIndex] = useState<number>(2);
+  const result = stability.response;
+  const selectedRunIndex = stability.selectedRunIndex;
+  const setSelectedRunIndex = setSelectedStabilityRunIndex;
 
-  // Active request ref to ignore late responses
-  const activeRequestRef = useRef(0);
-  const isRestoringRef = useRef(false);
   const restoredEvalIdRef = useRef<string | null>(null);
 
   // Read original submission text from shared context
@@ -129,55 +144,16 @@ export default function StabilityPage() {
     };
   }, [selectedExpId]);
 
-  // Reset or clear stale results on text/source or settings change
+  // Check URL on mount/auth for restored evaluation
   useEffect(() => {
-    if (prevTextRef.current !== submissionText || prevTaskIdRef.current !== selectedTaskId) {
-      prevTextRef.current = submissionText;
-      prevTaskIdRef.current = selectedTaskId;
-      if (!isRestoringRef.current) {
-        queueMicrotask(() => {
-          setResult(null);
-          setError("");
-          setStatusMessage("");
-          setSavedNotice("");
-          if (typeof window !== "undefined") {
-            const url = new URL(window.location.href);
-            url.searchParams.delete("evaluation_id");
-            window.history.replaceState(null, "", url.toString());
-          }
-        });
-      }
-    }
-  }, [submissionText, selectedTaskId]);
-
-
-  // Check URL on mount for restored evaluation
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || checking || !authorized) return;
     const params = new URLSearchParams(window.location.search);
     const evalId = params.get("evaluation_id");
     if (evalId && evalId !== restoredEvalIdRef.current) {
       restoredEvalIdRef.current = evalId;
-      isRestoringRef.current = true;
-      api<C4StabilityResponse>(`/c4/stability/${evalId}`)
-        .then((res) => {
-          setResult(res);
-          setSelectedExpId(res.explanation_id);
-          if (res.runs && res.runs.length > 1) {
-            setSelectedRunIndex(2);
-          } else {
-            setSelectedRunIndex(1);
-          }
-          setSavedNotice(`Restored saved evaluation #${res.evaluation_id}`);
-        })
-        .catch(() => {
-          setError("Failed to restore saved stability evaluation from database.");
-        })
-        .finally(() => {
-          isRestoringRef.current = false;
-        });
+      void restoreStability(evalId);
     }
-  }, []);
+  }, [checking, authorized, restoreStability]);
 
   // Check source-match status between current text and explanation
   const sourceMatchStatus = useMemo<"matched" | "mismatched" | "unknown">(() => {
@@ -200,10 +176,7 @@ export default function StabilityPage() {
 
   // Reset analysis results and clear URL evaluation parameter
   const handleResetAnalysis = () => {
-    setResult(null);
-    setError("");
-    setStatusMessage("");
-    setSavedNotice("");
+    resetStabilityAnalysis();
     restoredEvalIdRef.current = null;
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -214,116 +187,7 @@ export default function StabilityPage() {
 
   // Handle Run Analysis
   const handleRunAnalysis = async () => {
-    if (!submissionText || !submissionText.trim()) {
-      setError("No source text available in current case context.");
-      return;
-    }
-    if (!selectedExpId || !selectedExplanation) {
-      setError("Please select a saved explanation to analyze.");
-      return;
-    }
-
-    if (sourceMatchStatus === "mismatched") {
-      setError("Source text mismatch: The selected explanation was generated from different text than the current case input. Please select an explanation matching this case or generate a new explanation first.");
-      setResult(null);
-      return;
-    }
-
-    setIsBusy(true);
-    setError("");
-    setResult(null);
-    setStatusMessage("Running independent explainer computations across distinct seeds...");
-    setSavedNotice("");
-
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("evaluation_id");
-      window.history.replaceState(null, "", url.toString());
-    }
-    restoredEvalIdRef.current = null;
-
-    const reqId = ++activeRequestRef.current;
-
-    const payload: C4StabilityRequest = {
-      explanation_id: selectedExpId,
-      text: submissionText,
-      language: caseLanguage as C4StabilityRequest["language"],
-      run_count: runCount,
-      top_k: topK,
-      base_seed: baseSeed,
-      explainer_evals: explainerEvals,
-      source_reference: selectedExplanation.source_reference || `case-${selectedTaskId || "dev"}`,
-    };
-
-    try {
-      const res = await api<C4StabilityResponse>("/c4/stability", payload);
-
-      if (activeRequestRef.current !== reqId) return;
-
-      if (res.outcome === "TEXT_MISMATCH") {
-        setError("Source text mismatch: current input text does not match the explanation's source text.");
-        setResult(null);
-        return;
-      }
-      if (res.outcome === "UNAVAILABLE_MODEL") {
-        setError("Sentiment classifier model is currently unavailable.");
-        setResult(null);
-        return;
-      }
-      if (res.outcome === "INCOMPATIBLE_MODEL") {
-        setError(res.outcome_message || "Explanation model revision does not match current model.");
-        setResult(null);
-        return;
-      }
-      if (res.outcome === "UNSUPPORTED_ALIGNMENT") {
-        setError(res.outcome_message || "Reliable attribution alignment unavailable for this input.");
-        setResult(null);
-        return;
-      }
-      if (res.outcome === "OVERLENGTH_TEXT") {
-        setError(res.outcome_message || "Input text exceeds maximum allowed length.");
-        setResult(null);
-        return;
-      }
-      if (res.outcome === "TIMEOUT") {
-        setError("Stability analysis timed out before completing.");
-        setResult(null);
-        return;
-      }
-      if (res.outcome === "INFERENCE_FAILED") {
-        setError(res.outcome_message || "Stability inference failed.");
-        setResult(null);
-        return;
-      }
-
-      setResult(res);
-      setSelectedRunIndex(res.runs && res.runs.length > 1 ? 2 : 1);
-
-      if (res.saved && res.evaluation_id) {
-        setSavedNotice(`Confirmed & saved to database (ID: ${res.evaluation_id})`);
-        if (typeof window !== "undefined") {
-          const url = new URL(window.location.href);
-          url.searchParams.set("evaluation_id", String(res.evaluation_id));
-          window.history.replaceState(null, "", url.toString());
-        }
-      } else {
-        setSavedNotice("Completed (In-memory execution only)");
-      }
-      setStatusMessage("");
-    } catch (err: unknown) {
-      if (activeRequestRef.current !== reqId) return;
-      setResult(null);
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else {
-        setError("Failed to complete stability evaluation. Please check the backend services.");
-      }
-      setStatusMessage("");
-    } finally {
-      if (activeRequestRef.current === reqId) {
-        setIsBusy(false);
-      }
-    }
+    await computeStability();
   };
 
   // Recharts Chart Data: Compare Run 1 Reference vs Currently Selected Run

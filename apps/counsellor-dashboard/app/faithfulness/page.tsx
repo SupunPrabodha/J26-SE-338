@@ -16,6 +16,7 @@ import {
 import { Sidebar } from "../components/Sidebar";
 import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
+import { useC4Workspace } from "../context/C4WorkspaceContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
   C4ExplanationListResponse,
@@ -53,32 +54,45 @@ export default function FaithfulnessPage() {
     devInput,
   } = useReviewCase();
 
-  // State
-  const [isBusy, setIsBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [statusMessage, setStatusMessage] = useState("");
-  const [savedNotice, setSavedNotice] = useState("");
+  const {
+    faithfulness,
+    computeFaithfulness,
+    restoreFaithfulness,
+    setSelectedFaithfulnessExpId,
+    setSelectedFaithfulnessStep,
+    setFaithfulnessSettings,
+  } = useC4Workspace();
 
-  // Saved explanations list & selected explanation
+  const isBusy = faithfulness.status === "IN_FLIGHT";
+  const error = faithfulness.error;
+  const statusMessage = faithfulness.statusMessage;
+  const savedNotice = faithfulness.savedNotice;
+
   const [explanations, setExplanations] = useState<C4ExplanationSummary[]>([]);
-  const [selectedExpId, setSelectedExpId] = useState<string>("");
+  const selectedExpId = faithfulness.selectedExpId;
+  const setSelectedExpId = setSelectedFaithfulnessExpId;
   const [selectedExplanation, setSelectedExplanation] = useState<C4ExplanationResponse | null>(null);
 
-  // Faithfulness settings
-  const [budgetMode, setBudgetMode] = useState<"words" | "pct">("words");
-  const [maxWords, setMaxWords] = useState<number>(5);
-  const [maxPct, setMaxPct] = useState<number>(30);
-  const [randomTrials, setRandomTrials] = useState<number>(5);
-  const [seed, setSeed] = useState<number>(42);
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+  const budgetMode = faithfulness.budgetMode;
+  const setBudgetMode = (m: "words" | "pct") => setFaithfulnessSettings({ budgetMode: m });
+  const maxWords = faithfulness.maxWords;
+  const setMaxWords = (w: number) => setFaithfulnessSettings({ maxWords: w });
+  const maxPct = faithfulness.maxPct;
+  const setMaxPct = (p: number) => setFaithfulnessSettings({ maxPct: p });
+  const randomTrials = faithfulness.randomTrials;
+  const setRandomTrials = (t: number) => setFaithfulnessSettings({ randomTrials: t });
+  const seed = faithfulness.seed;
+  const setSeed = (s: number) => setFaithfulnessSettings({ seed: s });
+  const showAdvanced = faithfulness.showAdvanced;
+  const setShowAdvanced = (a: boolean | ((prev: boolean) => boolean)) => {
+    const next = typeof a === "function" ? a(showAdvanced) : a;
+    setFaithfulnessSettings({ showAdvanced: next });
+  };
 
-  // Evaluation results
-  const [result, setResult] = useState<C4FaithfulnessResponse | null>(null);
-  const [selectedStep, setSelectedStep] = useState<number | null>(null);
+  const result = faithfulness.response;
+  const selectedStep = faithfulness.selectedStep;
+  const setSelectedStep = setSelectedFaithfulnessStep;
 
-  // Active request ref to ignore late responses
-  const activeRequestRef = useRef(0);
-  const isRestoringRef = useRef(false);
   const restoredEvalIdRef = useRef<string | null>(null);
 
   // Read original submission text from shared context
@@ -118,40 +132,15 @@ export default function FaithfulnessPage() {
     const expIdParam = urlParams.get("exp_id");
 
     if (evalIdParam && evalIdParam !== restoredEvalIdRef.current) {
-      // Restore saved evaluation
-      isRestoringRef.current = true;
-      const currentReqId = ++activeRequestRef.current;
-      setIsBusy(true);
-
-      api<C4FaithfulnessResponse>(`/c4/faithfulness/${evalIdParam}`)
-        .then((data) => {
-          if (currentReqId !== activeRequestRef.current) return;
-          restoredEvalIdRef.current = evalIdParam;
-          setResult(data);
-          setSelectedExpId(data.explanation_id);
-          setStatusMessage("Restored saved faithfulness evaluation from database.");
-          setSavedNotice(`Saved in PostgreSQL (Record ID: ${data.evaluation_id})`);
-          if (data.steps && data.steps.length > 0) {
-            setSelectedStep(data.steps[data.steps.length - 1].step);
-          }
-        })
-        .catch((err) => {
-          if (currentReqId !== activeRequestRef.current) return;
-          setError(err.message || "Failed to retrieve saved faithfulness evaluation.");
-        })
-        .finally(() => {
-          isRestoringRef.current = false;
-          if (currentReqId === activeRequestRef.current) {
-            setIsBusy(false);
-          }
-        });
+      restoredEvalIdRef.current = evalIdParam;
+      void restoreFaithfulness(evalIdParam);
       return;
     }
 
     if (expIdParam && expIdParam !== selectedExpId) {
       setSelectedExpId(expIdParam);
     }
-  }, [checking, authorized, selectedExpId]);
+  }, [checking, authorized, selectedExpId, restoreFaithfulness, setSelectedExpId]);
 
   // Load details of selected explanation when selectedExpId changes
   useEffect(() => {
@@ -168,7 +157,7 @@ export default function FaithfulnessPage() {
       })
       .catch((err) => {
         if (!live) return;
-        setError(err.message || "Could not load selected explanation details.");
+        // Non-critical if fetch fails
       });
 
     return () => {
@@ -176,108 +165,9 @@ export default function FaithfulnessPage() {
     };
   }, [selectedExpId, authorized]);
 
-  // Clear stale results and saved IDs when source context or settings change
-  useEffect(() => {
-    if (!authorized) {
-      setResult(null);
-      setSelectedExplanation(null);
-      setSelectedExpId("");
-      setError("");
-      setStatusMessage("");
-      setSavedNotice("");
-      restoredEvalIdRef.current = null;
-      return;
-    }
-
-    if (isRestoringRef.current) return;
-
-    const textChanged = submissionText !== prevTextRef.current;
-    const taskChanged = selectedTaskId !== prevTaskIdRef.current;
-
-    prevTextRef.current = submissionText;
-    prevTaskIdRef.current = selectedTaskId;
-
-    if (textChanged || taskChanged) {
-      activeRequestRef.current += 1;
-      restoredEvalIdRef.current = null;
-      setResult(null);
-      setError("");
-      setStatusMessage("");
-      setSavedNotice("");
-    }
-  }, [authorized, submissionText, selectedTaskId]);
-
   // Run Faithfulness Test
   const handleRunTest = async () => {
-    if (!selectedExpId) {
-      setError("Please select a saved LIME or SHAP explanation to evaluate.");
-      return;
-    }
-
-    if (!submissionText) {
-      setError("No source text is available in the current context. Faithfulness testing requires the exact authorized source text.");
-      return;
-    }
-
-    setIsBusy(true);
-    setError("");
-    setStatusMessage("Running model-based progressive deletion & random trials...");
-    setSavedNotice("");
-    setResult(null);
-    const reqId = ++activeRequestRef.current;
-
-    const requestBody: C4FaithfulnessRequest = {
-      explanation_id: selectedExpId,
-      text: submissionText,
-      language: (caseLanguage as "English" | "Sinhala" | "Romanized Sinhala" | "Code-mixed") || null,
-      max_removal_words: budgetMode === "words" ? maxWords : null,
-      max_removal_pct: budgetMode === "pct" ? maxPct : null,
-      random_trials: randomTrials,
-      seed: seed,
-    };
-
-    try {
-      const data = await api<C4FaithfulnessResponse>("/c4/faithfulness", requestBody);
-      if (reqId !== activeRequestRef.current) return;
-
-      setResult(data);
-      if (data.outcome === "SUCCESS") {
-        setStatusMessage(data.outcome_message || "Faithfulness test completed successfully.");
-      } else if (data.outcome === "PARTIAL") {
-        setStatusMessage(`Partial result: ${data.outcome_message}`);
-      } else {
-        setError(`Evaluation halted: ${data.outcome_message}`);
-      }
-
-      if (data.saved && data.evaluation_id) {
-        setSavedNotice(`Saved in PostgreSQL (Record ID: ${data.evaluation_id})`);
-        // Update URL parameter without reload
-        if (typeof window !== "undefined") {
-          const url = new URL(window.location.href);
-          url.searchParams.set("eval_id", data.evaluation_id);
-          window.history.replaceState(null, "", url.toString());
-        }
-      } else if (data.outcome === "SUCCESS" || data.outcome === "PARTIAL") {
-        setSavedNotice("Completed (unsaved in database)");
-      }
-
-      if (data.steps && data.steps.length > 0) {
-        setSelectedStep(data.steps[data.steps.length - 1].step);
-      }
-    } catch (err: unknown) {
-      if (reqId !== activeRequestRef.current) return;
-      if (err instanceof ApiError) {
-        setError(`API Error (${err.status}): ${err.message}`);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred during faithfulness testing.");
-      }
-    } finally {
-      if (reqId === activeRequestRef.current) {
-        setIsBusy(false);
-      }
-    }
+    await computeFaithfulness();
   };
 
   // Prepare Recharts deletion curve data
@@ -482,9 +372,6 @@ export default function FaithfulnessPage() {
               value={selectedExpId}
               onChange={(e) => {
                 setSelectedExpId(e.target.value);
-                setResult(null);
-                setSavedNotice("");
-                setError("");
               }}
             >
               <option value="">-- Select a saved explanation --</option>

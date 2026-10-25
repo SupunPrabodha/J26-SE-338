@@ -16,6 +16,7 @@ import {
 import { Sidebar } from "../components/Sidebar";
 import { RequireAuth } from "../components/RequireAuth";
 import { useReviewCase } from "../context/CaseContext";
+import { useC4Workspace, type C4ComparisonState } from "../context/C4WorkspaceContext";
 import { api, ApiError } from "@j26/common/api";
 import type {
   C4ComparisonCurrentRequest,
@@ -116,6 +117,11 @@ export default function ComparisonPage() {
     devInput,
   } = useReviewCase();
 
+  const {
+    comparison,
+    setComparisonSettings,
+  } = useC4Workspace();
+
   const isMounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -123,60 +129,57 @@ export default function ComparisonPage() {
   );
 
   // Active Tab: "current" or "evaluated"
-  const [activeTab, setActiveTab] = useState<"current" | "evaluated">(() => {
-    if (typeof window !== "undefined") {
-      const p = new URLSearchParams(window.location.search).get("tab");
-      if (p === "current" || p === "evaluated") return p;
-    }
-    return "current";
-  });
+  const activeTab = comparison.activeTab;
+  const setActiveTab = (tab: "current" | "evaluated") => {
+    setComparisonSettings({ activeTab: tab });
+  };
 
   // Filters state (synchronized with URL where appropriate)
-  const [selectedMetric, setSelectedMetric] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const p = new URLSearchParams(window.location.search).get("metric");
-      if (p && METRIC_OPTIONS.some((m) => m.value === p)) return p;
-    }
-    return "DELETION_AOPC";
-  });
-  const [selectedLanguage, setSelectedLanguage] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const p = new URLSearchParams(window.location.search).get("lang");
-      if (p) return p;
-    }
-    return "all";
-  });
-  const [selectedClass, setSelectedClass] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const p = new URLSearchParams(window.location.search).get("class");
-      if (p) return p;
-    }
-    return "all";
-  });
-  const [selectedRevision, setSelectedRevision] = useState<string>("all");
-  const [commonK, setCommonK] = useState<number>(5);
+  const selectedMetric = comparison.selectedMetric;
+  const setSelectedMetric = (m: string) => setComparisonSettings({ selectedMetric: m });
+
+  const selectedLanguage = comparison.selectedLanguage;
+  const setSelectedLanguage = (l: string) => setComparisonSettings({ selectedLanguage: l });
+
+  const selectedClass = comparison.selectedClass;
+  const setSelectedClass = (c: string) => setComparisonSettings({ selectedClass: c });
+
+  const selectedRevision = comparison.selectedRevision;
+  const setSelectedRevision = (r: string) => setComparisonSettings({ selectedRevision: r });
+
+  const commonK = comparison.commonK;
+  const setCommonK = (k: number) => setComparisonSettings({ commonK: k });
 
   // Pagination for Evaluated Inputs
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 15;
 
   // Evaluated tab state
-  const [evaluatedData, setEvaluatedData] = useState<C4ComparisonEvaluatedResponse | null>(null);
+  const evaluatedData = comparison.evaluatedResponse;
+  const setEvaluatedData = (data: C4ComparisonEvaluatedResponse | null) => {
+    setComparisonSettings({ evaluatedResponse: data });
+  };
   const [isEvaluatedBusy, setIsEvaluatedBusy] = useState<boolean>(false);
   const [evaluatedError, setEvaluatedError] = useState<string>("");
 
   // Current Input tab state
-  const [currentData, setCurrentData] = useState<C4ComparisonCurrentResponse | null>(null);
+  const currentData = comparison.currentResponse;
+  const setCurrentData = (data: C4ComparisonCurrentResponse | null) => {
+    setComparisonSettings({ currentResponse: data });
+  };
   const [isCurrentBusy, setIsCurrentBusy] = useState<boolean>(false);
   const [currentError, setCurrentError] = useState<string>("");
-  const [selectedLimeRecId, setSelectedLimeRecId] = useState<string>("");
-  const [selectedShapRecId, setSelectedShapRecId] = useState<string>("");
+  const selectedLimeRecId = comparison.selectedLimeRecId;
+  const setSelectedLimeRecId = (id: string) => setComparisonSettings({ selectedLimeRecId: id });
+  const selectedShapRecId = comparison.selectedShapRecId;
+  const setSelectedShapRecId = (id: string) => setComparisonSettings({ selectedShapRecId: id });
 
   // Collapsible accordion for metric definitions & comparison settings
   const [showDefinitions, setShowDefinitions] = useState<boolean>(false);
 
   // Interactive chart language filter
-  const [chartLanguageFilter, setChartLanguageFilter] = useState<string | null>(null);
+  const chartLanguageFilter = comparison.chartLanguageFilter || null;
+  const setChartLanguageFilter = (f: string | null) => setComparisonSettings({ chartLanguageFilter: f || "" });
 
   // Read current input context
   const snapshot = devInput && devInput.text ? devInput : null;
@@ -263,18 +266,49 @@ export default function ComparisonPage() {
   }, [authorized, currentText, currentRef, currentLang, currentClass, commonK, selectedLimeRecId, selectedShapRecId]);
 
   // Trigger loads when active tab or filters change
+  const loadedCurrentKeyRef = useRef<string>("");
+  const loadedEvalKeyRef = useRef<string>("");
+
   useEffect(() => {
     if (authorized && !checking) {
       const timer = setTimeout(() => {
         if (activeTab === "evaluated") {
-          void loadEvaluatedInputs();
+          const evalKey = `${selectedMetric}_${selectedRevision}_${selectedClass}_${chartLanguageFilter || selectedLanguage}_${commonK}_${currentPage}`;
+          if (!evaluatedData || loadedEvalKeyRef.current !== evalKey) {
+            loadedEvalKeyRef.current = evalKey;
+            void loadEvaluatedInputs();
+          }
         } else {
-          void loadCurrentInput();
+          const currKey = `${currentRef}_${currentClass}_${commonK}_${selectedLimeRecId}_${selectedShapRecId}_${currentText?.length || 0}`;
+          if (!currentData || loadedCurrentKeyRef.current !== currKey) {
+            loadedCurrentKeyRef.current = currKey;
+            void loadCurrentInput();
+          }
         }
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [authorized, checking, activeTab, loadEvaluatedInputs, loadCurrentInput]);
+  }, [
+    authorized,
+    checking,
+    activeTab,
+    selectedMetric,
+    selectedRevision,
+    selectedClass,
+    selectedLanguage,
+    chartLanguageFilter,
+    commonK,
+    currentPage,
+    currentRef,
+    currentClass,
+    selectedLimeRecId,
+    selectedShapRecId,
+    currentText,
+    evaluatedData,
+    currentData,
+    loadEvaluatedInputs,
+    loadCurrentInput,
+  ]);
 
   // Tab switch handler
   function handleTabChange(tab: "current" | "evaluated") {
