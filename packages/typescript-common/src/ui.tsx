@@ -34,15 +34,50 @@ export function Icon({ name }: { name: string }) {
     chevron: <path d="m7 10 5 5 5-5" />,
     menu: <path d="M4 6h16M4 12h16M4 18h16" />,
     logout: <><path d="M10 4H4v16h6m4-12 4 4-4 4m-6-4h14" /></>,
+    leaf: <><path d="M20 3C8 2 3 7 5 14s15 8 15-11ZM4 21 16 9" /><path d="M9 16v-5m0 5h5" /></>,
+    heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />,
+    arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
+    book: <><path d="M12 5C8 2 4 3 2 4v15c4-2 7-1 10 1m0-15c4-3 8-2 10-1v15c-4-2-7-1-10 1Zm0 0v15" /></>,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
   };
   return <svg className="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{paths[name] || paths.info}</svg>;
 }
 
+export function ReflectionHero() {
+  return <section className="reflection-hero" aria-labelledby="reflection-title">
+    <div className="reflection-art" aria-hidden="true"><img src="/images/wellbeing-garden.webp" alt="" width="1600" height="800" fetchPriority="high" decoding="async" /><span className="art-caption"><Icon name="leaf" />Your pace. Your choice.</span></div>
+    <div className="reflection-hero-copy"><p className="hero-kicker"><span />A space to pause</p>
+      <h1 id="reflection-title" tabIndex={-1}>Your wellbeing<br /><em>reflection.</em></h1>
+      <p>A little room for reflection, with your choices at the centre. Explore a voluntary, fictional walkthrough of counsellor-assisted screening support.</p>
+      <div className="hero-actions"><a className="button-link" href="#consent-title">Start with your choice<Icon name="arrow" /></a><a className="hero-secondary" href="#reflection-guide">How it works</a></div>
+      <p className="hero-footnote"><Icon name="info" />Synthetic demonstration · No personal information</p>
+    </div>
+  </section>;
+}
+
+export function ReflectionPrinciples() {
+  return <div className="reflection-principles" aria-label="About this reflection">{[
+    ["heart", "Your choice comes first", "Agree, decline or withdraw. Taking part is always optional."],
+    ["book", "A fictional walkthrough", "Explore with built-in examples, without entering personal information."],
+    ["staff", "People stay in control", "Outputs support an authorized counsellor’s human review."],
+  ].map(([icon, title, description]) => <div className="reflection-principle" key={title}><span className="principle-icon"><Icon name={icon} /></span><div><h2>{title}</h2><p>{description}</p></div></div>)}</div>;
+}
+
+// Decorative representation of C1 responsibilities, never workflow or test-result data.
+export function WorkspaceIllustration() {
+  return <div className="workspace-illustration" aria-hidden="true"><div className="illustration-orbit orbit-outer" /><div className="illustration-orbit orbit-inner" /><span className="illustration-dot dot-one" /><span className="illustration-dot dot-two" />
+    <div className="illustration-core"><Icon name="leaf" /></div>
+    <div className="illustration-node node-consent"><span><Icon name="heart" /></span>Consent</div>
+    <div className="illustration-node node-access"><span><Icon name="shield" /></span>Access</div>
+    <div className="illustration-node node-trace"><span><Icon name="audit" /></span>Traceability</div>
+  </div>;
+}
+
 export const roleLabel = (role: string) => ({ ADMIN: "Admin", COUNSELLOR: "Counsellor", RESEARCHER: "Researcher" })[role] || "Staff";
 
-export function AccountMenu({ role, busy = false, onSignOut }: { role: string; busy?: boolean; onSignOut: () => void }) {
+export function AccountMenu({ role, busy = false, onSignOut, workspace }: { role: string; busy?: boolean; onSignOut: () => void; workspace?: string }) {
   const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), item = useRef<HTMLButtonElement>(null);
+  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), item = useRef<HTMLAnchorElement>(null);
   const id = useId();
   useEffect(() => {
     if (!open) return;
@@ -53,10 +88,16 @@ export function AccountMenu({ role, busy = false, onSignOut }: { role: string; b
   }, [open]);
   return <div className="account-control" ref={root} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }} onKeyDown={event => {
     if (event.key === "Escape") { event.preventDefault(); setOpen(false); trigger.current?.focus(); }
-    else if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) { event.preventDefault(); if (open) item.current?.focus(); else setOpen(true); }
+    else if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      event.preventDefault();
+      if (!open) { setOpen(true); return; }
+      const entries = [...root.current!.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+      const index = entries.indexOf(document.activeElement as HTMLElement);
+      entries[event.key === "Home" ? 0 : event.key === "End" ? entries.length - 1 : (index + (event.key === "ArrowUp" ? -1 : 1) + entries.length) % entries.length]?.focus();
+    }
   }}>
     <button ref={trigger} className="account-trigger" aria-label={`${roleLabel(role)} account`} aria-expanded={open} aria-haspopup="menu" aria-controls={open ? id : undefined} disabled={busy} onClick={() => setOpen(value => !value)}><span className="account-avatar"><Icon name="account" /></span><span>{roleLabel(role)}</span><Icon name="chevron" /></button>
-    {open && <div id={id} className="account-dropdown" role="menu" aria-label="Account menu"><p>Signed in as {roleLabel(role)}</p><button ref={item} role="menuitem" disabled={busy} onClick={() => { setOpen(false); onSignOut(); }}><Icon name="logout" />Sign out</button></div>}
+    {open && <div id={id} className="account-dropdown" role="menu" aria-label="Account menu"><p>Signed in as {roleLabel(role)}</p><a ref={item} role="menuitem" href={`/account?workspace=${workspace || (role === "ADMIN" ? "admin" : role === "RESEARCHER" ? "research" : "counsellor")}`} onClick={() => setOpen(false)}><Icon name="account" />Account profile</a><button role="menuitem" disabled={busy} onClick={() => { setOpen(false); onSignOut(); }}><Icon name="logout" />Sign out</button></div>}
   </div>;
 }
 
@@ -83,9 +124,10 @@ export function StaffFrame({ area, current, authorized, role, busy, onSignOut, c
     ["overview", "Overview", "/admin/overview"], ["staff", "Staff and roles", "/admin/staff"],
     ["assignments", "Case assignments", "/admin/assignments"], ["audit", "Audit log", "/admin"],
     ["operations", "Workflow / services", "/admin/operations"], ["retention", "Retention overview", "/admin/retention"],
-  ] : resolvedRole === "COUNSELLOR" ? [["queue", "Assigned cases", "/"], ["completed", "Completed reviews", "/?state=COMPLETED"]] : [];
+  ] : resolvedRole === "COUNSELLOR" ? [["queue", "Assigned cases", "/"], ["completed", "Completed reviews", "/?state=COMPLETED"]] : [["research", "Research directory", "/research"]];
+  links.push(["profile", "Account profile", `/account?workspace=${area}`]);
   const navigation = <div className="sidebar-content"><p className="eyebrow">{resolvedRole === "ADMIN" ? "Administration" : resolvedRole === "COUNSELLOR" ? "Review workspace" : "Research workspace"}</p><nav aria-label="Workspace sections">{links.map(([id, label, href]) => <a key={id} href={href} onClick={() => setDrawer(false)} aria-current={id === current ? "page" : undefined}><Icon name={id} />{label}</a>)}</nav><div className="sidebar-boundary"><p className="eyebrow">Integrations</p><a href="/research" aria-current={current === "research" ? "page" : undefined} onClick={() => setDrawer(false)}><Icon name="research" />Component directory</a></div><p className="sidebar-footnote">J26-SE-338<span>Local research workspace</span></p></div>;
-  return <div className={`staff-application ${authorized ? "has-sidebar" : ""}`}><header className="staff-topbar"><AppNavigation active={area} role={authorized ? resolvedRole : undefined}>{authorized && onSignOut && <AccountMenu key={resolvedRole} role={resolvedRole} busy={busy} onSignOut={onSignOut} />}</AppNavigation>{authorized && <button className="drawer-toggle secondary" aria-label="Open workspace navigation" aria-expanded={drawer} aria-haspopup="dialog" onClick={() => setDrawer(true)}><Icon name="menu" />Menu</button>}</header>
+  return <div className={`staff-application ${authorized ? "has-sidebar" : ""}`} data-area={area}><header className="staff-topbar"><AppNavigation active={area} role={authorized ? resolvedRole : undefined}>{authorized && onSignOut && <AccountMenu key={resolvedRole} role={resolvedRole} busy={busy} onSignOut={onSignOut} workspace={area} />}</AppNavigation>{authorized && <button className="drawer-toggle secondary" aria-label="Open workspace navigation" aria-expanded={drawer} aria-haspopup="dialog" onClick={() => setDrawer(true)}><Icon name="menu" />Menu</button>}</header>
     <div className="workspace-shell">{authorized && <aside className="staff-sidebar" aria-label={`${area} workspace navigation`}>{navigation}</aside>}<div className="workspace-main">{children}</div></div>
     {authorized && drawer && <AppDialog title="Workspace navigation" className="navigation-drawer" onClose={() => setDrawer(false)}>{navigation}</AppDialog>}
   </div>;
@@ -142,13 +184,15 @@ export function ConfirmChange({ title, ...props }: { title: string; description:
 }
 
 export function StaffSignIn({ kind, busy, onSubmit }: { kind: "counsellor" | "admin" | "research"; busy: boolean; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void }) {
-  return <section className="card sign-in" aria-labelledby="sign-in-title"><div className="sign-in-icon" aria-hidden="true">↗</div>
+  return <div className="signin-layout"><aside className="signin-story"><img src="/images/wellbeing-garden.webp" alt="" width="1600" height="800" decoding="async" /><div className="signin-story-copy"><p className="hero-kicker">Wellbeing · Research workspace</p><h2>A considered space.<br /><em>A human perspective.</em></h2><p>Thoughtful tools for people who support people.</p></div></aside><section className="card sign-in" aria-labelledby="sign-in-title"><div className="sign-in-icon" aria-hidden="true"><Icon name={kind === "admin" ? "shield" : kind === "research" ? "research" : "staff"} /></div>
     <p className="eyebrow">{kind === "admin" ? "Restricted administration" : kind === "research" ? "Permitted research navigation" : "Counsellor workspace"}</p>
     <h2 id="sign-in-title">Development sign-in</h2><p>{kind === "admin" ? "Review safe operational receipts. Counselling content is excluded." : kind === "research" ? "View the current component route directory with a locally granted staff/research role. No datasets or participant responses are available." : "Continue to your assigned, consent-valid cases and saved reviews."}</p>
     <form onSubmit={onSubmit}><label htmlFor="username">Development username</label><input id="username" name="username" required autoComplete="username" />
       <label htmlFor="password">Password</label><input id="password" name="password" type="password" required autoComplete="current-password" />
+      <label className="remember-choice"><input type="checkbox" name="remember_me" disabled={busy} aria-describedby="remember-help" />Remember me on this device</label>
+      <p id="remember-help" className="hint remember-help">Keep a bounded session across browser restarts. Use only on a device you control. Unchecked keeps the existing one-hour session behaviour.</p>
       <button disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button></form>
-    <p className="hint">Use your private local setup credentials. Use a separate browser profile for each demonstration role.</p></section>;
+    <p className="hint">Use your private local setup credentials. Use a separate browser profile for each demonstration role.</p></section></div>;
 }
 
 export function DemoHeader({ title, subtitle }: { title: string; subtitle: string }) {

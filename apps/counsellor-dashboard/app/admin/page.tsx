@@ -60,7 +60,7 @@ export default function Operations() {
     event.preventDefault(); const form = event.currentTarget, values = new FormData(form);
     await act(async () => {
       let account: AccountResponse;
-      try { account = await adminApi<AccountResponse>("/auth/login", { username: values.get("username"), password: values.get("password") }); }
+      try { account = await adminApi<AccountResponse>("/auth/login", { username: values.get("username"), password: values.get("password"), remember_me: values.get("remember_me") === "on" }); }
       finally { form.reset(); }
       if (account.role !== "ADMIN") { await adminApi("/auth/logout", {}); throw new ApiError(403, "Administrative access is required. This account cannot open operational evidence."); }
       setAuthorized(true); setCursor(null); setHistory([]); await read(initial, null);

@@ -44,6 +44,7 @@ export type Contracts =
   | ServiceError
   | ServiceProvenance
   | StaffPage
+  | StaffProfile
   | StaffSummary
   | StaffUpdateRequest
   | SubmissionCount
@@ -1144,6 +1145,7 @@ export type Synthetic35 = true;
 export type TraceId = string | null;
 export type DevelopmentOnly36 = true;
 export type Password = string;
+export type RememberMe = boolean;
 export type SchemaVersion36 = "1.0.0";
 export type Synthetic36 = true;
 export type Username = string;
@@ -1647,42 +1649,52 @@ export type NextOffset3 = number | null;
 export type ObservedAt7 = string;
 export type SchemaVersion45 = "1.0.0";
 export type Synthetic45 = true;
+export type AccountExpiresAt = string | null;
+export type AccountId2 = string;
+export type CreatedAt8 = string;
 export type DevelopmentOnly46 = true;
 export type Enabled1 = boolean;
-export type ExpectedUpdatedAt = string;
+export type RememberMe1 = boolean;
 export type Role2 = "ADMIN" | "COUNSELLOR" | "RESEARCHER";
 export type SchemaVersion46 = "1.0.0";
+export type SessionExpiresAt = string;
 export type Synthetic46 = true;
 export type DevelopmentOnly47 = true;
-export type ExpiresAt3 = string;
+export type Enabled2 = boolean;
+export type ExpectedUpdatedAt = string;
+export type Role3 = "ADMIN" | "COUNSELLOR" | "RESEARCHER";
 export type SchemaVersion47 = "1.0.0";
-export type SessionId = string;
 export type Synthetic47 = true;
 export type DevelopmentOnly48 = true;
-export type Mode = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY" | "SYNTHETIC_DEVELOPMENT_ONLY";
+export type ExpiresAt3 = string;
 export type SchemaVersion48 = "1.0.0";
-export type ServiceName6 = string;
-export type ServiceVersion6 = "0.1.0";
+export type SessionId = string;
 export type Synthetic48 = true;
 export type DevelopmentOnly49 = true;
-export type IdempotencyKey9 = string;
+export type Mode = "MOCK_SYNTHETIC_DEVELOPMENT_ONLY" | "SYNTHETIC_DEVELOPMENT_ONLY";
 export type SchemaVersion49 = "1.0.0";
+export type ServiceName6 = string;
+export type ServiceVersion6 = "0.1.0";
 export type Synthetic49 = true;
+export type DevelopmentOnly50 = true;
+export type IdempotencyKey9 = string;
+export type SchemaVersion50 = "1.0.0";
+export type Synthetic50 = true;
 export type Attempts1 = number;
 export type CaseId15 = string;
 export type CorrelationId13 = string;
-export type CreatedAt8 = string;
-export type DevelopmentOnly50 = true;
-export type IdempotencyKey10 = string;
-export type SchemaVersion50 = "1.0.0";
-export type Synthetic50 = true;
-export type UpdatedAt3 = string;
-export type ConsentId1 = string;
+export type CreatedAt9 = string;
 export type DevelopmentOnly51 = true;
-export type FixtureId = "english" | "sinhala" | "romanized" | "mixed";
-export type IdempotencyKey11 = string;
+export type IdempotencyKey10 = string;
 export type SchemaVersion51 = "1.0.0";
 export type Synthetic51 = true;
+export type UpdatedAt3 = string;
+export type ConsentId1 = string;
+export type DevelopmentOnly52 = true;
+export type FixtureId = "english" | "sinhala" | "romanized" | "mixed";
+export type IdempotencyKey11 = string;
+export type SchemaVersion52 = "1.0.0";
+export type Synthetic52 = true;
 export type Text1 = string;
 
 export interface AccountResponse {
@@ -2102,6 +2114,7 @@ export interface LifecycleAuditEvent {
 export interface LoginRequest {
   development_only?: DevelopmentOnly36;
   password: Password;
+  remember_me?: RememberMe;
   schema_version?: SchemaVersion36;
   synthetic?: Synthetic36;
   username: Username;
@@ -2192,55 +2205,67 @@ export interface StaffPage {
   schema_version?: SchemaVersion45;
   synthetic?: Synthetic45;
 }
-export interface StaffUpdateRequest {
+export interface StaffProfile {
+  account_expires_at?: AccountExpiresAt;
+  account_id: AccountId2;
+  created_at: CreatedAt8;
   development_only?: DevelopmentOnly46;
   enabled: Enabled1;
-  expected_updated_at: ExpectedUpdatedAt;
+  remember_me: RememberMe1;
   role: Role2;
   schema_version?: SchemaVersion46;
+  session_expires_at: SessionExpiresAt;
   synthetic?: Synthetic46;
 }
-export interface SubmissionSession {
+export interface StaffUpdateRequest {
   development_only?: DevelopmentOnly47;
-  expires_at: ExpiresAt3;
-  role: Role;
+  enabled: Enabled2;
+  expected_updated_at: ExpectedUpdatedAt;
+  role: Role3;
   schema_version?: SchemaVersion47;
-  session_id: SessionId;
   synthetic?: Synthetic47;
 }
-export interface VersionResponse {
+export interface SubmissionSession {
   development_only?: DevelopmentOnly48;
-  mode: Mode;
+  expires_at: ExpiresAt3;
+  role: Role;
   schema_version?: SchemaVersion48;
-  service_name: ServiceName6;
-  service_version?: ServiceVersion6;
+  session_id: SessionId;
   synthetic?: Synthetic48;
 }
-export interface WithdrawalRequest {
+export interface VersionResponse {
   development_only?: DevelopmentOnly49;
-  idempotency_key: IdempotencyKey9;
+  mode: Mode;
   schema_version?: SchemaVersion49;
+  service_name: ServiceName6;
+  service_version?: ServiceVersion6;
   synthetic?: Synthetic49;
+}
+export interface WithdrawalRequest {
+  development_only?: DevelopmentOnly50;
+  idempotency_key: IdempotencyKey9;
+  schema_version?: SchemaVersion50;
+  synthetic?: Synthetic50;
 }
 export interface WorkflowExecution {
   attempts?: Attempts1;
   case_id: CaseId15;
   correlation_id: CorrelationId13;
-  created_at: CreatedAt8;
-  development_only?: DevelopmentOnly50;
+  created_at: CreatedAt9;
+  development_only?: DevelopmentOnly51;
   error_code?: ErrorCode | null;
   idempotency_key: IdempotencyKey10;
   processing_status: WorkflowState;
-  schema_version?: SchemaVersion50;
-  synthetic?: Synthetic50;
+  schema_version?: SchemaVersion51;
+  synthetic?: Synthetic51;
   updated_at: UpdatedAt3;
 }
 export interface WorkflowRequest {
   consent_id: ConsentId1;
-  development_only?: DevelopmentOnly51;
+  development_only?: DevelopmentOnly52;
   fixture_id: FixtureId;
   idempotency_key: IdempotencyKey11;
-  schema_version?: SchemaVersion51;
-  synthetic?: Synthetic51;
+  schema_version?: SchemaVersion52;
+  synthetic?: Synthetic52;
   text: Text1;
 }

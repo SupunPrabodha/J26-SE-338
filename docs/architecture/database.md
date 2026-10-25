@@ -40,3 +40,12 @@ deletion follows withdrawal or the existing 24-hour retention sweep. Only safe a
 survives. Application administrators cannot read records; database operators remain trusted.
 There is no encryption-at-rest claim. Downgrade drops this table and loses its records;
 verification runs downgrade only in a newly generated, verified disposable schema.
+
+Revision `f310c1000004` adds `access_sessions.remembered` (non-null, server default false)
+and nullable `absolute_expires_at`. Existing sessions keep their expiry, revocation, hashes
+and family IDs and remain ordinary sessions. A remembered session requires a future
+absolute deadline at runtime; refresh preserves it. No existing migration is edited.
+Startup upgraded the preserved PostgreSQL volume; before/after aggregate counts matched
+for accounts, sessions, consent, cases and review records before new verification fixtures.
+Legacy-session migration and metadata drift are also checked in disposable tests.
+Downgrading loses the new metadata and must never be used to verify the retained volume.
