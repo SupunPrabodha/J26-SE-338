@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """
 Stage A Baseline Models (TF-IDF with Logistic Regression and Support Vector Machine).
 Owner: C3 - Ramanayake R. H. B. D. G. (IT23164130)
