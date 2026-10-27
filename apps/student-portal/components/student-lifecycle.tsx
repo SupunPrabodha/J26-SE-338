@@ -92,7 +92,7 @@ export default function StudentLifecycle() {
     <DemoHeader title="Your wellbeing reflection" subtitle="A voluntary, fictional walkthrough of consent and counsellor-assisted review." />
     <SafetyNotice />
     <section className="student-session" aria-label="Student session"><div><strong>{sessionEnded ? "Session ended" : ownerVerified ? "Student · owner session verified" : "Your private demonstration"}</strong><span>{ownerVerified ? "Your consent and case controls use an authenticated pseudonymous owner session." : "A pseudonymous owner session is checked when you record a decision. No identity details are requested."}</span></div></section>
-    <p className="demo-nav"><Link href="/demo" target="_blank" rel="noopener noreferrer">Open the Component 1 PP1 demo</Link><span className="hint">The checklist observes your runs in another tab using this browser's student session.</span></p>
+    <p className="demo-nav"><Link href="/demo" target="_blank" rel="noopener noreferrer">Open the Component 1 PP1 demo</Link> | <Link href="/demo/c3" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 650, color: "#17634e" }}>Open Component 3 DAPT Demo &rarr;</Link><span className="hint">The checklist observes your runs in another tab using this browser's student session.</span></p>
     <ol className="steps" aria-label="Demonstration steps"><li><span>1</span> Consent</li><li><span>2</span> Submission</li><li><span>3</span> Status & withdrawal</li></ol>
     {!confirming && <ErrorMessage message={error} />}
     <p className="feedback" role="status" aria-live="polite">{busy ? progressLabel : message}</p>

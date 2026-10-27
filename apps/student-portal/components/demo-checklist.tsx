@@ -54,7 +54,7 @@ export default function DemoChecklist() {
   return <><AppNavigation active="demo" /><main>
     <DemoHeader title="Infrastructure Privacy and Security — Component 1" subtitle="PP1 · Consent, access, routing, traceability and disposal" />
     <SafetyNotice />
-    <nav className="demo-nav" aria-label="Applications"><a href="/" target="_blank" rel="noopener noreferrer">Open student submission</a><a href="http://localhost:3001" target="_blank" rel="noopener noreferrer">Open counsellor application</a></nav>
+    <nav className="demo-nav" aria-label="Applications"><a href="/" target="_blank" rel="noopener noreferrer">Open student submission</a><a href="http://localhost:3001" target="_blank" rel="noopener noreferrer">Open counsellor application</a><a href="/demo/c3" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 650, color: "#17634e", border: "1px solid #17634e", padding: "4px 10px", borderRadius: "6px", background: "#eef3f1" }}>Open Component 3 DAPT Demo &rarr;</a></nav>
     <p className="hint">Use this tab and student submission in the same browser profile. Application cookies are isolated. Use a separate counsellor profile for clear demo roles; these links open tabs, not profiles.</p>
     <DemoOverview />
     <section className="card run-selector" aria-labelledby="run-title"><h2 id="run-title">Selected demonstration run</h2>
