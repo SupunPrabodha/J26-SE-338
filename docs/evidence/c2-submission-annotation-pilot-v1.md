@@ -239,3 +239,232 @@ Desktop column geometry/1160px maximum and 390px no-overflow layout checked;
 desktop/mobile screenshots actually inspected. Browser smoke appended only an
 explicit automated synthetic draft revision, never replaced/unlocked a final.
 Assignments and all existing saved history remain intact; no commit/push.
+
+## Shared one-item workbench (2026-10-25)
+
+URL: `http://localhost:3001/c2-demo/annotation` (no trailing period).
+Both reviewers use this same page with their separate existing authenticated
+accounts. The page now offers **Select assigned item**, Previous item and Next
+item across the authorized grouped Q4–Q10 answers. The displayed item ID is the
+server's immutable record ID; grouping, source provenance and frozen versions
+remain available in collapsed details. No actor selector or standalone-queue
+shortcut remains, and the page no longer calls the legacy prepare endpoint.
+
+Only presentation/client interaction changed. The existing submission catalogue,
+submission detail and revision APIs remain unchanged. Server assignments,
+revision checks, account ownership, immutable finals, provisional vocabulary,
+peer blinding, privacy withholding and release policy remain authoritative.
+Blank human labels are not populated from language detection or fixture metadata.
+Changing a label never changes the frozen answer. The progress denominator uses
+the account's available answers; withheld/missing required answers explicitly
+remain incomplete, while absent optional Q10 requires no annotation.
+
+Unsaved labels require confirmation before item selection, Previous/Next, reload
+or sign-out; page exit uses the browser's unsaved-change warning. A cancelled
+navigation retains the current item and labels. Finalized answers remain readable
+but uneditable; their notice explains the disabled controls. Withheld answers
+show actual blocking reasons; unavailable/unassigned requests show safe errors.
+Save/finalization success notifications appear only after actual server responses.
+Agreement, adjudication and controlled dataset release are still pending.
+
+Affected verification:
+
+```powershell
+npx vitest run tests/frontend/c2-submissions.test.tsx tests/frontend/c2-annotation.test.tsx
+npx eslint apps/counsellor-dashboard/app/c2-demo/annotation tests/frontend/c2-submissions.test.tsx tests/frontend/c2-annotation.test.tsx
+npm run typecheck --workspace @j26/counsellor-dashboard
+.venv/Scripts/python.exe -m pytest tests/integration/test_c2_submissions.py tests/integration/test_c2_annotation.py -p no:cacheprovider --basetemp=.local/c2-shared-item-pytest-verified --maxfail=1
+docker compose -f docker-compose.yml -f docker-compose.c2-gliner.yml build counsellor-dashboard
+docker compose -f docker-compose.yml -f docker-compose.c2-gliner.yml up -d --no-deps --wait counsellor-dashboard
+node .local/c2-shared-item-browser.mjs
+git diff --check
+```
+
+Results: **21 frontend tests passed**, scoped ESLint and dashboard typecheck
+passed; **21 existing synthetic backend tests passed** with the existing
+Starlette/httpx deprecation warning. Backend coverage includes distinct-account
+draft persistence, differing final decisions, immutable finals, assignment
+authorization, blinding and quality/privacy exclusion. The initial sandboxed
+pytest attempt failed with `PermissionError: [WinError 5] Access is denied` on
+its disposable temporary directory; the permitted rerun above passed.
+The dashboard production build and health check passed; no backend restart,
+migration, model evaluation or full-suite rerun was needed.
+
+Real Edge 156.0.4314.42 browser verification passed using two isolated existing
+account sessions. It verified identical assigned item ID/text/version, separate
+draft histories surviving full reload, unchanged text on label changes, hidden
+peer labels, unsaved navigation cancellation, reload confirmation, Previous/Next
+and existing final locks. It appended only draft revisions with unchanged human
+label values to an existing eligible synthetic item in each account; no final
+was created, unlocked, overwritten or deleted. Existing final history was checked
+unchanged. A first browser smoke reached desktop/mobile captures but failed its
+final preservation assertions; the subsequent complete smoke passed. Browser
+finalization was not repeated on live records; differing immutable finals are
+covered by the existing disposable backend tests and frontend tests.
+
+Local final browser evidence:
+`.local/c2-demo-browser-79540fc9-4755-4465-9715-5075d8df6835/report.json`.
+Desktop 1366px and mobile 390px at scale 1 had no horizontal overflow; both saved
+screenshots were visually inspected. No participant data was accessed. Existing
+backend/preprocessing, GLiNER configuration and volumes were preserved.
+Account separation is not evidence of independent human annotation, and this
+demonstration does not validate the provisional vocabulary or detector accuracy.
+
+### Final presentation cleanup: assigned list and radio chips (2026-10-25)
+
+The shared page now uses a narrow desktop **Assigned items** list beside the
+selected text/form. Mobile uses the native keyboard-accessible **Browse items**
+disclosure, collapsed initially. Rows show a readable item number/question and
+the account's actual status; selected rows are highlighted. Full immutable IDs,
+source grouping and versions remain in expandable details. Previous/Next and
+server-derived progress are retained.
+
+All four fields now use native radio inputs grouped by fieldset/legend and
+styled as selectable chips. Every server vocabulary option is rendered with
+unchanged stored values. Blank fields remain unselected; saved values restore
+without prefill. Finalized/unauthorized fields retain disabled fieldsets and
+their existing explanations. Save, finalization, ownership, revision, blinding,
+privacy and release logic is unchanged. No backend or contract change occurred.
+
+Verification: **22 affected frontend tests passed**, scoped ESLint, dashboard
+typecheck, dashboard-only Docker production build/health and `git diff --check`
+passed. Commands are the same frontend/build commands above; the browser command
+for this increment was `node .local/c2-chips-browser.mjs`. Existing 21 synthetic
+backend tests and two-account persistence verification above were reused without
+rerunning them. No offline language/model comparisons were repeated.
+
+Actual Edge browser verification passed: all vocabulary values, restored radio
+selections, native ArrowRight radio selection, unchanged text/other fields,
+unsaved navigation cancellation, final disabled controls, desktop sidebar geometry
+and mobile Browse-items Enter activation. The first keyboard smoke timed out
+because its CDP Enter event omitted the character event; the complete native
+keypress succeeded without an application change. Final evidence:
+`.local/c2-demo-browser-95416c26-d85f-4dac-8928-8ea1e8529d29/report.json`.
+Desktop 1366px and mobile 390px screenshots were inspected at scale 1; no
+horizontal overflow. This browser check wrote no drafts/finals or other saved
+annotation data. Only the dashboard was rebuilt; backend containers and data
+were retained. Vocabulary remains provisional; account separation does not
+establish independent human annotation. Development stops after this UI cleanup;
+agreement, adjudication and controlled release remain pending.
+
+### Centered work area simplification (2026-10-25)
+
+The latest presentation supersedes the permanent sidebar above: a centered 960px
+work area uses Previous, Item X of Y, Next and an initially collapsed Browse
+items disclosure. The list retains server-authorized IDs/statuses and unsaved
+navigation protection. Account progress appears once. The answer heading is
+**Anonymized answer**; its source remains read-only. Four unchanged vocabulary
+radio groups retain blank/saved values. Actions are Save draft, Finalize and the
+secondary Reload saved state. Finalized items have one short read-only notice.
+One collapsed Technical details disclosure contains history, peer visibility,
+full IDs/grouping/versions and provisional vocabulary/research/release notes.
+The pipeline stepper is removed from this annotation page only.
+
+Verification: 22 affected frontend tests, scoped ESLint, dashboard typecheck and
+dashboard-only Docker production build/health passed. Existing synthetic backend
+and two-account persistence/security checks above were reused, not rerun. The
+affected commands remain the same as above; browser verification used
+`node .local/c2-centered-browser.mjs`. Actual Edge browser checks passed for
+initially closed Browse items, keyboard Enter and radio-arrow interaction,
+restored selections, unchanged text/other fields, unsaved cancellation and final
+disabled controls. No saved annotation writes occurred. Desktop 1366px and mobile
+390px screenshots were inspected; no horizontal overflow. Evidence is local:
+`.local/c2-demo-browser-188dfa59-5a4b-4b95-89bf-36e5f355aa75/report.json`.
+Backend assignments, authorization, revision enforcement, peer blinding and
+privacy/release policies were unchanged. No new evaluations or workflows were
+added. Development stops after this presentation change; no commit or push.
+
+### Simple original-form appearance restored (2026-10-25)
+
+Read-only visual reference: the Earlier standalone synthetic items form in
+`page.tsx` at `170151c26ee13c2fcb9b3a1801204ca87b735a74`. No Git restore or
+legacy prepare/queue API was used. The current paired-assignment API remains
+the only item source. Presentation now uses one compact Annotation item select,
+question/context and read-only answer, four labelled dropdowns, small status,
+Save draft / Finalize submission / Reload saved state and collapsed Technical
+details/history. Sidebar, Browse popup and question navigation are removed.
+Every allowed stored vocabulary option and saved selection is retained. Existing
+unsaved-change confirmation, final locks, revision checks and peer hiding remain.
+
+Affected commands: the same focused Vitest, scoped ESLint, dashboard typecheck
+and dashboard-only Compose build/up commands above; browser command
+`node .local/c2-simple-form-browser.mjs`. Results: **22 frontend tests passed**,
+lint/typecheck/build/health and whitespace checks passed. Initial test adaptation
+used an ambiguous `/Item 1/` query matching Item 10–14; narrowing the query fixed
+the test without changing runtime behavior. Existing backend/security verification
+was reused; no model or preprocessing evaluation was rerun.
+
+Actual two-session browser verification passed: same assigned item ID/text/version,
+selector navigation, language changes preserve text, unsaved cancellation,
+draft save/full-page reload, separate revision histories, hidden peer labels and
+existing immutable finals unchanged. Only identical-label draft revisions were
+appended to eligible synthetic items; no final was changed/deleted/unlocked.
+Desktop 1366px and mobile 390px screenshots were inspected with no horizontal
+overflow. Local evidence:
+`.local/c2-demo-browser-19ccc9ea-c3a3-4f8a-a82c-0d9995d7ea32/report.json`.
+URL remains `http://localhost:3001/c2-demo/annotation`. Only the dashboard was
+rebuilt; all backend behavior and saved data remain intact. Provisional vocabulary
+and pending agreement/adjudication/release limitations remain unchanged.
+Development stops here without commit or push.
+
+### Approved shared-workspace mockup (2026-10-25)
+
+Current inspection URLs:
+
+- `http://localhost:3001/c2-demo/annotation/annotator-1`
+- `http://localhost:3001/c2-demo/annotation/annotator-2`
+- Shared entry remains `http://localhost:3001/c2-demo/annotation`.
+
+Both new routes re-export the same existing authenticated page. They contain no
+actor IDs, account mapping, permission logic or authentication replacement.
+Use separate browser profiles/private sessions for the two existing accounts:
+two URLs in ordinary tabs share cookies and do not establish separate identities.
+Assignments and ownership are always server-derived from the signed-in account.
+
+The workspace follows the supplied mockup: 1120px maximum width, narrow searchable
+Assigned items sidebar, actual anonymous frozen IDs/statuses and selected-row
+highlight; question/context and read-only anonymized text on the right. Mobile
+places a bounded, scrollable assigned-item list above the work area. Emotion and
+Wellbeing are primary dropdowns; unchanged Language and Code-mixing fields are in
+initially collapsed Additional labels. Missing additional required labels visibly
+explain disabled finalization. No label is autofilled. Save draft, Finalize
+submission, Reload saved state and Previous/Next operate on the same existing
+revision APIs. Source/group/version/history stays in Technical details. Privacy
+holds, final locks, optional/missing answers and safe errors remain visible.
+
+Affected verification commands:
+
+```powershell
+npx vitest run tests/frontend/c2-submissions.test.tsx tests/frontend/c2-annotation.test.tsx
+npx eslint apps/counsellor-dashboard/app/c2-demo/annotation tests/frontend/c2-submissions.test.tsx tests/frontend/c2-annotation.test.tsx
+npm run typecheck --workspace @j26/counsellor-dashboard
+docker compose -f docker-compose.yml -f docker-compose.c2-gliner.yml build counsellor-dashboard
+docker compose -f docker-compose.yml -f docker-compose.c2-gliner.yml up -d --no-deps --wait counsellor-dashboard
+node .local/c2-mockup-browser.mjs
+git diff --check
+```
+
+Results: **24 frontend tests passed**, scoped lint, typecheck, production build,
+dashboard health and whitespace checks passed. New tests cover ID filtering,
+selection retention while filtering, cross-group Previous/Next and incomplete
+collapsed additional labels. The initial new navigation assertion omitted the
+async wait for another submission; corrected waiting passed without runtime
+changes. Backend/API/contracts/migrations are unchanged; matching existing
+persistence/security tests were reused without full-suite or model evaluations.
+
+Actual Edge two-context verification opened annotator-1 with the existing
+counsellor test account and annotator-2 with the existing admin test account.
+It verified same item/text/version, ID search, language/text preservation,
+unsaved-change cancellation, reload confirmation, separate draft histories after
+page reload, peer blinding and unchanged existing final history. It appended only
+unchanged-label synthetic draft revisions; no final was created or unlocked.
+Live finalization was not repeated; immutable/differing finals remain covered by
+the matching existing synthetic backend and focused frontend tests.
+Local evidence:
+`.local/c2-demo-browser-c02570c4-714b-46e1-95c6-e5176ffb65b6/report.json`.
+Desktop 1366px/mobile 390px screenshots were inspected with no horizontal overflow.
+The running dashboard contains the new UI and both entry routes. Only that
+container was rebuilt/recreated, preserving backend services, GLiNER overlay and
+database volumes. No check required by this UI increment remained blocked.
+Account separation is not independent human annotation; vocabulary is provisional,
+and agreement/adjudication/release remain pending. No commit or push was made.

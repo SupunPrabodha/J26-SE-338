@@ -1,5 +1,10 @@
 # C2 tokenization evidence report
 
+Documentation reference: committed c2adc308. Actual method and executed reference
+comparison are distinguished below; the 16-case measurements are preserved from
+the original run, not rerun for the 2026-10-15 documentation consolidation.
+See [current quality/privacy report](c2-quality-privacy-v1.md).
+
 Purpose: expose actual tokens after normalization for every language category,
 including uncertain/unknown, without changing masking or release decisions.
 Configuration: `c2-grapheme-words-v1` in `services/preprocessing/text_processing.py`,

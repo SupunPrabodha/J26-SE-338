@@ -23,7 +23,9 @@ function setup() {
     const data = options?.body ? JSON.parse(String(options.body)) : {};
     if (url.endsWith("/auth/me") || url.endsWith("/auth/login")) return ok({ account_id: "synthetic-account-a", role: "COUNSELLOR" });
     if (url.endsWith("/auth/logout")) return { ok: true, status: 204, json: async () => undefined };
-    if (url.endsWith("/submissions")) return ok({ submissions: [], vocabulary });
+    const submission = { submission_id: "SYN-test", submission_version: "v1", available_answers: 1, finalized_answers: state.own_history.at(-1)?.status === "FINAL" ? 1 : 0, blocked_answers: 0, complete: false, source_dataset_id: "synthetic", source_file_sha256: "f".repeat(64), answers: [{ question_id: "Q4", question_text: "Fictional question", source_record_id: "english", state: "AVAILABLE", blocking_reasons: [], annotation: state }] };
+    if (url.endsWith("/submissions")) return ok({ submissions: [submission], vocabulary });
+    if (url.endsWith("/submissions/SYN-test")) return ok(submission);
     if (url.endsWith("/prepare")) return ok({ items: [item], vocabulary });
     if (url.endsWith("/revisions")) {
       state.own_history.push({ revision: state.own_history.length + 1, status: data.status, labels: data.labels, saved_at: "2026-10-15T00:00:00Z" });
@@ -37,17 +39,21 @@ function setup() {
 }
 function ok(value: unknown) { return { ok: true, status: 200, json: async () => structuredClone(value) }; }
 async function choose() {
-  await screen.findByLabelText("Annotation item");
-  fireEvent.click(screen.getByText("Earlier standalone synthetic items (saved history preserved)"));
-  fireEvent.change(screen.getByLabelText("Annotation item"), { target: { value: "english" } });
-  await screen.findByRole("heading", { name: "Your annotation" });
+  await screen.findByRole("button", { name: "english" });
+  fireEvent.click(screen.getByRole("button", { name: "english" }));
+  await screen.findByLabelText("Emotion");
+  fireEvent.click(screen.getByText("Additional labels"));
 }
 
+
 test("renders immutable actual fixture text, provisional labels and no peer data", async () => {
-  setup(); render(<AnnotationPage />); await choose();
+  const { fetcher } = setup(); render(<AnnotationPage />); await choose();
+  expect(fetcher.mock.calls.some(([url]) => url.endsWith("/prepare"))).toBe(false);
+  expect(screen.queryByText(/Earlier standalone/)).toBeNull();
   expect(screen.getByText(fixtures.results.english.records[0].anonymized_text)).toBeVisible();
   expect(screen.queryByRole("textbox", { name: /text/i })).not.toBeInTheDocument();
-  expect(screen.getByText(/vocabulary is not expert-approved/)).toBeVisible();
+  fireEvent.click(screen.getByText("Technical details"));
+  expect(screen.getByText(/Vocabulary is provisional and not expert-approved/)).toBeVisible();
   expect(screen.getByText(/labels remain hidden until both/)).toBeVisible();
   expect(screen.getByRole("button", { name: "Finalize submission" })).toBeDisabled();
 });
@@ -69,13 +75,14 @@ test("saves partial draft and restores it after unmount/reload without browser s
 test("neutral/none/no-indicator and uncertain are completed choices, then final is locked", async () => {
   setup(); render(<AnnotationPage />); await choose();
   for (const [name, value] of [["Language", "uncertain"], ["Code-mixing pattern", "none"], ["Emotion", "neutral"], ["Wellbeing indicator", "no-clear-indicator"]]) {
-    fireEvent.change(screen.getByLabelText(name), { target: { value } });
+    fireEvent.change(screen.getByLabelText(name), { target: { value: value } });
   }
   fireEvent.click(screen.getByRole("button", { name: "Finalize submission" }));
-  await screen.findByText(/Final submission saved/);
+  await screen.findByText(/Final answer saved and locked/);
   expect(screen.getByLabelText("Emotion")).toBeDisabled();
-  expect(screen.getByText(/Submitted · awaiting second annotator/)).toBeVisible();
-  expect(screen.getByText(/Agreement: NOT_EVALUATED/)).toBeVisible();
+  expect(screen.getByText("Finalized — read only")).toBeVisible();
+  fireEvent.click(screen.getByText("Technical details"));
+  expect(screen.getByText(/Agreement not evaluated/)).toBeVisible();
 });
 
 test("shows peer final only from backend after both finalize; agreement/release stay pending", async () => {
@@ -84,11 +91,12 @@ test("shows peer final only from backend after both finalize; agreement/release 
   state.annotation_status = "PAIR_FINALIZED"; state.finalized_count = 2; state.can_submit = false;
   state.peer_final = { ...state.own_history[0], labels: { ...state.own_history[0].labels, emotion: "sadness" } };
   render(<AnnotationPage />); await choose();
-  expect(screen.getByText("Two submissions saved")).toBeVisible();
+  expect(screen.getByText("Finalized — read only")).toBeVisible();
+  fireEvent.click(screen.getByText("Technical details"));
   fireEvent.click(screen.getByText(/Other annotator’s final labels/));
-  expect(screen.getByText("Emotion: sadness")).toBeVisible();
-  expect(screen.getByText(/Adjudication: PENDING/)).toBeVisible();
-  expect(screen.getByText(/Human release approval remains required/)).toBeVisible();
+  expect(screen.getByText(/Emotion: sadness/)).toBeVisible();
+  expect(screen.getByText(/adjudication and human release approval pending/)).toBeVisible();
+  expect(screen.getByText(/Vocabulary is provisional/)).toBeVisible();
 });
 
 test.each([401, 403, 404, 409, 422, 503])("safe %s errors expose no server body", async status => {
@@ -105,14 +113,15 @@ test("clears password after existing-login submission", async () => {
   const password = screen.getByLabelText("Password");
   fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
   expect(password).toHaveValue("");
-  await screen.findByLabelText("Annotation item");
+  await screen.findByRole("button", { name: "english" });
 });
 
 test("logout invalidates a delayed result so saved labels cannot reappear", async () => {
-  const { fetcher } = setup(); render(<AnnotationPage />); await screen.findByLabelText("Annotation item");
+  const { fetcher } = setup(); render(<AnnotationPage />); await screen.findByRole("button", { name: "english" });
   let resolve!: (value: ReturnType<typeof ok>) => void;
   fetcher.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
-  fireEvent.change(screen.getByLabelText("Annotation item"), { target: { value: "english" } });
+  await screen.findByRole("button", { name: "english" });
+  fireEvent.click(screen.getByRole("button", { name: "english" }));
   fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
   await act(async () => resolve(ok({ item, own_history: [], annotation_status: "PAIR_FINALIZED" })));
   expect(screen.queryByRole("heading", { name: "Your annotation" })).not.toBeInTheDocument();

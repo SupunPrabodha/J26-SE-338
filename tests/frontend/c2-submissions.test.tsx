@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import { SubmissionWorkbench } from "../../apps/counsellor-dashboard/app/c2-demo/annotation/SubmissionWorkbench";
 import fixtures from "../fixtures/synthetic/c2-demo.json";
@@ -31,20 +31,21 @@ function setup() {
   return { rows, fetcher };
 }
 function ok(data: unknown) { return { ok: true, status: 200, json: async () => structuredClone(data) }; }
-async function open() { fireEvent.click(await screen.findByRole("button", { name: "SYN-A" })); await screen.findByRole("heading", { name: "Submission SYN-A" }); }
+async function selectItem(id: string) { fireEvent.click(await screen.findByRole("button", { name: id })); }
+async function open() { await selectItem("SYN-A-Q4"); await screen.findByRole("heading", { name: "SYN-A-Q4" }); fireEvent.click(screen.getByText("Additional labels")); }
 
 test("navigates ordered answers and submissions; optional Q10 and withheld answers have no labels", async () => {
   setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
-  expect(screen.getByRole("button", { name: "Previous answer" })).toBeDisabled();
-  fireEvent.click(screen.getByRole("button", { name: "Next answer" }));
-  await screen.findByRole("heading", { name: "Q5: Fictional question 5" });
-  fireEvent.click(screen.getByRole("button", { name: "Q9" }));
+  expect(screen.getByRole("button", { name: "SYN-A-Q4" })).toHaveAttribute("aria-current", "true");
+  await selectItem("SYN-A-Q5");
+  await screen.findByRole("heading", { name: "SYN-A-Q5" });
+  await selectItem("SYN-A-Q9");
   await screen.findByText(/Answer withheld or missing/); expect(screen.queryByLabelText("Language")).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "Q10" }));
-  await screen.findByText(/Optional Q10 unanswered/); expect(screen.queryByRole("button", { name: "Finalize answer" })).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "Next submission" }));
-  await screen.findByRole("heading", { name: "Submission SYN-B" });
-  expect(screen.getByRole("heading", { name: "Q4: Fictional question 4" })).toBeVisible();
+  await selectItem("SYN-A-Q10");
+  await screen.findByText(/Optional Q10 unanswered/); expect(screen.queryByRole("button", { name: "Finalize submission" })).toBeNull();
+  await selectItem("SYN-B-Q4");
+  await screen.findByRole("heading", { name: "SYN-B-Q4" });
+  expect(screen.getByText("Q4: Fictional question 4")).toBeVisible();
 });
 
 test("language labels never change text; draft survives reload and finals lock", async () => {
@@ -58,10 +59,11 @@ test("language labels never change text; draft survives reload and finals lock",
   expect(sent.labels).toEqual({ ...blank, language: "sinhala" }); expect(sent).not.toHaveProperty("text");
   first.unmount(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
   expect(screen.getByLabelText("Language")).toHaveValue("sinhala"); expect(screen.getByText(original)).toBeVisible();
-  for (const [field, value] of [["Code-mixing pattern", "none"], ["Emotion", "neutral"], ["Wellbeing indicator", "no-clear-indicator"]]) fireEvent.change(screen.getByLabelText(field), { target: { value } });
-  fireEvent.click(screen.getByRole("button", { name: "Finalize answer" })); await screen.findByText(/Final answer saved and locked/);
+  for (const [field, value] of [["Code-mixing pattern", "none"], ["Emotion", "neutral"], ["Wellbeing indicator", "no-clear-indicator"]]) fireEvent.change(screen.getByLabelText(field), { target: { value: value } });
+  fireEvent.click(screen.getByRole("button", { name: "Finalize submission" })); await screen.findByText(/Final answer saved and locked/);
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
   expect(screen.getByLabelText("Language")).toBeDisabled();
+  fireEvent.click(screen.getByText("Technical details"));
   expect(screen.getByText(/labels remain hidden until both/)).toBeVisible();
 });
 
@@ -75,7 +77,7 @@ test("unassigned account has empty queue and no way to claim answers", async () 
 test("expired session clears protected results", async () => {
   const { fetcher } = setup(); const expired = vi.fn(); render(<SubmissionWorkbench onExpired={expired} />); await open();
   fetcher.mockImplementation(async () => ({ ok: false, status: 401, json: async () => ({}) }));
-  fireEvent.click(screen.getByRole("button", { name: "Next submission" }));
+  await selectItem("SYN-B-Q4");
   await screen.findByRole("alert"); expect(expired).toHaveBeenCalledOnce();
   expect(screen.queryByText(fixtures.results.english.records[0].anonymized_text)).toBeNull();
 });
@@ -89,16 +91,16 @@ test("final notice and distinct states explain locks while other answers stay ed
   expect(screen.getByText("Finalized — read only")).toBeVisible();
   expect(screen.getByLabelText("Language")).toBeDisabled();
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Q4" })).toHaveAttribute("aria-current", "step");
-  expect(screen.getByRole("button", { name: "Q5" })).toHaveTextContent("Draft");
-  expect(screen.getByRole("button", { name: "Q6" })).toHaveTextContent("Pending");
-  expect(screen.getByRole("button", { name: "Q9" })).toHaveTextContent("Privacy hold");
-  expect(screen.getByRole("button", { name: "Q10" })).toHaveTextContent("Optional missing");
+  expect(screen.getByRole("button", { name: "SYN-A-Q4" })).toHaveAttribute("aria-current", "true");
+  expect(screen.getByRole("button", { name: "SYN-A-Q5" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "SYN-A-Q6" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "SYN-A-Q9" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "SYN-A-Q10" })).toBeInTheDocument();
   const calls = fetcher.mock.calls.length;
-  fireEvent.click(screen.getByRole("button", { name: "Next answer" }));
+  await selectItem("SYN-A-Q5");
   expect(screen.getByLabelText("Language")).toBeEnabled(); expect(screen.getByLabelText("Language")).toHaveValue("sinhala");
   expect(screen.queryByText("Finalized — read only")).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "Q6" })); expect(screen.getByLabelText("Language")).toHaveValue("");
+  await selectItem("SYN-A-Q6"); expect(screen.getByLabelText("Language")).toHaveValue("");
   expect(fetcher.mock.calls.length).toBe(calls);
 });
 
@@ -106,8 +108,8 @@ test("unsaved navigation cancellation retains labels; successful save shows one 
   setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
   vi.stubGlobal("confirm", vi.fn(() => false));
   fireEvent.change(screen.getByLabelText("Language"), { target: { value: "english" } });
-  fireEvent.click(screen.getByRole("button", { name: "Q5" }));
-  expect(screen.getByRole("button", { name: "Q4" })).toHaveAttribute("aria-current", "step");
+  await selectItem("SYN-A-Q5");
+  expect(screen.getByRole("button", { name: "SYN-A-Q4" })).toHaveAttribute("aria-current", "true");
   expect(screen.getByLabelText("Language")).toHaveValue("english");
   fireEvent.click(screen.getByRole("button", { name: "Save draft" })); await screen.findByText("Draft saved on the server.");
   expect(screen.getAllByText("Draft saved on the server.")).toHaveLength(1);
@@ -118,7 +120,69 @@ test("unsaved navigation cancellation retains labels; successful save shows one 
 test("unavailable assignment gives a specific safe error and keeps final states unchanged", async () => {
   const { fetcher } = setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
   fetcher.mockImplementationOnce(async () => ({ ok: false, status: 404, json: async () => ({ private: "not displayed" }) }));
-  fireEvent.click(screen.getByRole("button", { name: "Next submission" }));
+  await selectItem("SYN-B-Q4");
   expect(await screen.findByRole("alert")).toHaveTextContent("unassigned to your account");
   expect(screen.queryByText("not displayed")).toBeNull();
+});
+
+test("item navigation crosses grouping boundaries and reload protects unsaved decisions", async () => {
+  setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
+  await selectItem("SYN-A-Q10");
+  await selectItem("SYN-B-Q4");
+  await screen.findByRole("heading", { name: "SYN-B-Q4" });
+  expect(screen.getByLabelText("Language")).toHaveValue("");
+  vi.stubGlobal("confirm", vi.fn(() => false));
+  fireEvent.change(screen.getByLabelText("Language"), { target: { value: "english" } });
+  await selectItem("SYN-A-Q4");
+  expect(screen.getByRole("button", { name: "SYN-B-Q4" })).toHaveAttribute("aria-current", "true");
+  fireEvent.click(screen.getByRole("button", { name: "Reload saved state" }));
+  expect(screen.getByLabelText("Language")).toHaveValue("english");
+  const event = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(event); expect(event.defaultPrevented).toBe(true);
+});
+
+test("failed save keeps edits and shows an actual error without a success notification", async () => {
+  const { fetcher } = setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
+  fireEvent.change(screen.getByLabelText("Language"), { target: { value: "english" } });
+  fetcher.mockImplementationOnce(async () => ({ ok: false, status: 409, json: async () => ({}) }));
+  fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Saved version changed");
+  expect(screen.getByLabelText("Language")).toHaveValue("english");
+  expect(screen.queryByText("Draft saved on the server.")).toBeNull();
+});
+
+test("dropdowns render all server options and leave unfinished decisions blank", async () => {
+  setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
+  for (const [name, values] of [["Language", vocabulary.language], ["Code-mixing pattern", vocabulary.code_mixing], ["Emotion", vocabulary.emotion], ["Wellbeing indicator", vocabulary.wellbeing]] as const) {
+    const field = screen.getByLabelText(name);
+    expect(field).toHaveValue("");
+    expect(within(field).getAllByRole("option")).toHaveLength(values.length + 1);
+    for (const value of values) expect(within(field).getByRole("option", { name: value.replaceAll("-", " ") })).toHaveValue(value);
+  }
+  expect(screen.queryByText("Browse items")).toBeNull();
+});
+
+test("search filters authorized IDs without changing selection and navigation crosses groups", async () => {
+  setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />); await open();
+  fireEvent.change(screen.getByLabelText("Search anonymous item ID"), { target: { value: "syn-b-q4" } });
+  expect(screen.queryByRole("button", { name: "SYN-A-Q4" })).toBeNull();
+  expect(screen.getByRole("heading", { name: "SYN-A-Q4" })).toBeVisible();
+  await selectItem("SYN-B-Q4");
+  expect(await screen.findByRole("heading", { name: "SYN-B-Q4" })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Previous item" }));
+  expect(await screen.findByText(/Optional Q10 unanswered/)).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Next item" }));
+  expect(await screen.findByRole("heading", { name: "SYN-B-Q4" })).toBeVisible();
+});
+
+test("primary labels do not auto-complete collapsed additional labels", async () => {
+  setup(); render(<SubmissionWorkbench onExpired={vi.fn()} />);
+  await selectItem("SYN-A-Q4"); await screen.findByLabelText("Emotion");
+  expect(screen.getByText("Additional labels").parentElement).not.toHaveAttribute("open");
+  fireEvent.change(screen.getByLabelText("Emotion"), { target: { value: "neutral" } });
+  fireEvent.change(screen.getByLabelText("Wellbeing indicator"), { target: { value: "no-clear-indicator" } });
+  expect(screen.getByLabelText("Language")).toHaveValue("");
+  expect(screen.getByLabelText("Code-mixing pattern")).toHaveValue("");
+  expect(screen.getByRole("button", { name: "Finalize submission" })).toBeDisabled();
+  expect(screen.getByText(/Complete Language and Code-mixing pattern in Additional labels/)).toBeVisible();
 });

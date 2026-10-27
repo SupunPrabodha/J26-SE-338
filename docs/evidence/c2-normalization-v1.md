@@ -1,5 +1,10 @@
 # C2 normalization evidence report
 
+Documentation reference: committed c2adc308. Actual method and executed reference
+comparison are distinguished below; the 16-case measurements are preserved from
+the original run, not rerun for the 2026-10-15 documentation consolidation.
+See [current quality/privacy report](c2-quality-privacy-v1.md).
+
 Purpose: produce a separate stable `normalized_text` after Language ID while
 retaining `anonymized_text`, all quality/privacy policies and release blocking.
 Actual configuration: `c2-nfc-whitespace-v1` in

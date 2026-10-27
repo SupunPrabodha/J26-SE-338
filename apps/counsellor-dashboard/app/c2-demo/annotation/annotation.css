@@ -1,6 +1,35 @@
-.c2-demo.c2-annotation-page { max-width: 1160px; }
+.c2-demo.c2-annotation-page { max-width: 1120px; }
 .c2-submission-workbench { min-width: 0; }
-.c2-annotation-layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 24px; align-items: start; }
+.c2-annotation-layout { display: block; }
+.c2-annotation-layout > .c2-annotation-content { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0; background: white; border: 1px solid #dce5eb; border-radius: 10px; overflow: hidden; align-items: start; }
+.c2-assignment-sidebar { padding: 22px 14px; background: #f7f9fb; min-width: 0; align-self: stretch; border-right: 1px solid #e4ebf0; }
+.c2-assignment-sidebar h2 { font-size: 1rem; margin: 0 0 16px; }
+.c2-search-label { display: block; font-size: .8rem; margin-bottom: 6px; }
+.c2-assignment-sidebar input { width: 100%; box-sizing: border-box; }
+.c2-assignment-list { padding: 0; list-style: none; display: grid; gap: 5px; max-height: 650px; overflow-y: auto; }
+.c2-annotation-page .c2-assignment-list li { padding: 0; border: 0; }
+.c2-assignment-list button { display: grid; gap: 7px; width: 100%; min-width: 0; text-align: left; overflow-wrap: anywhere; font-size: .8rem; padding: 12px; border-radius: 7px; border: 0; color: #20344d; background: transparent; }
+.c2-workspace-main { min-width: 0; padding: 28px; }
+.c2-workspace-main .card { padding: 0; border: 0; box-shadow: none; margin: 0; }
+.c2-workspace-main .c2-question-heading h2 { font-size: 1.35rem; overflow-wrap: anywhere; }
+.c2-question-context { color: #53657c; margin-bottom: 24px; }
+.c2-additional-labels { margin: 20px 0; }
+.c2-additional-labels > div { padding-top: 12px; }
+.c2-workspace-main .c2-technical-details { margin-top: 20px; font-size: .85rem; }
+@media (max-width: 760px) {
+  .c2-annotation-layout > .c2-annotation-content { grid-template-columns: minmax(0, 1fr); }
+  .c2-assignment-sidebar { border-right: 0; border-bottom: 1px solid #e4ebf0; padding: 16px; }
+  .c2-assignment-list { max-height: 175px; }
+  .c2-assignment-list button { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .c2-workspace-main { padding: 20px; }
+}
+
+.c2-simple-fields label { display: block; font-weight: 600; margin-bottom: 6px; }
+.c2-simple-fields select { width: 100%; min-width: 0; }
+.c2-simple-fields { display: grid; gap: 16px; }
+.c2-technical-details { padding: 12px 0; }
+.c2-annotation-answer .c2-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; max-height: 360px; overflow-y: auto; }
+
 .c2-annotation-sidebar, .c2-annotation-content { display: grid; gap: 18px; min-width: 0; }
 .c2-annotation-page .c2-annotation-sidebar .card { padding: 18px; }
 .c2-annotation-sidebar h2 { margin: 0 0 8px; }

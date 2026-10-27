@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@j26/common/api";
 import type { C2AnnotationLabels, C2AnnotationSubmission, C2AnnotationSubmissionQueue, C2AnnotationSaveRequest } from "@j26/common/contracts";
-import { PipelineStepper } from "../PipelineStepper";
 import "./annotation.css";
 
 const dimensions = ["language", "code_mixing", "emotion", "wellbeing"] as const;
@@ -19,7 +18,7 @@ function answerStatus(answer: C2AnnotationSubmission["answers"][number]) {
   return latest === "FINAL" ? { label: "Finalized", style: "final" } : latest === "DRAFT" ? { label: "Draft", style: "draft" } : { label: "Pending", style: "pending" };
 }
 
-export function SubmissionWorkbench({ onExpired }: { onExpired: (reason: string) => void }) {
+export function SubmissionWorkbench({ onExpired, onDirtyChange }: { onExpired: (reason: string) => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [queue, setQueue] = useState<C2AnnotationSubmissionQueue | null>(null);
   const [submission, setSubmission] = useState<C2AnnotationSubmission | null>(null);
   const [index, setIndex] = useState(0);
@@ -28,10 +27,12 @@ export function SubmissionWorkbench({ onExpired }: { onExpired: (reason: string)
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [dirty, setDirty] = useState(false);
+  const [search, setSearch] = useState("");
   const sequence = useRef(0), pending = useRef<AbortController | null>(null), active = useRef(false);
   const answer = submission?.answers[index];
   const annotation = answer?.annotation;
   const finalized = annotation?.own_history.at(-1)?.status === "FINAL";
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
   function apply(value: C2AnnotationSubmission, position: number) {
     setSubmission(value); setIndex(position); setLabels(value.answers[position]?.annotation?.own_history.at(-1)?.labels ?? blank); setDirty(false);
     setQueue(current => current ? { ...current, submissions: current.submissions.map(row => row.submission_id === value.submission_id ? value : row) } : current);
@@ -90,7 +91,30 @@ export function SubmissionWorkbench({ onExpired }: { onExpired: (reason: string)
     } catch (cause) { if (request === sequence.current) fail(cause); }
     finally { if (request === sequence.current) { setBusy(false); active.current = false; } }
   }
-  const position = queue?.submissions.findIndex(row => row.submission_id === submission?.submission_id) ?? -1;
+  const items = queue?.submissions.flatMap(row => row.answers.map((value, position) => ({ submission: row, answer: value, position, id: value.annotation?.item.record_id ?? value.source_record_id }))) ?? [];
+  const selectedId = answer?.annotation?.item.record_id ?? answer?.source_record_id ?? "";
+  const position = items.findIndex(item => item.id === selectedId);
+  const filteredItems = items.filter(item => item.id.toLowerCase().includes(search.trim().toLowerCase()));
+  const completed = queue?.submissions.reduce((count, row) => count + row.finalized_answers, 0) ?? 0;
+  const eligible = queue?.submissions.reduce((count, row) => count + row.available_answers, 0) ?? 0;
+  function selectItem(id: string) {
+    const item = items.find(value => value.id === id);
+    if (!item) return;
+    if (item.submission.submission_id === submission?.submission_id) navigateAnswer(item.position);
+    else void load(item.submission.submission_id, item.position);
+  }
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+  function renderField(key: typeof dimensions[number]) {
+    return <div key={key}><label htmlFor={`submission-${key}`}>{titles[key]}</label>
+      <select id={`submission-${key}`} value={labels[key] ?? ""} disabled={busy || finalized || !annotation?.can_submit} onChange={event => { setLabels(current => ({ ...current, [key]: event.target.value || null })); setDirty(true); setMessage(""); }}>
+        <option value="">Not completed</option>{queue?.vocabulary[key].map(value => <option key={value} value={value}>{value.replaceAll(/[-_]/g, " ")}</option>)}
+      </select></div>;
+  }
   return <section aria-label="Submission annotation" className="c2-submission-workbench">
     <div className="c2-annotation-notifications" aria-label="Annotation notifications">
       {error && <div role="alert" className="c2-annotation-error">{error}<button aria-label="Dismiss error" onClick={() => setError("")}>×</button></div>}
@@ -98,53 +122,55 @@ export function SubmissionWorkbench({ onExpired }: { onExpired: (reason: string)
     </div>
     {busy && <p role="status" className="hint">Loading or saving actual server state…</p>}
     <div className="c2-annotation-layout">
-      <aside className="c2-annotation-sidebar">
-        <section className="card"><h2>Assigned submissions</h2><p className="hint">Your finalized answers / available answers</p>
-          <ul className="c2-submission-list">{queue?.submissions.map(row => <li key={row.submission_id}><button aria-label={row.submission_id} aria-current={row.submission_id === submission?.submission_id ? "true" : undefined} disabled={busy} onClick={() => load(row.submission_id)}>
-            <span>{row.submission_id}</span><span className="c2-navigation-detail">{row.finalized_answers}/{row.available_answers} finalized{row.blocked_answers ? ` · ${row.blocked_answers} on hold/missing` : ""}{row.complete ? " · Complete" : ""}</span>
-          </button></li>)}</ul>
-          {queue && !queue.submissions.length && <p>No submissions assigned to this account. Empty slots cannot be claimed.</p>}
-          {submission && <nav className="c2-compact-actions" aria-label="Submission navigation">
-            <button title={position <= 0 ? "First assigned submission" : "Open previous submission"} disabled={busy || position <= 0} onClick={() => load(queue!.submissions[position - 1].submission_id)}>Previous submission</button>
-            <button title={position >= (queue?.submissions.length ?? 0) - 1 ? "Last assigned submission" : "Open next submission"} disabled={busy || position < 0 || position >= (queue?.submissions.length ?? 0) - 1} onClick={() => load(queue!.submissions[position + 1].submission_id)}>Next submission</button>
-          </nav>}
-        </section>
-        {submission && <section className="card"><h2>Questions</h2><p className="hint">Q4–Q9 required · Q10 optional</p>
-          <ol className="c2-question-list">{submission.answers.map((value, i) => { const status = answerStatus(value); return <li key={value.question_id}><button aria-label={value.question_id} disabled={busy} aria-current={i === index ? "step" : undefined} onClick={() => navigateAnswer(i)}>
-            <strong>{value.question_id}</strong><span className={`c2-answer-badge c2-answer-${status.style}`}>{status.label}</span>
-          </button></li>; })}</ol>
-        </section>}
-      </aside>
       <div className="c2-annotation-content">
-        {!submission && <section className="card c2-annotation-empty"><h2>Choose an assigned submission</h2><p>Open a submission to read its answers and save your own labels. Completed finals remain read-only.</p></section>}
+      <aside className="c2-assignment-sidebar">
+        <h2>Assigned items</h2>
+        <label className="c2-search-label" htmlFor="assigned-search">Search anonymous item ID</label>
+        <input id="assigned-search" type="search" placeholder="Search ID" value={search} onChange={event => setSearch(event.target.value)} />
+        <p className="hint">Your progress: {completed}/{eligible} eligible items finalized.</p>
+        {queue?.submissions.some(row => row.blocked_answers) && <p className="hint">Withheld or missing required answers remain incomplete.</p>}
+        <ul className="c2-assignment-list">{filteredItems.map(item => { const status = answerStatus(item.answer); return <li key={item.id}>
+          <button disabled={busy} aria-label={item.id} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => selectItem(item.id)}>
+            <span>{item.id}</span><span className={`c2-answer-badge c2-answer-${status.style}`}>{status.label}</span>
+          </button>
+        </li>; })}</ul>
+        {queue && !items.length && <p>No submissions assigned to this account. Empty slots cannot be claimed.</p>}
+        {!!items.length && !filteredItems.length && <p>No assigned IDs match your search.</p>}
+      </aside>
+      <div className="c2-workspace-main">
+        {!submission && <section className="card c2-annotation-empty"><h2>Select an assigned item</h2><p>Choose an authorized item above to read its frozen text and save your own labels. Completed finals remain read-only.</p></section>}
         {submission && answer && <>
           <section className="card c2-annotation-answer">
-            <div className="c2-current-submission"><h2>Submission {submission.submission_id}</h2><p>{submission.finalized_answers}/{submission.available_answers} available answers finalized{submission.blocked_answers ? ` · ${submission.blocked_answers} on hold/missing` : ""}. {submission.complete ? "Your answers complete." : "Submission incomplete."}</p>
-              <progress aria-label="Submission completion" value={submission.finalized_answers} max={Math.max(1, submission.available_answers)} />
-            </div>
-            <nav className="c2-answer-pagination" aria-label="Answer navigation">
-              <button title={index === 0 ? "First answer" : "Open previous answer"} disabled={busy || index === 0} onClick={() => navigateAnswer(index - 1)}>Previous answer</button><span>Answer {index + 1} of {submission.answers.length}</span>
-              <button title={index >= submission.answers.length - 1 ? "Last answer" : "Open next answer"} disabled={busy || index >= submission.answers.length - 1} onClick={() => navigateAnswer(index + 1)}>Next answer</button>
-            </nav>
-            <div className="c2-question-heading"><h2>{answer.question_id}: {answer.question_text}</h2><span className={`c2-answer-badge c2-answer-${answerStatus(answer).style}`}>{answerStatus(answer).label}</span></div>
+            <div className="c2-question-heading"><h2>{selectedId}</h2><span className={`c2-answer-badge c2-answer-${answerStatus(answer).style}`}>{answerStatus(answer).label}</span></div>
+            <p className="c2-question-context">{answer.question_id}: {answer.question_text}</p>
             {answer.state === "OPTIONAL_UNANSWERED" ? <p className="c2-answer-notice">Optional Q10 unanswered — no annotation required.</p> : answer.state !== "AVAILABLE" ? <div role="alert" className="c2-answer-hold"><strong>{answerStatus(answer).label} — answer withheld</strong><p>Answer withheld or missing. Submission remains incomplete.</p><ul>{answer.blocking_reasons.map(reason => <li key={reason}>{reason.replaceAll("_", " ")}</li>)}</ul><p>Labels cannot be saved for this answer.</p></div> : annotation && <>
-              {finalized ? <div className="c2-final-notice"><strong>Finalized — read only</strong><p>Your final labels are permanently saved. You can read them and navigate to other answers; editing and saving are disabled.</p></div> : !annotation.can_submit ? <p role="alert" className="c2-answer-hold">Editing is not authorized for this answer. Reload saved state or use your assigned account; existing submissions remain unchanged.</p> : null}
-              <h3>Immutable anonymized text</h3><p className="c2-text">{annotation.item.preprocessing.records[0].anonymized_text}</p>
-              <p className="hint">Language selection saves your label only; it never changes the answer.</p>
-              <h3>Your annotation</h3><div className="c2-label-fields">{dimensions.map(key => <div key={key}><label htmlFor={`submission-${key}`}>{titles[key]}</label><select id={`submission-${key}`} value={labels[key] ?? ""} disabled={busy || finalized || !annotation.can_submit} onChange={event => { setLabels(current => ({ ...current, [key]: event.target.value || null })); setDirty(true); setMessage(""); }}>
-                <option value="">Not completed</option>{queue?.vocabulary[key].map(value => <option key={value} value={value}>{value.replaceAll("-", " ")}</option>)}</select></div>)}</div>
+              {finalized ? <div className="c2-final-notice"><strong>Finalized — read only</strong></div> : !annotation.can_submit ? <p role="alert" className="c2-answer-hold">Editing is not authorized for this answer. Reload saved state or use your assigned account; existing submissions remain unchanged.</p> : null}
+              <h3>Anonymized answer</h3><p className="c2-text">{annotation.item.preprocessing.records[0].anonymized_text}</p>
+              <div className="c2-simple-fields">{(["emotion", "wellbeing"] as const).map(key => renderField(key))}</div>
+              <details className="c2-additional-labels"><summary>Additional labels</summary><div className="c2-simple-fields">{(["language", "code_mixing"] as const).map(key => renderField(key))}</div></details>
               {!finalized && annotation.can_submit && <p className="hint">{dirty ? "Unsaved changes. " : ""}{dimensions.filter(key => !labels[key]).length ? `${dimensions.filter(key => !labels[key]).length} fields unfinished. Save a partial draft, or complete all four fields to finalize.` : "All fields completed. Save a draft or explicitly finalize."}</p>}
-              <div className="actions"><button disabled={busy || finalized || !annotation.can_submit} onClick={() => save("DRAFT")}>Save draft</button><button disabled={busy || finalized || !annotation.can_submit || dimensions.some(key => !labels[key])} onClick={() => save("FINAL")}>Finalize answer</button><button className="secondary" disabled={busy} onClick={() => load(submission.submission_id, index)}>Reload saved state</button></div>
-              <p className="hint">Neutral, uncertain and no-clear-indicator are explicit labels; blank is unfinished. Final answers are immutable.</p>
-              <details><summary>Your saved revisions ({annotation.own_history.length})</summary>{annotation.own_history.map(row => <p key={row.revision}>Revision {row.revision} · {row.status} · {dimensions.map(key => row.labels[key] ?? "Unfinished").join(", ")}</p>)}</details>
-              {annotation.peer_final ? <details><summary>Other annotator’s final labels — both finalized</summary><p>{dimensions.map(key => `${titles[key]}: ${annotation.peer_final!.labels[key]}`).join("; ")}</p></details> : <p className="hint">Other annotator’s labels remain hidden until both finalize this answer.</p>}
+              { !finalized && annotation?.can_submit && (!labels.language || !labels.code_mixing) && <p id="additional-required" className="hint">Complete Language and Code-mixing pattern in Additional labels before finalizing.</p>}
+              <div className="actions"><button disabled={busy || finalized || !annotation.can_submit} onClick={() => save("DRAFT")}>Save draft</button><button aria-describedby={!finalized && (!labels.language || !labels.code_mixing) ? "additional-required" : undefined} disabled={busy || finalized || !annotation.can_submit || dimensions.some(key => !labels[key])} onClick={() => save("FINAL")}>Finalize submission</button><button className="secondary" disabled={busy} onClick={() => load(submission.submission_id, index)}>Reload saved state</button></div>
             </>}
           </section>
-          <section className="card"><p><strong>Agreement not evaluated; adjudication and human release approval pending.</strong> Automated checks do not certify complete anonymization. Vocabulary is provisional and not expert-approved.</p><details><summary>Pipeline and frozen source versions</summary>
-            {annotation && <PipelineStepper result={annotation.item.preprocessing} busy={false} annotationStatus={annotation.annotation_status} />}
+          <details className="c2-technical-details"><summary>Technical details</summary><p><strong>Agreement not evaluated; adjudication and human release approval pending.</strong> Automated checks do not certify complete anonymization. Vocabulary is provisional and not expert-approved.</p>
+            <p>Submission: {submission.submission_id} · {answer.question_id} · Answer {index + 1} of {submission.answers.length}. Q4–Q9 required; Q10 optional.</p>
+            <p>Item: {selectedId}. Record version: {annotation?.item.record_version ?? "Withheld or unavailable"}</p>
             <p>Submission version: {submission.submission_version}</p><p>Dataset: {submission.source_dataset_id}</p><p>Source file SHA-256: {submission.source_file_sha256}</p>
-          </details></section>
+          <p>Labels describe text, not clinical diagnoses. Two accounts do not establish independent human annotation. Blank fields are unfinished; neutral, uncertain and no-clear-indicator are explicit decisions.</p>
+            {annotation && <>
+              <h3>Your saved revisions ({annotation.own_history.length})</h3>{annotation.own_history.map(row => <p key={row.revision}>Revision {row.revision} · {row.status} · {dimensions.map(key => row.labels[key] ?? "Unfinished").join(", ")}</p>)}
+              {annotation.peer_final ? <><h3>Other annotator’s final labels — both finalized</h3><p>{dimensions.map(key => `${titles[key]}: ${annotation.peer_final!.labels[key]}`).join("; ")}</p></> : <p className="hint">Other annotator’s labels remain hidden until both finalize this answer.</p>}
+
+            </>}
+          </details>
         </>}
+        <nav className="c2-answer-pagination" aria-label="Item navigation">
+          <button className="secondary" disabled={busy || position <= 0} title={position <= 0 ? "Select an item, or this is the first assigned item" : "Previous assigned item"} onClick={() => selectItem(items[position - 1].id)}>Previous item</button>
+          <span>{position < 0 ? "No item selected" : `Item ${position + 1} of ${items.length}`}</span>
+          <button className="secondary" disabled={busy || position < 0 || position >= items.length - 1} title={position < 0 ? "Select an assigned item first" : position >= items.length - 1 ? "Last assigned item" : "Next assigned item"} onClick={() => selectItem(items[position + 1].id)}>Next item</button>
+        </nav>
+      </div>
       </div>
     </div>
   </section>;

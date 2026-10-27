@@ -19,7 +19,12 @@ test.each(["NO_SIGNAL", "FAIL", "REVIEW", "NOT_EVALUATED"] as const)("shows actu
   if (status === "NO_SIGNAL") Object.assign(changed.stages[0], { checked_records: 0, passed_records: 0, not_evaluated_records: 1, pass_rate_percent: null });
   render(<RunValidation summary={changed} />);
   const assessment = screen.getByRole("generic", { name: "Residual assessment record 1" });
-  expect(assessment).toHaveTextContent(status === "NO_SIGNAL" ? "No residual signal detected" : status === "NOT_EVALUATED" ? "Not evaluated" : status);
+  if (status === "NO_SIGNAL") {
+    expect(within(assessment).queryByText(/Residual PII:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/No residual signal detected/)).not.toBeInTheDocument();
+  } else {
+    expect(assessment).toHaveTextContent(status === "NOT_EVALUATED" ? "Not evaluated" : status);
+  }
   expect(assessment).toHaveTextContent("Structured PII pattern checks:");
   expect(screen.queryByText(/Privacy verified|Complete anonymization/)).not.toBeInTheDocument();
   if (status === "NO_SIGNAL") {

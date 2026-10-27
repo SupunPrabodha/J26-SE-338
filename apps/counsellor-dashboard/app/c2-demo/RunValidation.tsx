@@ -33,7 +33,7 @@ export default function RunValidation({ summary, configuration, release }: { sum
         const structured = record.checks.filter(check => ["anonymization.residual_email", "anonymization.residual_phone", "anonymization.residual_student_id"].includes(check.rule_id));
         const status = assessment?.status;
         return <div key={record.record_index} className="c2-residual-assessment" aria-label={`Residual assessment record ${record.record_index}`}>
-          <p><strong className={`c2-status ${status === "FAIL" ? "c2-status-fail" : status === "REVIEW" ? "c2-status-review" : "c2-status-unknown"}`}>Residual PII: {status === "NO_SIGNAL" ? "No residual signal detected" : status === "NOT_EVALUATED" ? "Not evaluated" : status ?? "Unavailable"}</strong></p>
+          {status !== "NO_SIGNAL" && <p><strong className={`c2-status ${status === "FAIL" ? "c2-status-fail" : status === "REVIEW" ? "c2-status-review" : "c2-status-unknown"}`}>Residual PII: {status === "NOT_EVALUATED" ? "Not evaluated" : status ?? "Unavailable"}</strong></p>}
           {assessment && ["FAIL", "REVIEW"].includes(assessment.status) && <ul>{assessment.reasons.map(reason => <li key={reason}>{reason.replaceAll(/[-_:]/g, " ")}</li>)}</ul>}
           <p className="hint">Structured PII pattern checks: {Object.entries({ residual_email: "Email", residual_phone: "Phone", residual_student_id: "Student ID" }).map(([rule, label], index) => {
             const outcome = structured.find(check => check.rule_id === `anonymization.${rule}`)?.status;
