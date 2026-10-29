@@ -60,13 +60,13 @@ export default function Operations() {
     event.preventDefault(); const form = event.currentTarget, values = new FormData(form);
     await act(async () => {
       let account: AccountResponse;
-      try { account = await adminApi<AccountResponse>("/auth/login", { username: values.get("username"), password: values.get("password") }); }
+      try { account = await adminApi<AccountResponse>("/auth/login", { username: values.get("username"), password: values.get("password"), remember_me: values.get("remember_me") === "on" }); }
       finally { form.reset(); }
       if (account.role !== "ADMIN") { await adminApi("/auth/logout", {}); throw new ApiError(403, "Administrative access is required. This account cannot open operational evidence."); }
       setAuthorized(true); setCursor(null); setHistory([]); await read(initial, null);
     });
   }
-  return <StaffFrame area="admin" current="audit" authorized={authorized} busy={busy} onSignOut={() => act(async () => { setPage(null); setDetail(null); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
+  return <StaffFrame area="admin" current="audit" authorized={authorized} checking={checking} busy={busy} onSignOut={() => act(async () => { setPage(null); setDetail(null); setAuthorized(false); await adminApi("/auth/logout", {}); })}><main>
     <DemoHeader title="Operational evidence" subtitle="Restricted lifecycle receipts, policy outcomes and service provenance." />
     <SafetyNotice /><ErrorMessage message={error} />
     {checking ? <section className="card empty" role="status">Checking administrative access…</section> : !authorized ? <StaffSignIn kind="admin" busy={busy} onSubmit={login} /> : <>

@@ -16,14 +16,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+import pandas as pd
+
 # Add current src directory to sys.path so imports resolve both in IDE and across execution CWDs
 CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_DIR))
-
-import numpy as np
-import pandas as pd
-from metrics import evaluate_predictions, save_confusion_matrix_plot  # type: ignore
 
 
 def train_transformer_candidate(
@@ -40,6 +39,8 @@ def train_transformer_candidate(
     seed: int = 42,
 ) -> dict[str, Any]:
     """Fine-tunes a transformer model candidate and evaluates on the test split."""
+    from metrics import evaluate_predictions, save_confusion_matrix_plot
+
     try:
         import torch  # type: ignore
         from datasets import Dataset  # type: ignore

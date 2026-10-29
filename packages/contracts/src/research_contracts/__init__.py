@@ -505,6 +505,7 @@ class VersionResponse(Contract):
 class LoginRequest(Contract):
     username: Annotated[str, Field(min_length=1, max_length=100)]
     password: Annotated[str, Field(min_length=1, max_length=256)]
+    remember_me: StrictBool = False
 
 
 class AssignmentRequest(Contract):
@@ -514,6 +515,16 @@ class AssignmentRequest(Contract):
 class AccountResponse(Contract):
     account_id: UUID
     role: Role
+
+
+class StaffProfile(Contract):
+    account_id: UUID
+    role: Literal[Role.ADMIN, Role.COUNSELLOR, Role.RESEARCHER]
+    enabled: StrictBool
+    created_at: AwareDatetime
+    account_expires_at: AwareDatetime | None = None
+    session_expires_at: AwareDatetime
+    remember_me: StrictBool
 
 
 class FixturesResponse(Contract):

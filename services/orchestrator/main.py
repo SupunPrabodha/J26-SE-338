@@ -7,6 +7,7 @@ from research_common.config import settings
 from research_common.database import (
     Account,
     Assignment,
+    AuthSession,
     Case,
     CaseLink,
     Consent,
@@ -39,6 +40,7 @@ from research_contracts import (
     ReviewRecordRequest,
     ReviewTask,
     Role,
+    StaffProfile,
     SubmissionSession,
     WithdrawalRequest,
     WorkflowRequest,
@@ -166,6 +168,25 @@ def logout(request: Request, response: Response, db: Session = Depends(session))
 @app.get("/api/v1/auth/me", response_model=AccountResponse)
 def me(account=Depends(auth.current_account)):
     return AccountResponse(account_id=account.id, role=account.role)
+
+
+@app.get("/api/v1/auth/profile", response_model=StaffProfile)
+def staff_profile(
+    request: Request,
+    account=Depends(auth.require_role(Role.ADMIN, Role.COUNSELLOR, Role.RESEARCHER)),
+    db: Session = Depends(session),
+):
+    account = auth.lock_valid_account(db, account, request, account.role)
+    record = db.get(AuthSession, request.state.auth_session_id, populate_existing=True)
+    return StaffProfile(
+        account_id=account.id,
+        role=account.role,
+        enabled=account.enabled,
+        created_at=account.created_at,
+        account_expires_at=account.expires_at,
+        session_expires_at=record.expires_at,
+        remember_me=record.remembered,
+    )
 
 
 @app.post("/api/v1/consents", response_model=ConsentRecord, status_code=201)

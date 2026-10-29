@@ -2,7 +2,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import StudentPortal from "../../apps/student-portal/app/page";
-import Dashboard from "../../apps/counsellor-dashboard/app/page";
+import Dashboard from "../../apps/counsellor-dashboard/components/counsellor-workspace";
 
 afterEach(() => vi.unstubAllGlobals());
 const ok = (data: unknown) => ({ ok: true, status: 200, json: async () => data });

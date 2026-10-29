@@ -81,4 +81,38 @@ no human C2–C4 web routes exist. The protected directory reports those facts. 
 RESEARCHER account grants directory metadata only; no annotator role, institutional approval,
 clinical interpretation or completed research result is inferred. Automatic assignment is
 preserved as a configurable development policy; institutional allocation/retention policy
-still needs approval. Source availability limitations from the workspace audit remain.
+still needs approval. Source availability was restored as recorded in the privacy source
+correction above; the earlier workspace audit's availability statement is historical.
+
+## Final C1 PP1 source recheck — 2026-10-24
+
+Read finalized TAF V2.2 pp7–8, Master Research Context section 6.1 and adjacent ownership
+sections, and IT23187450 p15, pp18–20, p22 and pp27–28 from their supplied local paths.
+All were available. The exact proposed FR01–12/NFR01–10 wording and objective/evaluation
+gaps are mapped in [the final readiness audit](../evidence/c1-final-pp1-audit.md).
+No new ownership conflict was found. C1 pseudonymous linkage is distinct from C2 text
+anonymization; orchestration over fixed mocks is distinct from real C2–C4 integration.
+Backoff, editable review records and physical store separation must not be silently added
+as literal FR requirements, although policy/threat analysis can justify them. TLS is
+explicitly required by NFR02 and is absent from the localhost deployment; storage encryption
+remains supporting TAF/Master planning/evidence work. No approval or completed research
+evaluation is inferred, and no academic source document was copied into Git.
+
+## C1 status decomposition and researcher reuse — 2026-10-25
+
+The user-requested checklist correction separates implemented mechanisms from approval,
+deployment/integration and research evaluation; it does not alter the source requirements.
+The existing proposal-derived FR/NFR traceability and ownership remain. FR03.b is logical
+separation implemented in distinct linkage/access/workflow records with boundary tests;
+independent storage privileges and real-data evaluation remain pending. C2 anonymization
+is not claimed. NFR05 covers implemented current mock-contract compatibility; actual
+C2–C4 integration remains Partial at FR04.b and a separately stated readiness dependency.
+NFR08's missing experiment and FR01.b's notice approval are not application-code defects;
+neither evaluation nor approval is claimed complete by a Not applicable code status.
+
+The existing development RESEARCHER role is reused for component-directory metadata and
+its own minimal account profile only. No approved institutional permission expansion,
+dataset access, research UI or clinical review authority is inferred. One local account
+was privately provisioned through the existing helper; no credentials/source documents
+were added to Git. Institutional role/notice approval, TLS, encryption-at-rest evidence,
+real integration and human/research evaluations remain explicit in the focused evidence note.

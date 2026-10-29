@@ -3,5 +3,5 @@
   "version": "0.1.0",
   "private": true,
   "exports": { "./contracts": "./src/contracts.d.ts", "./api": "./src/api.ts", "./ui": "./src/ui.tsx", "./proxy": "./src/proxy.ts" },
-  "peerDependencies": { "react": "19.3.0" }
+  "peerDependencies": { "react": "19.3.0", "react-dom": "19.3.0", "next": "16.4.1" }
 }

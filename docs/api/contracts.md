@@ -108,3 +108,19 @@ No migration or existing-row mutation is required. JSON Schema, OpenAPI and Type
 regenerated centrally. Strict event-union consumers must update to accept this new safe type;
 owner DemoReceipt types and C2–C4 service schemas remain unchanged. Coordinate consumer
 review before merge. The admin API is metadata-only; ADMIN has no review-content privilege.
+
+## Staff persistence/profile additions — 2026-10-25
+
+`LoginRequest` adds optional strict boolean `remember_me`, default false. Older callers
+that omit it retain existing behaviour. This opt-in does not extend student sessions or
+consent. `AccountResponse` remains unchanged. New staff-only `GET /api/v1/auth/profile`
+returns `StaffProfile`: current account ID/role/enabled/creation/account-expiry metadata,
+current server session expiry and remembered flag. STUDENT and SERVICE are denied; no
+other account selector, login handle, token or case-content fields are accepted/exposed.
+Backend role/current-session checks apply independently of UI navigation.
+
+The existing same-origin auth aliases expose profile through admin-auth/research-auth or
+the counsellor auth realm without sharing cookies. Central Python, JSON Schema, OpenAPI
+and TypeScript consumers are regenerated together. Strict independent LoginRequest
+consumers must regenerate to accept the additive optional field. C2–C4 schemas are unchanged.
+Storage adds only migration `f310c1000004`; no merged migration is rewritten.

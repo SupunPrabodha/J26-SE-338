@@ -12,7 +12,6 @@ Audits:
 
 from __future__ import annotations
 
-import html
 import re
 import sys
 import unicodedata
@@ -30,11 +29,11 @@ def run_corpus_diagnostic(corpus_path: Path | str) -> None:
         print(f"Error: Corpus file not found at: {path}")
         return
 
-    print(f"\n=======================================================")
+    print("\n=======================================================")
     print(f" CORPUS DIAGNOSTIC REPORT: {path.name}")
-    print(f"=======================================================")
+    print("=======================================================")
 
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+    with open(path, encoding="utf-8", errors="ignore") as f:
         lines = [line.strip() for line in f if line.strip()]
 
     total_lines = len(lines)
@@ -51,7 +50,9 @@ def run_corpus_diagnostic(corpus_path: Path | str) -> None:
                 nfc_diff_samples.append((line, nfc_norm))
 
     print("--- 1. Unicode NFC Normalization ---")
-    print(f"Lines altered by NFC normalization: {nfc_diff_count} ({nfc_diff_count/total_lines*100:.2f}%)")
+    print(
+        f"Lines altered by NFC normalization: {nfc_diff_count} ({nfc_diff_count / total_lines * 100:.2f}%)"
+    )
     if nfc_diff_samples:
         print("Sample NFC changes (Original -> Normalized):")
         for orig, norm in nfc_diff_samples[:3]:
@@ -84,7 +85,9 @@ def run_corpus_diagnostic(corpus_path: Path | str) -> None:
             zwsp_count += 1
 
     print("--- 2. Zero-Width Characters Audit ---")
-    print(f"Lines containing ZWJ (\\u200D):                 {zwj_count} ({zwj_count/total_lines*100:.2f}%)")
+    print(
+        f"Lines containing ZWJ (\\u200D):                 {zwj_count} ({zwj_count / total_lines * 100:.2f}%)"
+    )
     print(f"Lines containing ZWNJ (\\u200C):                {zwnj_count}")
     print(f"Lines containing Zero-Width Spaces (\\u200B/BOM): {zwsp_count}")
     print("\nMost Common ZWJ Contexts (Top 5):")
@@ -101,26 +104,34 @@ def run_corpus_diagnostic(corpus_path: Path | str) -> None:
     html_count = sum(1 for line in lines if html_entity_pattern.search(line))
     url_count = sum(1 for line in lines if url_pattern.search(line))
 
-    print(f"\n--- 3. Technical Noise Audit ---")
-    print(f"Lines with HTML entities (&amp;, &#39;, etc.): {html_count} ({html_count/total_lines*100:.2f}%)")
-    print(f"Lines with URLs (http/www/youtu.be):          {url_count} ({url_count/total_lines*100:.2f}%)")
+    print("\n--- 3. Technical Noise Audit ---")
+    print(
+        f"Lines with HTML entities (&amp;, &#39;, etc.): {html_count} ({html_count / total_lines * 100:.2f}%)"
+    )
+    print(
+        f"Lines with URLs (http/www/youtu.be):          {url_count} ({url_count / total_lines * 100:.2f}%)"
+    )
 
     # 4. Short Sentences Audit (1-2 words)
     short_sentences = [line for line in lines if len(line.split()) in (1, 2)]
-    print(f"\n--- 4. Short Sentence Audit (1-2 words) ---")
-    print(f"Total 1-2 word sentences: {len(short_sentences)} ({len(short_sentences)/total_lines*100:.2f}%)")
+    print("\n--- 4. Short Sentence Audit (1-2 words) ---")
+    print(
+        f"Total 1-2 word sentences: {len(short_sentences)} ({len(short_sentences) / total_lines * 100:.2f}%)"
+    )
     print("Sample 1-2 word sentences:")
     for s in short_sentences[:8]:
-        print(f"   • \"{s}\"")
+        print(f'   • "{s}"')
 
     # 5. Character Elongation Audit (3+ repeats)
     elongation_pattern = re.compile(r"([a-zA-Z\u0D80-\u0DFF])\1{2,}")
     elongated_lines = [line for line in lines if elongation_pattern.search(line)]
-    print(f"\n--- 5. Character Elongations Audit (3+ identical consecutive chars) ---")
-    print(f"Lines with character elongations: {len(elongated_lines)} ({len(elongated_lines)/total_lines*100:.2f}%)")
+    print("\n--- 5. Character Elongations Audit (3+ identical consecutive chars) ---")
+    print(
+        f"Lines with character elongations: {len(elongated_lines)} ({len(elongated_lines) / total_lines * 100:.2f}%)"
+    )
     print("Sample elongated sentences:")
     for s in elongated_lines[:5]:
-        print(f"   • \"{s}\"")
+        print(f'   • "{s}"')
 
     print("\n=======================================================")
     print(" AUDIT COMPLETE")
@@ -128,5 +139,10 @@ def run_corpus_diagnostic(corpus_path: Path | str) -> None:
 
 
 if __name__ == "__main__":
-    corpus_file = Path(__file__).resolve().parent.parent / "data" / "adaptation" / "youtube_unified_corpus.txt"
+    corpus_file = (
+        Path(__file__).resolve().parent.parent
+        / "data"
+        / "adaptation"
+        / "youtube_unified_corpus.txt"
+    )
     run_corpus_diagnostic(corpus_file)

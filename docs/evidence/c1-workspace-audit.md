@@ -1,5 +1,11 @@
 # C1 requirement and interface audit — 2026-10-24
 
+Later final audit at baseline `15f4a81`:
+[exact source requirements, current/retained evidence, gap ownership and PP1 script](c1-final-pp1-audit.md).
+It distinguishes bounded FR06 implementation from additional resilience evaluation and
+marks NFR05 Partial while real providers await integration. Historical results below retain
+their original scope; absent backoff or an editing UI is not automatically a source requirement.
+
 Current FR07/FR08/FR12 follow-on evidence: [manual assignment and operational aggregate charts](c1-manual-assignment-charts.md).
 It verifies consent-only absence of work, C2–C4 processing before assignment, persisted owner
 assignment receipts, protected admin aggregates and honest unavailable C4 chart inputs.
