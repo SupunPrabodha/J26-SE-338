@@ -103,9 +103,9 @@ export function AccountMenu({ role, busy = false, onSignOut, workspace }: { role
   </div>;
 }
 
-export function AppNavigation({ active, role, children }: { active: "student" | "counsellor" | "admin" | "demo" | "research"; role?: string; children?: ReactNode }) {
-  const links = active === "student" || active === "demo"
-    ? [{ id: "student", label: "Your reflection", href: "/" }, { id: "demo", label: "C1 evidence", href: "/demo" }]
+export function AppNavigation({ active, role, children }: { active: "student" | "counsellor" | "admin" | "demo" | "research" | "c3"; role?: string; children?: ReactNode }) {
+  const links = active === "student" || active === "demo" || active === "c3"
+    ? [{id: "student", label: "Your reflection", href: "/" }, { id: "demo", label: "C1 evidence", href: "/demo" }, { id: "c3", label: "C3 DAPT Demo", href: "/demo/c3" }]
     : [{ id: "counsellor", label: "Case workspace", href: "/" }, { id: "admin", label: "Administration", href: "/admin/overview" }, { id: "research", label: "C2–C4 routes", href: "/research" }].filter(link => link.id === active || link.id === "research" || (role === "ADMIN" && link.id === "admin") || (role === "COUNSELLOR" && link.id === "counsellor"));
   const brand = <><span className="brand-mark" aria-hidden="true">W</span><span>Wellbeing<span className="brand-caption">Research workspace · J26-SE-338</span></span></>;
   const home = active === "admin" ? "/admin/overview" : active === "research" ? "/research" : "/";

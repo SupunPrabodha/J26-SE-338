@@ -21,7 +21,24 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "@j26/common/contracts": [
+        "../../packages/typescript-common/src/contracts.d.ts"
+      ],
+      "@j26/common/api": [
+        "../../packages/typescript-common/src/api.ts"
+      ],
+      "@j26/common/ui": [
+        "../../packages/typescript-common/src/ui.tsx"
+      ],
+      "@j26/common/proxy": [
+        "../../packages/typescript-common/src/proxy.ts"
+      ],
+      "@j26/common/*": [
+        "../../packages/typescript-common/src/*"
+      ]
+    }
   },
   "include": [
     "next-env.d.ts",
